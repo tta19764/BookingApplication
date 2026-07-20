@@ -1,0 +1,13 @@
+﻿services:
+  bookingapp.api:
+    image: bookingapp.api
+    build:
+      context: .
+      dockerfile: BookingApp.Api/Dockerfile
+
+  bookingapp.api-1:
+    image: bookingapp.api-1
+    build:
+      context: .
+      dockerfile: BookingApp.Api/Dockerfile
+
