@@ -7,10 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Abstractions\" />
-      <Folder Include="Bookings\" />
-      <Folder Include="ConferenceHalls\" />
-      <Folder Include="Exceptions\" />
+      <ProjectReference Include="..\BookingApp.Domain\BookingApp.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FluentValidation" Version="12.1.1" />
+      <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     </ItemGroup>
 
 </Project>

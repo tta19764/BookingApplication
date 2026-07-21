@@ -2,6 +2,7 @@
 using BookingApp.Domain.Bookings.Events;
 using BookingApp.Domain.ConferenceHalls;
 using BookingApp.Domain.Shared;
+using BookingApp.Domain.Users;
 
 namespace BookingApp.Domain.Bookings;
 
@@ -52,7 +53,11 @@ public sealed class Booking : Entity
     public DateTime? CompletedOnUtc { get; private set; }
 
     public DateTime? CancelledOnUtc { get; private set; }
-    
+
+    public ConferenceHall ConferenceHall { get; private set; } = null!;
+
+    public User User { get; private set; } = null!;
+
     public static Booking Reserve(
         ConferenceHall hall,
         IEnumerable<Amenity>? amenities,

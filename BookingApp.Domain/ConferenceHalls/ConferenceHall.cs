@@ -1,4 +1,5 @@
 ﻿using BookingApp.Domain.Abstractions;
+using BookingApp.Domain.Bookings;
 using BookingApp.Domain.Shared;
 
 namespace BookingApp.Domain.ConferenceHalls;
@@ -12,6 +13,8 @@ public sealed class ConferenceHall(Guid id, Name name, Capacity seats, Money pri
     public DateTime? LastBookedOnUtc { get; internal set; }
 
     public List<Amenity> Amenities { get; private set; } = amenities;
+    
+    public ICollection<Booking> Bookings { get; private set; } = new List<Booking>();
 
     public bool SupportsAmenity(Amenity amenity)
     {

@@ -1,4 +1,5 @@
 ﻿using BookingApp.Domain.Abstractions;
+using BookingApp.Domain.Bookings;
 
 namespace BookingApp.Domain.Users;
 
@@ -25,6 +26,8 @@ public sealed class User : Entity
     public Email Email { get; private set; }
 
     public IReadOnlyCollection<Role> Roles => _roles.ToList();
+    
+    public ICollection<Booking> Bookings { get; private set; } = new List<Booking>();
     
     public static User Create(FirstName firstName, LastName lastName, Email email)
     {
