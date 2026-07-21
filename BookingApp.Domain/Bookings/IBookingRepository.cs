@@ -8,7 +8,7 @@ public interface IBookingRepository
     /// <summary>
     /// Finds a booking by its identifier.
     /// </summary>
-    Task<Booking?> GetById(Guid id, CancellationToken cancellationToken = default);
+    Task<Booking?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Checks whether the hall already has a booking that overlaps the requested period.
@@ -16,9 +16,17 @@ public interface IBookingRepository
     Task<bool> HasOverlap(Guid conferenceHallId, DateRange duration, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Lists bookings for reporting and read-side projections.
+    /// Lists bookings in pages for reporting and read-side projections.
     /// </summary>
-    Task<IReadOnlyCollection<Booking>> List(CancellationToken cancellationToken = default);
+    IAsyncEnumerable<IReadOnlyCollection<Booking>> List(int pageSize, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns reserved bookings whose booking period has ended and should be completed.
+    /// </summary>
+    Task<IReadOnlyCollection<Booking>> GetReservedBookingsDueForCompletion(
+        DateTime utcNow,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new booking to the persistence context.

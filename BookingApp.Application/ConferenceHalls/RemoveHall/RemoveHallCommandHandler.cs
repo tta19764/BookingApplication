@@ -13,7 +13,7 @@ public class RemoveHallCommandHandler(
 {
     public async Task<Result> Handle(RemoveHallCommand request, CancellationToken cancellationToken)
     {
-        var hall = await hallRepository.GetById(request.HallId, cancellationToken);
+        var hall = await hallRepository.GetByIdAsync(request.HallId, cancellationToken);
 
         if (hall is null)
         {

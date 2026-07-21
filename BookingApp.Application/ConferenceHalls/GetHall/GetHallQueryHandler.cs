@@ -12,7 +12,7 @@ public class GetHallQueryHandler(IConferenceHallRepository hallRepository)
 {
     public async Task<Result<HallResponse>> Handle(GetHallQuery request, CancellationToken cancellationToken)
     {
-        var hall = await hallRepository.GetById(request.HallId, cancellationToken);
+        var hall = await hallRepository.GetByIdAsync(request.HallId, cancellationToken);
 
         return hall is null
             ? Result.Failure<HallResponse>(ConferenceHallErrors.NotFound)

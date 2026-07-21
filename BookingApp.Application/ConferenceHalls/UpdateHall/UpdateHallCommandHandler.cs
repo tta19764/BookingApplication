@@ -14,7 +14,7 @@ public class UpdateHallCommandHandler(
 {
     public async Task<Result> Handle(UpdateHallCommand request, CancellationToken cancellationToken)
     {
-        var hall = await hallRepository.GetById(request.HallId, cancellationToken);
+        var hall = await hallRepository.GetByIdAsync(request.HallId, cancellationToken);
 
         if (hall is null)
         {

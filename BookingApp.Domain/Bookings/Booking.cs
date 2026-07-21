@@ -46,8 +46,6 @@ public sealed class Booking : Entity
 
     public DateTime CreatedOnUtc { get; private set; }
 
-    public DateTime? ConfirmedOnUtc { get; private set; }
-
     public DateTime? RejectedOnUtc { get; private set; }
 
     public DateTime? CompletedOnUtc { get; private set; }

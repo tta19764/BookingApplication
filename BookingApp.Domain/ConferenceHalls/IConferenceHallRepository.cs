@@ -10,7 +10,7 @@ public interface IConferenceHallRepository
     /// <summary>
     /// Finds a hall by its identifier.
     /// </summary>
-    Task<ConferenceHall?> GetById(Guid id, CancellationToken cancellationToken = default);
+    Task<ConferenceHall?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new hall to the persistence context.

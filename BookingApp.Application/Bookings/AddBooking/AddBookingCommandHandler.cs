@@ -1,3 +1,4 @@
+using BookingApp.Application.Abstractions.Clock;
 using BookingApp.Application.Abstractions.Messaging;
 using BookingApp.Domain.Abstractions;
 using BookingApp.Domain.Bookings;
@@ -12,13 +13,14 @@ public class AddBookingCommandHandler(
     IConferenceHallRepository hallRepository,
     IBookingRepository bookingRepository,
     PricingService pricingService,
+    IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork) : ICommandHandler<AddBookingCommand, BookingConfirmationResponse>
 {
     public async Task<Result<BookingConfirmationResponse>> Handle(
         AddBookingCommand request,
         CancellationToken cancellationToken)
     {
-        var hall = await hallRepository.GetById(request.HallId, cancellationToken);
+        var hall = await hallRepository.GetByIdAsync(request.HallId, cancellationToken);
 
         if (hall is null)
         {
@@ -40,7 +42,7 @@ public class AddBookingCommandHandler(
                 request.Amenities.Distinct(),
                 request.UserId,
                 duration,
-                DateTime.UtcNow,
+                dateTimeProvider.UtcNow,
                 pricingService);
 
             bookingRepository.Add(booking);
