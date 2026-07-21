@@ -5,9 +5,12 @@ using MediatR;
 
 namespace BookingApp.Application.Abstractions.Behaviours;
 
+/// <summary>
+/// Runs FluentValidation validators before a MediatR request reaches its handler.
+/// </summary>
 public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IBaseCommand
+    where TRequest : IRequest<TResponse>
 {
     public async Task<TResponse> Handle(
         TRequest request,

@@ -1,5 +1,13 @@
-﻿using BookingApp.Application.Abstractions.Messaging;
+using BookingApp.Application.Abstractions.Messaging;
+using BookingApp.Domain.ConferenceHalls;
 
 namespace BookingApp.Application.ConferenceHalls.AddHall;
 
-public record AddHallCommand() : ICommand<Guid>;
+/// <summary>
+/// Command for creating a conference hall with its capacity, hourly rate, and supported amenities.
+/// </summary>
+public record AddHallCommand(
+    string Name,
+    int Capacity,
+    decimal HourlyRate,
+    IReadOnlyCollection<Amenity> Amenities) : ICommand<Guid>;

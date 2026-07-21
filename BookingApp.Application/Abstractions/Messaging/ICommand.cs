@@ -3,14 +3,23 @@ using MediatR;
 
 namespace BookingApp.Application.Abstractions.Messaging;
 
+/// <summary>
+/// Represents an application request that changes state and returns only success or failure.
+/// </summary>
 public interface ICommand : IRequest<Result>, IBaseCommand
 {
 }
 
-public interface ICommand<TReponse> : IRequest<Result<TReponse>>, IBaseCommand
+/// <summary>
+/// Represents an application request that changes state and returns a response payload.
+/// </summary>
+public interface ICommand<TResponse> : IRequest<Result<TResponse>>, IBaseCommand
 {
 }
 
+/// <summary>
+/// Marker interface used to identify requests that belong to the command pipeline.
+/// </summary>
 public interface IBaseCommand
 {
 }

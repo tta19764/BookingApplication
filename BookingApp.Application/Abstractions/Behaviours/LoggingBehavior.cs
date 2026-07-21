@@ -5,6 +5,9 @@ using Serilog.Context;
 
 namespace BookingApp.Application.Abstractions.Behaviours;
 
+/// <summary>
+/// Logs MediatR request execution and result state for observability.
+/// </summary>
 public class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TRequest, TResponse>> logger) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IBaseRequest
     where TResponse : Result

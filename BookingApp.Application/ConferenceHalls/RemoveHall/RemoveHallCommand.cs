@@ -1,5 +1,8 @@
-﻿using BookingApp.Application.Abstractions.Messaging;
+using BookingApp.Application.Abstractions.Messaging;
 
 namespace BookingApp.Application.ConferenceHalls.RemoveHall;
 
-public record RemoveHallCommand() : ICommand;
+/// <summary>
+/// Command for removing a conference hall by identifier.
+/// </summary>
+public record RemoveHallCommand(Guid HallId) : ICommand;
