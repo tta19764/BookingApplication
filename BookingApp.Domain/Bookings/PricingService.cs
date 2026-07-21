@@ -3,10 +3,16 @@ using BookingApp.Domain.Shared;
 
 namespace BookingApp.Domain.Bookings;
 
+/// <summary>
+/// Calculates booking prices from hall hourly rate, time-based modifiers, and selected amenities.
+/// </summary>
 public sealed class PricingService
 {
     private static readonly int[] Boundaries = [6, 9, 12, 14, 18, 23];
 
+    /// <summary>
+    /// Calculates the full booking price and validates that all selected amenities are supported by the hall.
+    /// </summary>
     public PricingDetails CalculatePrice(
         ConferenceHall hall,
         DateRange period,

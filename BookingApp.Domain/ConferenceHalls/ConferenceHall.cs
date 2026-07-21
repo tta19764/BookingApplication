@@ -16,6 +16,14 @@ public sealed class ConferenceHall(Guid id, Name name, Capacity seats, Money pri
     
     public ICollection<Booking> Bookings { get; private set; } = new List<Booking>();
 
+    public void Update(Name name, Capacity seats, Money price, IEnumerable<Amenity> amenities)
+    {
+        Name = name;
+        Seats = seats;
+        Price = price;
+        Amenities = amenities.Distinct().ToList();
+    }
+
     public bool SupportsAmenity(Amenity amenity)
     {
         return Amenities.Contains(amenity);
