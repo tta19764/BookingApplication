@@ -27,6 +27,7 @@ public class AddBookingCommandHandler(
 
         var duration = DateRange.Create(request.Start, request.End);
 
+        // Prevent double-booking before creating the reservation aggregate.
         if (await bookingRepository.HasOverlap(hall.Id, duration, cancellationToken))
         {
             return Result.Failure<BookingConfirmationResponse>(BookingErrors.Overlap);
@@ -58,11 +59,13 @@ public class AddBookingCommandHandler(
         }
         catch (ArgumentException)
         {
+            // Domain amenity failures are returned as application results instead of leaking exceptions to API callers.
             return Result.Failure<BookingConfirmationResponse>(
                 new Error("Booking.UnsupportedAmenity", "The hall does not support one or more selected amenities"));
         }
         catch (InvalidOperationException exception)
         {
+            // Pricing rejects periods outside allowed business hours.
             return Result.Failure<BookingConfirmationResponse>(
                 new Error("Booking.InvalidPeriod", exception.Message));
         }

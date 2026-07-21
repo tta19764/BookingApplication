@@ -17,6 +17,8 @@ public class GetAvailableHallsQueryHandler(IConferenceHallRepository hallReposit
         CancellationToken cancellationToken)
     {
         var duration = DateRange.Create(request.Start, request.End);
+
+        // Availability is delegated to the repository because overlap checks depend on stored bookings.
         var halls = await hallRepository.GetAvailableConferenceHalls(
             duration,
             new Capacity(request.Capacity),

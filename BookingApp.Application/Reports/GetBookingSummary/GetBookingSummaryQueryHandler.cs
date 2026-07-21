@@ -17,6 +17,7 @@ public class GetBookingSummaryQueryHandler(IBookingRepository bookingRepository)
     {
         var bookings = await bookingRepository.List(cancellationToken);
 
+        // Group by hall to expose both usage and revenue concentration for business reporting.
         var hallSummaries = bookings
             .GroupBy(booking => booking.ConferenceHallId)
             .Select(group => new HallBookingSummaryResponse(

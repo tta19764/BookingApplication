@@ -66,6 +66,7 @@ public sealed class Booking : Entity
         DateTime utcNow,
         PricingService pricingService)
     {
+        // Reservation owns price calculation so persisted bookings keep an immutable price snapshot.
         var pricingDetails = pricingService.CalculatePrice(hall, duration, amenities);
 
         var booking = new Booking(
@@ -81,6 +82,7 @@ public sealed class Booking : Entity
         
         booking.RaiseDomainEvent(new BookingReservedDomainEvent(booking.Id));
 
+        // Keep the hall's operational metadata in sync with the successful reservation.
         hall.LastBookedOnUtc = utcNow;
 
         return booking;
@@ -125,6 +127,7 @@ public sealed class Booking : Entity
 
         if (utcNow > Duration.Start)
         {
+            // Started bookings must move through completion/rejection rules, not cancellation.
             return Result.Failure(BookingErrors.AlreadyStarted);
         }
 

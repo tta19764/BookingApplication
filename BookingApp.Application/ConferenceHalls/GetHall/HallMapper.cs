@@ -21,6 +21,7 @@ internal static class HallMapper
             hall.Amenities
                 .Select(amenity =>
                 {
+                    // Response models include resolved amenity prices so callers do not duplicate catalog logic.
                     var price = amenity.GetPrice(hall.Price.Currency);
 
                     return new AmenityResponse(
@@ -34,6 +35,7 @@ internal static class HallMapper
 
     private static string GetDisplayName(Amenity amenity)
     {
+        // Keep API labels user-friendly while preserving enum values for stable client contracts.
         return amenity switch
         {
             Amenity.Projector => "Projector",

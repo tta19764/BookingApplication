@@ -33,6 +33,7 @@ public static class AmenityExtensions
     /// </summary>
     public static Money GetPrice(this Amenity amenity, Currency currency)
     {
+        // Amenity prices are defined only for currencies explicitly supported by the domain.
         if (Currency.All.All(c => c != currency))
         {
             throw new NotSupportedException($"Currency '{currency}' is not supported.");
@@ -40,6 +41,7 @@ public static class AmenityExtensions
 
         if (currency == Currency.Uah)
         {
+            // Prices are fixed per booking, not multiplied by booking duration.
             return amenity switch
             {
                 Amenity.Projector => new Money(500m, currency),

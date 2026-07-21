@@ -18,6 +18,7 @@ public sealed class PricingService
         DateRange period,
         IEnumerable<Amenity>? amenities = null)
     {
+        // Pricing is allowed only for amenities that belong to the selected hall.
         foreach (var amenity in amenities ?? [])
         {
             if (!hall.SupportsAmenity(amenity))
@@ -51,6 +52,7 @@ public sealed class PricingService
 
         while (current < period.End)
         {
+            // Split the booking by pricing boundaries so each slice receives the correct modifier.
             var nextBoundary = GetNextBoundary(current);
             var intervalEnd = nextBoundary < period.End
                 ? nextBoundary
@@ -58,6 +60,7 @@ public sealed class PricingService
 
             var hours = (decimal)(intervalEnd - current).TotalHours;
 
+            // The modifier is based on the slice start because slices never cross a pricing boundary.
             total += hourlyRate with { Amount = hours * hourlyRate.Amount * GetPriceModifier(current) };
 
             current = intervalEnd;
@@ -93,6 +96,7 @@ public sealed class PricingService
 
     private static DateTime GetNextBoundary(DateTime time)
     {
+        // Boundaries are evaluated within the current day first.
         foreach (var boundary in Boundaries)
         {
             var boundaryTime = time.Date.AddHours(boundary);
@@ -103,6 +107,7 @@ public sealed class PricingService
             }
         }
 
+        // After 23:00, the next valid pricing boundary is 06:00 on the next day.
         return time.Date.AddDays(1).AddHours(6);
     }
 }
