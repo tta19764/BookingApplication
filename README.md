@@ -69,7 +69,10 @@ Conference hall IDs are generated during seeding. Use the paginated halls endpoi
 - Serilog
 - Seq
 - Docker Compose
-- xUnit unit tests
+- xUnit
+- FluentAssertions
+- NSubstitute
+- Testcontainers for PostgreSQL-backed integration tests
 
 ## Architecture
 
@@ -82,6 +85,8 @@ The solution follows a Clean Architecture style.
 | `BookingApp.Infrastructure` | EF Core database context, repository implementations, entity configurations, unit of work, date/time provider, and Quartz jobs. |
 | `BookingApp.Api` | Minimal API endpoints, API versioning, Swagger, exception handling, request logging, dependency wiring, migration execution, and seed data. |
 | `BookingApp.Domain.UnitTests` | Focused tests for domain behavior. |
+| `test/BookingApp.Application.UnitTests` | Application handler tests with mocked repositories, unit of work, pricing service, and date/time dependencies. |
+| `test/BookingApp.Application.IntegrationTests` | Application integration tests that run the real API host and EF Core repositories against a PostgreSQL Testcontainer. |
 
 The API is versioned with URL segments, currently under `/api/v1`. Swagger is generated for the available API versions.
 
@@ -269,6 +274,14 @@ Run tests:
 ```powershell
 dotnet test BookingApplicationSolution.sln
 ```
+
+The test suite includes:
+
+- Domain unit tests for entities, value objects, domain events, and pricing rules.
+- Application unit tests for command/query handlers such as creating halls, creating bookings, available halls, and booking summary aggregation.
+- Application integration tests using `WebApplicationFactory<Program>` and a temporary PostgreSQL container to verify DI, EF Core mappings, repositories, migrations, seeding, and handler execution together.
+
+Docker Desktop must be running for the application integration tests because they use Testcontainers.
 
 Validate Docker Compose configuration:
 
