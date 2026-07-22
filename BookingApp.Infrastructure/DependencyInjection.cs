@@ -1,4 +1,6 @@
-﻿using BookingApp.Application.Abstractions.Clock;
+﻿using System.Text.Json.Serialization;
+using Asp.Versioning;
+using BookingApp.Application.Abstractions.Clock;
 using BookingApp.Domain.Abstractions;
 using BookingApp.Domain.Bookings;
 using BookingApp.Domain.ConferenceHalls;
@@ -68,4 +70,20 @@ public static class DependencyInjection
 
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
     }
-}
+    
+    public static void AddApiVersioning(IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            })
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'V";
+                options.SubstituteApiVersionInUrl = true;
+            });
+    }}
