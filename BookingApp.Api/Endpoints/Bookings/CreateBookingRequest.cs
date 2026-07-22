@@ -7,6 +7,7 @@ namespace BookingApp.Api.Endpoints.Bookings;
 /// </summary>
 public sealed record CreateBookingRequest(
     Guid HallId,
-    DateTime Start,
-    DateTime End,
+    DateOnly Date,
+    string StartTime,
+    string EndTime,
     IReadOnlyCollection<Amenity> Amenities);

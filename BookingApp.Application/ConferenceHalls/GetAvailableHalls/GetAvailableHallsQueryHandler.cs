@@ -3,6 +3,7 @@ using BookingApp.Application.ConferenceHalls.GetHall;
 using BookingApp.Domain.Abstractions;
 using BookingApp.Domain.Bookings;
 using BookingApp.Domain.ConferenceHalls;
+using System.Globalization;
 
 namespace BookingApp.Application.ConferenceHalls.GetAvailableHalls;
 
@@ -16,7 +17,10 @@ public class GetAvailableHallsQueryHandler(IConferenceHallRepository hallReposit
         GetAvailableHallsQuery request,
         CancellationToken cancellationToken)
     {
-        var duration = DateRange.Create(request.Start, request.End);
+        var duration = DateRange.Create(
+            request.Date,
+            TimeOnly.ParseExact(request.StartTime, "HH:mm", CultureInfo.InvariantCulture),
+            TimeOnly.ParseExact(request.EndTime, "HH:mm", CultureInfo.InvariantCulture));
 
         // Availability is delegated to the repository because overlap checks depend on stored bookings.
         var halls = await hallRepository.GetAvailableConferenceHalls(

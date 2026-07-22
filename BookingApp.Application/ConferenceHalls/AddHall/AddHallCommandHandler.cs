@@ -18,7 +18,7 @@ public class AddHallCommandHandler(
             Guid.NewGuid(),
             new Name(request.Name.Trim()),
             new Capacity(request.Capacity),
-            new Money(request.HourlyRate, Currency.Uah),
+            new Money(request.HourlyRate, Currency.FromCode(request.CurrencyCode.Trim().ToUpperInvariant())),
             request.Amenities.Distinct().ToList());
 
         hallRepository.Add(hall);

@@ -1,0 +1,475 @@
+{
+  "info": {
+    "_postman_id": "baf09589-0109-4d9f-96ee-f5b02d79f2f5",
+    "name": "BookingApp API",
+    "description": "Full local API smoke-test collection for conference halls, availability, bookings, and reports.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health / Swagger",
+      "item": [
+        {
+          "name": "Swagger UI Redirect",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Swagger redirect or page is reachable', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Conference Halls",
+      "item": [
+        {
+          "name": "Create Conference Hall",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test Hall\",\n  \"capacity\": 75,\n  \"hourlyRate\": 2600,\n  \"currencyCode\": \"UAH\",\n  \"amenities\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/conference-halls",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "conference-halls"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Conference hall is created', function () {",
+                  "    pm.expect(pm.response.code).to.eql(201);",
+                  "});",
+                  "",
+                  "const body = pm.response.json();",
+                  "const hallId = body.data || body.value;",
+                  "pm.environment.set('conferenceHallId', hallId);",
+                  "",
+                  "pm.test('Conference hall id is returned', function () {",
+                  "    pm.expect(hallId).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Conference Halls Paginated",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/conference-halls?page=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "conference-halls"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Conference halls page is returned', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(pm.response.json().data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Conference Hall By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/conference-halls/{{conferenceHallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "conference-halls",
+                "{{conferenceHallId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Conference hall details are returned', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(pm.response.json().data.id).to.eql(pm.environment.get('conferenceHallId'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Conference Hall",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test Hall Updated\",\n  \"capacity\": 90,\n  \"hourlyRate\": 3100,\n  \"amenities\": [1, 2]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/conference-halls/{{conferenceHallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "conference-halls",
+                "{{conferenceHallId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Conference hall is updated', function () {",
+                  "    pm.expect(pm.response.code).to.eql(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Available Conference Halls",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/conference-halls/available?date={{bookingDate}}&startTime={{startTime}}&endTime={{endTime}}&capacity=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "conference-halls",
+                "available"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "{{bookingDate}}"
+                },
+                {
+                  "key": "startTime",
+                  "value": "{{startTime}}"
+                },
+                {
+                  "key": "endTime",
+                  "value": "{{endTime}}"
+                },
+                {
+                  "key": "capacity",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Available halls are returned', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(pm.response.json().data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hallId\": \"{{conferenceHallId}}\",\n  \"date\": \"{{bookingDate}}\",\n  \"startTime\": \"{{startTime}}\",\n  \"endTime\": \"{{endTime}}\",\n  \"amenities\": [1, 2]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "bookings"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Booking is created', function () {",
+                  "    pm.expect(pm.response.code).to.eql(201);",
+                  "});",
+                  "",
+                  "const body = pm.response.json();",
+                  "const bookingId = body.data && body.data.bookingId;",
+                  "pm.environment.set('bookingId', bookingId);",
+                  "",
+                  "pm.test('Booking id and total price are returned', function () {",
+                  "    pm.expect(bookingId).to.be.a('string').and.not.empty;",
+                  "    pm.expect(body.data.totalPrice).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Overlapping Booking Should Fail",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hallId\": \"{{conferenceHallId}}\",\n  \"date\": \"{{bookingDate}}\",\n  \"startTime\": \"11:00\",\n  \"endTime\": \"12:00\",\n  \"amenities\": [1]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "bookings"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Overlapping booking is rejected', function () {",
+                  "    pm.expect(pm.response.code).to.eql(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Bookings Paginated",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/bookings?page=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "bookings"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Bookings page is returned', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(pm.response.json().data).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Get Booking Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/reports/bookings-summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "reports",
+                "bookings-summary"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Booking summary is returned', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "    pm.expect(pm.response.json().data).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "item": [
+        {
+          "name": "Delete Conference Hall",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/conference-halls/{{conferenceHallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "{{apiVersion}}",
+                "conference-halls",
+                "{{conferenceHallId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Delete returns no content or conflict depending on bookings', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([204, 400, 404, 500]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

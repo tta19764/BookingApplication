@@ -9,6 +9,7 @@ namespace BookingApp.Application.Bookings.AddBooking;
 public record AddBookingCommand(
     Guid HallId,
     Guid UserId,
-    DateTime Start,
-    DateTime End,
+    DateOnly Date,
+    string StartTime,
+    string EndTime,
     IReadOnlyCollection<Amenity> Amenities) : ICommand<BookingConfirmationResponse>;

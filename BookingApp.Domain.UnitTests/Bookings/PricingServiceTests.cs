@@ -101,9 +101,9 @@ public class PricingServiceTests
     [Fact]
     public void CalculatePrice_ShouldThrowException_WhenTimeIsOutsideAllowedHours()
     {
-        // Arrange: 23:00 - 01:00 (Next day) - This is outside allowed 06:00-23:00
-        var start = new DateTime(2026, 7, 20, 23, 0, 0);
-        var end = start.AddHours(2);
+        // Arrange: 05:00 - 06:00 is outside allowed rental hours.
+        var start = new DateTime(2026, 7, 20, 5, 0, 0);
+        var end = start.AddHours(1);
         var period = DateRange.Create(start, end);
 
         // Act
@@ -112,6 +112,67 @@ public class PricingServiceTests
         // Assert
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("Bookings are allowed only between 06:00 and 23:00.");
+    }
+
+    [Fact]
+    public void CalculatePrice_ShouldCalculateFractionalHours_WhenPeriodUsesMinutes()
+    {
+        // Arrange: 10:40 - 12:10 spans 80 standard minutes and 10 peak minutes.
+        var start = new DateTime(2026, 7, 20, 10, 40, 0);
+        var end = new DateTime(2026, 7, 20, 12, 10, 0);
+        var period = DateRange.Create(start, end);
+
+        // Act
+        var result = _sut.CalculatePrice(_hall, period);
+
+        // Assert
+        result.TotalPrice.Amount.Should().Be(152.50m);
+    }
+
+    [Fact]
+    public void CalculatePrice_ShouldThrowException_WhenPeriodUsesSeconds()
+    {
+        // Arrange
+        var start = new DateTime(2026, 7, 20, 10, 40, 30);
+        var end = new DateTime(2026, 7, 20, 12, 0, 0);
+        var period = DateRange.Create(start, end);
+
+        // Act
+        var act = () => _sut.CalculatePrice(_hall, period);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("Bookings must start and end at minute precision.");
+    }
+
+    [Fact]
+    public void CalculatePrice_ShouldThrowException_WhenPeriodCrossesCalendarDay()
+    {
+        // Arrange
+        var start = new DateTime(2026, 7, 20, 22, 0, 0);
+        var end = new DateTime(2026, 7, 21, 7, 0, 0);
+        var period = DateRange.Create(start, end);
+
+        // Act
+        var act = () => _sut.CalculatePrice(_hall, period);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("Booking period must be within one calendar day.");
+    }
+
+    [Fact]
+    public void DateRangeCreate_ShouldCreateMinuteLevelRange_FromDateAndTimes()
+    {
+        // Arrange
+        var date = new DateOnly(2026, 7, 20);
+
+        // Act
+        var period = DateRange.Create(date, new TimeOnly(10, 40), new TimeOnly(14, 15));
+
+        // Assert
+        period.Start.Should().Be(new DateTime(2026, 7, 20, 10, 40, 0));
+        period.End.Should().Be(new DateTime(2026, 7, 20, 14, 15, 0));
     }
     
     [Fact]

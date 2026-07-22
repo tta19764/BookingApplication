@@ -10,4 +10,5 @@ public record AddHallCommand(
     string Name,
     int Capacity,
     decimal HourlyRate,
+    string CurrencyCode,
     IReadOnlyCollection<Amenity> Amenities) : ICommand<Guid>;

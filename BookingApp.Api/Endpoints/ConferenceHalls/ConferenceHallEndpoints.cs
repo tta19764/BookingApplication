@@ -144,8 +144,9 @@ public static class ConferenceHallEndpoints
         CancellationToken cancellationToken)
     {
         var query = new GetAvailableHallsQuery(
-            request.Start,
-            request.End,
+            request.Date,
+            request.StartTime,
+            request.EndTime,
             request.Capacity);
 
         var result = await sender.Send(query, cancellationToken);

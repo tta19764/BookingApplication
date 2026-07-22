@@ -46,6 +46,8 @@ public sealed class PricingService
         Money hourlyRate,
         DateRange period)
     {
+        ValidatePricingPeriod(period);
+
         var total = Money.Zero(hourlyRate.Currency);
 
         var current = period.Start;
@@ -58,7 +60,7 @@ public sealed class PricingService
                 ? nextBoundary
                 : period.End;
 
-            var hours = (decimal)(intervalEnd - current).TotalHours;
+            var hours = (decimal)(intervalEnd - current).Ticks / TimeSpan.TicksPerHour;
 
             // The modifier is based on the slice start because slices never cross a pricing boundary.
             total += hourlyRate with { Amount = hours * hourlyRate.Amount * GetPriceModifier(current) };
@@ -67,6 +69,29 @@ public sealed class PricingService
         }
 
         return total;
+    }
+
+    private static void ValidatePricingPeriod(DateRange period)
+    {
+        if (period.Start.Date != period.End.Date)
+        {
+            throw new InvalidOperationException("Booking period must be within one calendar day.");
+        }
+
+        if (!IsMinutePrecision(period.Start) || !IsMinutePrecision(period.End))
+        {
+            throw new InvalidOperationException("Bookings must start and end at minute precision.");
+        }
+
+        if (period.Start.Hour < 6 || period.End.Hour > 23)
+        {
+            throw new InvalidOperationException("Bookings are allowed only between 06:00 and 23:00.");
+        }
+    }
+
+    private static bool IsMinutePrecision(DateTime dateTime)
+    {
+        return dateTime is { Second: 0, Millisecond: 0, Microsecond: 0 };
     }
 
     private static Money CalculateAmenitiesPrice(
@@ -107,7 +132,8 @@ public sealed class PricingService
             }
         }
 
-        // After 23:00, the next valid pricing boundary is 06:00 on the next day.
-        return time.Date.AddDays(1).AddHours(6);
+        // Cross-day bookings are currently rejected before pricing reaches this point.
+        // If overnight bookings are added later, return the next day's opening boundary here.
+        throw new InvalidOperationException("No pricing boundary was found for the current day.");
     }
 }

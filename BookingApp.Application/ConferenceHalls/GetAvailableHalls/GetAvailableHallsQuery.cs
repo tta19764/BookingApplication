@@ -7,6 +7,7 @@ namespace BookingApp.Application.ConferenceHalls.GetAvailableHalls;
 /// Query for finding halls available for a requested period and minimum capacity.
 /// </summary>
 public record GetAvailableHallsQuery(
-    DateTime Start,
-    DateTime End,
+    DateOnly Date,
+    string StartTime,
+    string EndTime,
     int Capacity) : IQuery<IEnumerable<HallResponse>>;

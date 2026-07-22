@@ -19,4 +19,8 @@ public static class BookingErrors
     public static Error AlreadyStarted = new(
         "Booking.AlreadyStarted",
         "The booking has already started");
+
+    public static Error StartsInPast = new(
+        "Booking.StartsInPast",
+        "The booking start time must be in the future");
 }

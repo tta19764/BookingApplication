@@ -58,8 +58,9 @@ public static class BookingEndpoints
         var command = new AddBookingCommand(
             request.HallId,
             SeedDataExtensions.SeededUserId,
-            request.Start,
-            request.End,
+            request.Date,
+            request.StartTime,
+            request.EndTime,
             request.Amenities);
 
         var result = await sender.Send(command, cancellationToken);

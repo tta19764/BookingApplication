@@ -28,12 +28,12 @@ public class HallConfiguration : IEntityTypeConfiguration<ConferenceHall>
             .HasColumnName("name")
             .IsRequired();
 
-        builder.Property(hall => hall.Seats)
-            .HasConversion(
-                capacity => capacity.Value,
-                value => new Capacity(value))
-            .HasColumnName("capacity")
-            .IsRequired();
+        builder.OwnsOne(hall => hall.Seats, seatsBuilder =>
+        {
+            seatsBuilder.Property(seats => seats.Value)
+                .HasColumnName("capacity")
+                .IsRequired();
+        });
 
         builder.OwnsOne(hall => hall.Price, priceBuilder =>
         {

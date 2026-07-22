@@ -3,6 +3,7 @@ using BookingApp.Application.Abstractions.Messaging;
 using BookingApp.Domain.Abstractions;
 using BookingApp.Domain.Bookings;
 using BookingApp.Domain.ConferenceHalls;
+using System.Globalization;
 
 namespace BookingApp.Application.Bookings.AddBooking;
 
@@ -27,7 +28,17 @@ public class AddBookingCommandHandler(
             return Result.Failure<BookingConfirmationResponse>(ConferenceHallErrors.NotFound);
         }
 
-        var duration = DateRange.Create(request.Start, request.End);
+        var duration = DateRange.Create(
+            request.Date,
+            TimeOnly.ParseExact(request.StartTime, "HH:mm", CultureInfo.InvariantCulture),
+            TimeOnly.ParseExact(request.EndTime, "HH:mm", CultureInfo.InvariantCulture));
+
+        var currentBookingTime = DateTime.SpecifyKind(dateTimeProvider.UtcNow, DateTimeKind.Unspecified);
+
+        if (duration.Start <= currentBookingTime)
+        {
+            return Result.Failure<BookingConfirmationResponse>(BookingErrors.StartsInPast);
+        }
 
         // Prevent double-booking before creating the reservation aggregate.
         if (await bookingRepository.HasOverlap(hall.Id, duration, cancellationToken))

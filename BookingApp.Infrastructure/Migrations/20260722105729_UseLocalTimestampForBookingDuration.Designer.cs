@@ -3,6 +3,7 @@ using System;
 using BookingApp.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookingApp.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260722105729_UseLocalTimestampForBookingDuration")]
+    partial class UseLocalTimestampForBookingDuration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,6 +88,10 @@ namespace BookingApp.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
+
+                    b.Property<int>("Seats")
+                        .HasColumnType("integer")
+                        .HasColumnName("capacity");
 
                     b.HasKey("Id");
 
@@ -347,23 +354,6 @@ namespace BookingApp.Infrastructure.Migrations
 
             modelBuilder.Entity("BookingApp.Domain.ConferenceHalls.ConferenceHall", b =>
                 {
-                    b.OwnsOne("BookingApp.Domain.ConferenceHalls.Capacity", "Seats", b1 =>
-                        {
-                            b1.Property<Guid>("ConferenceHallId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<int>("Value")
-                                .HasColumnType("integer")
-                                .HasColumnName("capacity");
-
-                            b1.HasKey("ConferenceHallId");
-
-                            b1.ToTable("conference_halls");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ConferenceHallId");
-                        });
-
                     b.OwnsOne("BookingApp.Domain.Shared.Money", "Price", b1 =>
                         {
                             b1.Property<Guid>("ConferenceHallId")
@@ -389,9 +379,6 @@ namespace BookingApp.Infrastructure.Migrations
                         });
 
                     b.Navigation("Price")
-                        .IsRequired();
-
-                    b.Navigation("Seats")
                         .IsRequired();
                 });
 
