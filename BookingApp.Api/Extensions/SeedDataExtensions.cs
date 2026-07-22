@@ -31,6 +31,8 @@ public static class SeedDataExtensions
         SeedConferenceHalls(dbContext);
 
         dbContext.SaveChanges();
+        dbContext.ChangeTracker.Clear();
+        ClearRegisteredRoleNavigationState();
     }
 
     private static void SeedRolesAndPermissions(ApplicationDbContext dbContext)
@@ -76,6 +78,8 @@ public static class SeedDataExtensions
 
         // Persist catalog rows before creating the user-role join row.
         dbContext.SaveChanges();
+        dbContext.ChangeTracker.Clear();
+        ClearRegisteredRoleNavigationState();
     }
 
     private static void SeedUser(ApplicationDbContext dbContext)
@@ -85,18 +89,41 @@ public static class SeedDataExtensions
             return;
         }
 
+        ClearRegisteredRoleNavigationState();
+
         var user = User.Create(
             SeededUserId,
             new FirstName("Seeded"),
             new LastName("User"),
             new Email("seeded.user@booking.local"));
 
-        if (dbContext.Entry(Role.Registered).State == EntityState.Detached)
-        {
-            dbContext.Attach(Role.Registered);
-        }
+        ClearUserRoles(user);
 
         dbContext.Set<User>().Add(user);
+
+        dbContext.Set<Dictionary<string, object>>("user_roles").Add(new Dictionary<string, object>
+        {
+            ["user_id"] = SeededUserId,
+            ["role_id"] = Role.Registered.Id
+        });
+    }
+
+    private static void ClearRegisteredRoleNavigationState()
+    {
+        // EF relationship fix-up mutates navigation collections on the static role instance.
+        // Clearing them keeps repeated app/test startups from reusing previously tracked users.
+        Role.Registered.Users.Clear();
+        Role.Registered.Permissions.Clear();
+    }
+
+    private static void ClearUserRoles(User user)
+    {
+        var rolesField = typeof(User).GetField("_roles", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+        if (rolesField?.GetValue(user) is List<Role> roles)
+        {
+            roles.Clear();
+        }
     }
 
     private static void SeedConferenceHalls(ApplicationDbContext dbContext)
