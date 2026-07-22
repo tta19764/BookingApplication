@@ -32,12 +32,12 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         {
             durationBuilder.Property(duration => duration.Start)
                 .HasColumnName("start")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .IsRequired();
 
             durationBuilder.Property(duration => duration.End)
                 .HasColumnName("end")
-                .HasColumnType("timestamp without time zone")
+                .HasColumnType("timestamp with time zone")
                 .IsRequired();
         });
 

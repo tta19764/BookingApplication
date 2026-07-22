@@ -70,12 +70,10 @@ public class BookingRepository(ApplicationDbContext dbContext)
                 throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be greater than zero.");
         }
 
-        var currentBookingTime = DateTime.SpecifyKind(utcNow, DateTimeKind.Unspecified);
-
         return await DbSet
             .Where(booking =>
                 booking.Status == BookingStatus.Reserved &&
-                booking.Duration.End <= currentBookingTime)
+                booking.Duration.End <= utcNow)
             .OrderBy(booking => booking.Duration.End)
             .Take(pageSize)
             .ToListAsync(cancellationToken);

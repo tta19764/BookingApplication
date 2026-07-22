@@ -45,8 +45,8 @@ public record DateRange
         }
 
         return Create(
-            date.ToDateTime(startTime),
-            date.ToDateTime(endTime));
+            DateTime.SpecifyKind(date.ToDateTime(startTime), DateTimeKind.Utc),
+            DateTime.SpecifyKind(date.ToDateTime(endTime), DateTimeKind.Utc));
     }
 
     /// <summary>

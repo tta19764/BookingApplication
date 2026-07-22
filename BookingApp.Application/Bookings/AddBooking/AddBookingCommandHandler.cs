@@ -33,9 +33,7 @@ public class AddBookingCommandHandler(
             TimeOnly.ParseExact(request.StartTime, "HH:mm", CultureInfo.InvariantCulture),
             TimeOnly.ParseExact(request.EndTime, "HH:mm", CultureInfo.InvariantCulture));
 
-        var currentBookingTime = DateTime.SpecifyKind(dateTimeProvider.UtcNow, DateTimeKind.Unspecified);
-
-        if (duration.Start <= currentBookingTime)
+        if (duration.Start <= dateTimeProvider.UtcNow)
         {
             return Result.Failure<BookingConfirmationResponse>(BookingErrors.StartsInPast);
         }

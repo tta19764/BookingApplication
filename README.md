@@ -15,7 +15,7 @@ The project is intentionally split into API, Application, Domain, and Infrastruc
 
 ## Pricing Rules
 
-Bookings are calculated inside the domain layer. A booking must be within one calendar day and within supported rental hours. Booking and availability requests accept minute-level times in `HH:mm` format, for example `10:40`.
+Bookings are calculated inside the domain layer. A booking must be within one calendar day and within supported rental hours. Booking and availability requests accept minute-level UTC times in `HH:mm` format, for example `10:40`.
 
 | Time window | Rule |
 | --- | --- |
@@ -282,5 +282,6 @@ docker compose config
 - Finished reservations are completed by the Quartz `CompleteBookingsJob`.
 - The booking summary query reads bookings in pages instead of loading all bookings at once.
 - The API currently uses one seeded user with full permissions. Authentication and authorization are intentionally not part of the current scope.
-- Booking period columns are stored as local wall-clock timestamps, while audit fields such as `created_on_utc` use UTC timestamps.
+- Booking period columns and audit fields use UTC timestamps.
+- Current-time guards and automatic completion compare booking periods against `IDateTimeProvider.UtcNow`.
 - The current scope is a development/test API. Production hardening would add authentication, authorization policies, stricter access control, and deployment-specific secret management.
