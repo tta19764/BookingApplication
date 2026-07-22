@@ -108,19 +108,19 @@ public static class SeedDataExtensions
 
         dbContext.Set<ConferenceHall>().AddRange(
             new ConferenceHall(
-                Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                Guid.NewGuid(),
                 new Name("Hall A"),
                 new Capacity(50),
                 new Money(2000m, Currency.Uah),
                 [Amenity.Projector, Amenity.WiFi, Amenity.SoundSystem]),
             new ConferenceHall(
-                Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                Guid.NewGuid(),
                 new Name("Hall B"),
                 new Capacity(100),
                 new Money(3500m, Currency.Uah),
                 [Amenity.Projector, Amenity.WiFi, Amenity.SoundSystem]),
             new ConferenceHall(
-                Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                Guid.NewGuid(),
                 new Name("Hall C"),
                 new Capacity(30),
                 new Money(1500m, Currency.Uah),

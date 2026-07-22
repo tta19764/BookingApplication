@@ -23,6 +23,14 @@ public interface IConferenceHallRepository
     void Update(ConferenceHall hall);
 
     /// <summary>
+    /// Returns one page of halls ordered by identifier.
+    /// </summary>
+    Task<IReadOnlyCollection<ConferenceHall>> GetListPaginatedAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Removes a hall from the persistence context.
     /// </summary>
     void Remove(ConferenceHall hall);

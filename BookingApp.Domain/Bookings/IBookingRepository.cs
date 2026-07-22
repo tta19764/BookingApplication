@@ -21,6 +21,14 @@ public interface IBookingRepository
     IAsyncEnumerable<IReadOnlyCollection<Booking>> List(int pageSize, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Returns one page of bookings ordered by identifier.
+    /// </summary>
+    Task<IReadOnlyCollection<Booking>> GetListPaginatedAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Returns reserved bookings whose booking period has ended and should be completed.
     /// </summary>
     Task<IReadOnlyCollection<Booking>> GetReservedBookingsDueForCompletion(

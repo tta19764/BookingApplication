@@ -18,18 +18,19 @@ public class ConferenceHallRepository(ApplicationDbContext dbContext)
         Capacity seats,
         CancellationToken cancellationToken = default)
     {
-        return await DbContext
-            .Set<ConferenceHall>()
+        var unreservedHalls = DbContext.Set<Booking>()
+            .Where(booking =>
+                booking.Status == BookingStatus.Reserved &&
+                booking.Duration.Start < dateRange.End &&
+                booking.Duration.End > dateRange.Start)
+            .Select(booking => booking.ConferenceHallId);
+        
+        return await DbSet
             .AsNoTracking()
             .Where(hall => hall.Seats.Value >= seats.Value)
             // A hall is unavailable only when an active reservation overlaps the requested period.
-            .Where(hall => 
-                !DbContext.Set<Booking>()
-                .Where(booking =>
-                    booking.Status == BookingStatus.Reserved &&
-                    booking.Duration.Start < dateRange.End &&
-                    booking.Duration.End > dateRange.Start)
-                .Select(booking => booking.ConferenceHallId).Contains(hall.Id))
+            .Where(hall => !unreservedHalls 
+            .Contains(hall.Id))
             .OrderBy(hall => hall.Name)
             .ToListAsync(cancellationToken);
     }

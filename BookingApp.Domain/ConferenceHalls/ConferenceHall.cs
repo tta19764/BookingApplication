@@ -4,15 +4,26 @@ using BookingApp.Domain.Shared;
 
 namespace BookingApp.Domain.ConferenceHalls;
 
-public sealed class ConferenceHall(Guid id, Name name, Capacity seats, Money price, List<Amenity> amenities)
-    : Entity(id)
+public sealed class ConferenceHall : Entity
 {
-    public Name Name { get; private set; } = name;
-    public Capacity Seats { get; private set; } = seats;
-    public Money Price { get; private set; } = price;
+    private ConferenceHall()
+    {
+    }
+
+    public ConferenceHall(Guid id, Name name, Capacity seats, Money price, List<Amenity> amenities) : base(id)
+    {
+        Name = name;
+        Seats = seats;
+        Price = price;
+        Amenities = amenities;
+    }
+
+    public Name Name { get; private set; } = null!;
+    public Capacity Seats { get; private set; } = null!;
+    public Money Price { get; private set; } = null!;
     public DateTime? LastBookedOnUtc { get; internal set; }
 
-    public List<Amenity> Amenities { get; private set; } = amenities;
+    public List<Amenity> Amenities { get; private set; } = [];
     
     public ICollection<Booking> Bookings { get; private set; } = new List<Booking>();
 

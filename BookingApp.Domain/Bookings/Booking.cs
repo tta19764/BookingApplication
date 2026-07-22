@@ -8,6 +8,10 @@ namespace BookingApp.Domain.Bookings;
 
 public sealed class Booking : Entity
 {
+    private Booking()
+    {
+    }
+
     private Booking(
         Guid id,
         Guid conferenceHallId,
@@ -34,13 +38,13 @@ public sealed class Booking : Entity
 
     public Guid UserId { get; private set; }
 
-    public DateRange Duration { get; private set; }
+    public DateRange Duration { get; private set; } = null!;
 
-    public Money PriceForPeriod { get; private set; }
+    public Money PriceForPeriod { get; private set; } = null!;
 
-    public Money AmenitiesUpCharge { get; private set; }
+    public Money AmenitiesUpCharge { get; private set; } = null!;
 
-    public Money TotalPrice { get; private set; }
+    public Money TotalPrice { get; private set; } = null!;
 
     public BookingStatus Status { get; private set; }
 

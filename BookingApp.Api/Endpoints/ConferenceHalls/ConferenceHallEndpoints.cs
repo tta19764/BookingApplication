@@ -3,6 +3,7 @@ using BookingApp.Api.Extensions;
 using BookingApp.Application.ConferenceHalls.AddHall;
 using BookingApp.Application.ConferenceHalls.GetAvailableHalls;
 using BookingApp.Application.ConferenceHalls.GetHall;
+using BookingApp.Application.ConferenceHalls.GetHalls;
 using BookingApp.Application.ConferenceHalls.RemoveHall;
 using BookingApp.Application.ConferenceHalls.UpdateHall;
 using MediatR;
@@ -27,6 +28,12 @@ public static class ConferenceHallEndpoints
             .WithSummary("Create a conference hall")
             .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
             .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest);
+
+        group.MapGet(string.Empty, GetConferenceHalls)
+            .WithName(nameof(GetConferenceHalls))
+            .WithSummary("Get conference halls by page")
+            .Produces<ApiResponse<IReadOnlyCollection<HallResponse>>>()
+            .Produces<ApiResponse<IReadOnlyCollection<HallResponse>>>(StatusCodes.Status400BadRequest);
 
         group.MapGet("{hallId:guid}", GetConferenceHall)
             .WithName(nameof(GetConferenceHall))
@@ -54,6 +61,20 @@ public static class ConferenceHallEndpoints
             .Produces<ApiResponse<IEnumerable<HallResponse>>>(StatusCodes.Status400BadRequest);
 
         return builder;
+    }
+
+    public static async Task<IResult> GetConferenceHalls(
+        [AsParameters] GetConferenceHallsRequest request,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetHallsQuery(request.Page, request.PageSize),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
     }
 
     public static async Task<IResult> CreateConferenceHall(

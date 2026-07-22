@@ -23,6 +23,20 @@ public static class ServiceCollectionExtensions
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
 
+        services
+            .AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = BookingAppApiVersions.V1;
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            })
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'V";
+                options.SubstituteApiVersionInUrl = true;
+            });
+
         services.AddSwaggerGen();
         services.ConfigureOptions<ConfigureSwaggerOptions>();
 
