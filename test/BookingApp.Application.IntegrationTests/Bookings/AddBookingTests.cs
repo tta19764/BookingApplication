@@ -9,13 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookingApp.Application.IntegrationTests.Bookings;
 
-public class AddBookingTests : BaseIntegrationTest
+public class AddBookingTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
-    public AddBookingTests(IntegrationTestWebAppFactory factory)
-        : base(factory)
-    {
-    }
-
     [Fact]
     public async Task AddBooking_Should_PersistBookingAndReturnPriceBreakdown()
     {
@@ -45,13 +40,13 @@ public class AddBookingTests : BaseIntegrationTest
         result.Value.Currency.Should().Be("UAH");
         result.Value.TotalPrice.Should().BeGreaterThan(result.Value.PriceForPeriod);
 
-        Booking? booking = await DbContext
+        var booking = await DbContext
             .Set<Booking>()
             .AsNoTracking()
             .FirstOrDefaultAsync(storedBooking => storedBooking.Id == result.Value.BookingId, cancellationToken);
 
         booking.Should().NotBeNull();
-        booking!.Status.Should().Be(BookingStatus.Reserved);
+        booking.Status.Should().Be(BookingStatus.Reserved);
         booking.Duration.Start.Kind.Should().Be(DateTimeKind.Utc);
         booking.Duration.End.Kind.Should().Be(DateTimeKind.Utc);
     }

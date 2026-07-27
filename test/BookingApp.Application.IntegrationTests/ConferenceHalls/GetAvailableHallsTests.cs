@@ -6,18 +6,13 @@ using FluentAssertions;
 
 namespace BookingApp.Application.IntegrationTests.ConferenceHalls;
 
-public class GetAvailableHallsTests : BaseIntegrationTest
+public class GetAvailableHallsTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
-    public GetAvailableHallsTests(IntegrationTestWebAppFactory factory)
-        : base(factory)
-    {
-    }
-
     [Fact]
     public async Task GetAvailableHalls_Should_ReturnSeededHalls_WhenNoBookingsOverlap()
     {
         // Arrange
-        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        var cancellationToken = TestContext.Current.CancellationToken;
         var query = new GetAvailableHallsQuery(
             DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2)),
             "10:40",
