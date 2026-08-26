@@ -1,6 +1,6 @@
 # Рівень API
 
-`BookingApp.Api` є HTTP entry point. Він використовує ASP.NET Core Minimal APIs під `/api/v1`, перетворює application results на єдиний response envelope і публікує Swagger у Development.
+`BookingApp.Api` є точкою входу для HTTP-запитів. Він використовує мінімальні API ASP.NET Core за адресою `/api/v1`, перетворює результати прикладного рівня на єдину структуру відповіді та публікує Swagger у середовищі розробки.
 
 ## Endpoints
 
@@ -20,14 +20,14 @@ GET    /api/v1/reports/bookings-summary
 
 ## Наскрізна поведінка
 
-- Версіонування через URL і окремі Swagger documents для версій.
-- FluentValidation повертає HTTP 400 problem details.
-- Мапінг result у success, not-found та business-rule HTTP responses.
+- Версіонування через URL і окремі документи Swagger для кожної версії.
+- FluentValidation повертає опис проблеми зі статусом HTTP 400.
+- Перетворення результатів на успішні відповіді, відповіді про відсутність ресурсу та порушення бізнес-правил.
 - Централізована обробка винятків не розкриває клієнтам внутрішні деталі.
-- Request-context logging через Serilog і Seq.
-- HTTPS redirection у middleware pipeline.
-- Development migrations та ідемпотентний seed data startup.
+- Контекстне журналювання запитів через Serilog і Seq.
+- Перенаправлення на HTTPS у конвеєрі проміжного програмного забезпечення.
+- Застосування міграцій і повторюване заповнення початкових даних під час запуску середовища розробки.
 
-Поточне API використовує seeded-користувача. Для production слід додати authentication, authorization policies, secret management, rate limiting та конфігурацію proxy/trust для середовища.
+Поточне API використовує попередньо створеного користувача. Для промислового середовища слід додати автентифікацію, політики авторизації, безпечне керування секретами, обмеження частоти запитів і налаштування довірених проксі-серверів.
 
-Багаторазова Postman collection у `test/Postman/` надає ручний сценарій. Автоматичну HTTP-поведінку перевіряє `BookingApp.Api.IntegrationTests`.
+Багаторазова колекція Postman у `test/Postman/` надає сценарій ручної перевірки. Автоматичну поведінку HTTP перевіряє `BookingApp.Api.IntegrationTests`.

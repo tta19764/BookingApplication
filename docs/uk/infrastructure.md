@@ -1,25 +1,24 @@
-# Інфраструктурний рівень
+# Infrastructure
 
-`BookingApp.Infrastructure` реалізує зовнішні та persistence-компоненти, потрібні внутрішнім рівням.
+`BookingApp.Infrastructure` реалізує зовнішні компоненти та засоби збереження даних, потрібні внутрішнім рівням.
 
-## Persistence
+## Збереження даних
 
-- `ApplicationDbContext` є EF Core Unit of Work.
-- PostgreSQL repositories реалізують контракти залів, бронювань і користувачів.
-- Entity configurations маплять aggregates і value objects: точність грошей, UTC timestamps, список послуг, зв'язки й правила видалення.
-- Migrations версіонують реляційну схему.
+- `ApplicationDbContext` є реалізацією Unit of Work на основі EF Core.
+- Репозиторії PostgreSQL реалізують контракти залів, бронювань і користувачів.
+- Конфігурації сутностей зіставляють агрегати та об'єкти-значення: точність грошових сум, часові позначки UTC, список послуг, зв'язки й правила видалення.
+- Міграції версіонують реляційну схему.
 - Перевірки доступності та перетину виконуються запитами до бази.
 - Дані для звіту читаються детерміновано й посторінково.
 
 ## Операційні сервіси
 
-- `DateTimeProvider` надає UTC-час через application-абстракцію.
-- Quartz запускає `CompleteBookingsJob`, яка обробляє обмежені пакети завершених у часі бронювань.
+- `DateTimeProvider` надає час UTC через абстракцію Application-рівня.
+- Quartz запускає завдання `CompleteBookingsJob`, яке обробляє обмежені пакети завершених у часі бронювань.
 - Реєстрація dependency injection зосереджена в `DependencyInjection` цього рівня.
 
 ## Конфігурація
 
-Development connection string і параметри job знаходяться в `BookingApp.Api/appsettings.Development.json`; Docker Compose перевизначає значення, залежні від середовища. У production secrets мають надходити з конфігурації deployment, а не з committed-файлів.
+Рядок підключення середовища розробки та параметри завдання знаходяться в `BookingApp.Api/appsettings.Development.json`; Docker Compose перевизначає значення, залежні від середовища. У промисловому середовищі секрети мають надходити з конфігурації розгортання, а не зі збережених у репозиторії файлів.
 
-Мапінги репозиторіїв і поведінку бази перевіряють обидва integration test projects із тимчасовими PostgreSQL Testcontainers.
-
+Зіставлення репозиторіїв і поведінку бази перевіряють обидва integration test projects із тимчасовими контейнерами PostgreSQL, створеними через Testcontainers.

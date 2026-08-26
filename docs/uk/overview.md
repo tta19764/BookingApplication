@@ -30,7 +30,7 @@ Booking Application керує орендою конференц-залів. К�
 
 ## Початкові дані
 
-У Development створюються Hall A (50 місць, 2000 UAH/год), Hall B (100, 3500), Hall C (30, 1500) і користувач `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa`. Автентифікація не входить до поточного обсягу, тому endpoint бронювання використовує цього користувача.
+У середовищі розробки створюються `Hall A` (50 місць, 2000 UAH/год), `Hall B` (100, 3500), `Hall C` (30, 1500) і користувач `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa`. Автентифікація не входить до поточного обсягу, тому Endpoint бронювання використовує цього користувача.
 
 ## Запуск
 
@@ -50,5 +50,4 @@ dotnet run --project BookingApp.Api
 
 ## Архітектура
 
-Залежності спрямовані всередину: API та Infrastructure залежать від Application і Domain, тоді як Domain не містить деталей HTTP або бази даних. Деталі: [Domain](domain.md), [Application](application.md), [Infrastructure](infrastructure.md), [API](api.md), [Тестування](testing.md).
-
+Залежності спрямовані всередину: API та Infrastructure залежать від Application і Domain, тоді як Domain не містить деталей HTTP або бази даних. Докладніше: [Domain](domain.md), [Application](application.md), [Infrastructure](infrastructure.md), [API](api.md), [Тестування](testing.md).

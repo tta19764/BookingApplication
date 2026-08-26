@@ -1,28 +1,27 @@
 # Тестування
 
-Усі тестові методи мають явні секції `Arrange`, `Act` і `Assert`. Запуск повного набору:
+Усі тестові методи мають явні секції підготовки, виконання та перевірки (`Arrange`, `Act`, `Assert`). Запуск повного набору:
 
 ```powershell
 dotnet test BookingApplicationSolution.sln
 ```
 
-Для integration-тестів потрібен Docker Desktop або сумісний Docker engine.
+Для integration-тестів потрібен Docker Desktop або сумісний рушій Docker.
 
 ## BookingApp.Domain.UnitTests
 
-Швидкі тести переходів статусів, доменних подій, дозволених годин, неповних годин, тарифних меж, знижок, пікової націнки, вартості послуг і невалідних періодів. Вони не використовують mocks, HTTP або базу даних.
+Швидкі тести переходів статусів, доменних подій, дозволених годин, неповних годин, тарифних меж, знижок, пікової націнки, вартості послуг і некоректних періодів. Вони не використовують імітації залежностей, HTTP або базу даних.
 
 ## BookingApp.Application.UnitTests
 
-Тести handlers із NSubstitute. Перевіряють створення залу, пошук доступності, успішні й неуспішні бронювання, overlap, непідтримувані послуги, минулий час, виклики repositories та Unit of Work, а також посторінкову агрегацію звіту.
+Тести handlers із NSubstitute. Перевіряють створення залу, пошук доступності, успішні й неуспішні бронювання, перетини, непідтримувані послуги, минулий час, виклики репозиторіїв та Unit of Work, а також посторінкове підсумовування звіту.
 
 ## BookingApp.Application.IntegrationTests
 
-Application-level тести отримують MediatR та EF Core з реального host, виконують commands/queries без HTTP і перевіряють PostgreSQL persistence, mappings, seed data, UTC timestamps, доступність і деталізацію ціни.
+Тести Application-рівня отримують MediatR та EF Core з реального вузла застосунку, виконують Commands і Queries без HTTP та перевіряють збереження даних у PostgreSQL, зіставлення, початкові дані, часові позначки UTC, доступність і деталізацію ціни.
 
 ## BookingApp.Api.IntegrationTests
 
-End-to-end тести викликають in-memory ASP.NET Core host через `HttpClient` і використовують реальну тимчасову PostgreSQL базу. Вони покривають п'ять обов'язкових операцій: створення, оновлення, видалення, пошук доступності та бронювання. Assertions перевіряють HTTP status codes, routing/model binding, JSON contracts, persistence, виключення перетинів і точну ціну пікового часу та послуг.
+End-to-end тести викликають розміщений у пам'яті вузол ASP.NET Core через `HttpClient` і використовують реальну тимчасову базу PostgreSQL. Вони покривають п'ять обов'язкових операцій: створення, оновлення, видалення, пошук доступності та бронювання. Перевірки охоплюють коди стану HTTP, маршрутизацію та прив'язування моделей, контракти JSON, збереження даних, виключення перетинів і точну ціну пікового часу та послуг.
 
-Кожен integration test project має власні `WebApplicationFactory` і PostgreSQL container, тому API та application test concerns залишаються розділеними.
-
+Кожен integration test project має власні `WebApplicationFactory` і контейнер PostgreSQL, тому перевірки API та Application залишаються розділеними.
