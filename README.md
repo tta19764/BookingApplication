@@ -10,13 +10,13 @@ The solution uses Clean Architecture with separate Domain, Application, Infrastr
 
 | Subject | English | Українська |
 | --- | --- | --- |
-| Project overview, business rules, setup, and API | [Overview](docs/en/overview.md) | [Огляд](docs/uk/overview.md) |
-| Domain layer | [Domain](docs/en/domain.md) | [Доменний рівень](docs/uk/domain.md) |
-| Application layer | [Application](docs/en/application.md) | [Прикладний рівень](docs/uk/application.md) |
-| Infrastructure layer | [Infrastructure](docs/en/infrastructure.md) | [Інфраструктурний рівень](docs/uk/infrastructure.md) |
-| API layer | [API](docs/en/api.md) | [Рівень API](docs/uk/api.md) |
-| Test projects and strategy | [Testing](docs/en/testing.md) | [Тестування](docs/uk/testing.md) |
-| Features added beyond the assignment | [Extended features](docs/en/extended-features.md) | [Розширені можливості](docs/uk/extended-features.md) |
+| Project overview, business rules, setup, and API | [Overview](docs/en/overview.md) | [Огляд](docs/ua/overview.md) |
+| Domain layer | [Domain](docs/en/domain.md) | [Доменний рівень](docs/ua/domain.md) |
+| Application layer | [Application](docs/en/application.md) | [Прикладний рівень](docs/ua/application.md) |
+| Infrastructure layer | [Infrastructure](docs/en/infrastructure.md) | [Інфраструктурний рівень](docs/ua/infrastructure.md) |
+| API layer | [API](docs/en/api.md) | [Рівень API](docs/ua/api.md) |
+| Test projects and strategy | [Testing](docs/en/testing.md) | [Тестування](docs/ua/testing.md) |
+| Features added beyond the assignment | [Extended features](docs/en/extended-features.md) | [Розширені можливості](docs/ua/extended-features.md) |
 
 ## Technologies and tools / Технології та інструменти
 
