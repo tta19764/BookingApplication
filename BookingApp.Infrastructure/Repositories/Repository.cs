@@ -64,12 +64,4 @@ public abstract class Repository<T>(ApplicationDbContext dbContext)
     {
         DbContext.Remove(entity);
     }
-    
-    /// <summary>
-    /// Marks an entity as modified in the current persistence context.
-    /// </summary>
-    public virtual void Update(T entity)
-    {
-        DbContext.Update(entity);
-    }
 }

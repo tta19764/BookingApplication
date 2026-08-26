@@ -47,11 +47,10 @@ internal sealed class CompleteBookingsJob(
                     continue;
                 }
 
-                bookingRepository.Update(booking);
+                await unitOfWork.SaveChangesAsync(context.CancellationToken);
+
                 completedCount++;
             }
-
-            await unitOfWork.SaveChangesAsync(context.CancellationToken);
 
             // A short batch means there is no remaining page to fetch for this run.
             if (bookings.Count < pageSize)

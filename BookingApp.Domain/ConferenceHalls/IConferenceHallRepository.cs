@@ -18,11 +18,6 @@ public interface IConferenceHallRepository
     void Add(ConferenceHall hall);
 
     /// <summary>
-    /// Marks an existing hall as changed in the persistence context.
-    /// </summary>
-    void Update(ConferenceHall hall);
-
-    /// <summary>
     /// Returns one page of halls ordered by identifier.
     /// </summary>
     Task<IReadOnlyCollection<ConferenceHall>> GetListPaginatedAsync(

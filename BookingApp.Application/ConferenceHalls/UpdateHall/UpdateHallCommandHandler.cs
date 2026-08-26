@@ -27,8 +27,6 @@ public class UpdateHallCommandHandler(
             new Money(request.HourlyRate, Currency.Uah),
             request.Amenities);
 
-        hallRepository.Update(hall);
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

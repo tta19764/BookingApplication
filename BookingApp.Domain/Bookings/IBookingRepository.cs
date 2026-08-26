@@ -42,11 +42,6 @@ public interface IBookingRepository
     void Add(Booking booking);
 
     /// <summary>
-    /// Marks an existing booking as changed in the persistence context.
-    /// </summary>
-    void Update(Booking booking);
-
-    /// <summary>
     /// Removes a booking from the persistence context.
     /// </summary>
     void Remove(Booking booking);
