@@ -1,5 +1,36 @@
-bin/
-obj/
+# Build output
+**/bin/
+**/obj/
+**/TestResults/
+**/coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+# NuGet
 /packages/
+*.nupkg
+*.snupkg
+
+# Visual Studio and VS Code
+.vs/
+.vscode/
+*.suo
+*.user
+*.rsuser
+*.userosscache
+*.sln.docstates
+
+# JetBrains Rider and ReSharper
+.idea/
+*.DotSettings.user
 riderModule.iml
-/_ReSharper.Caches/
+_ReSharper.Caches/
+*.sln.iml
+
+# Operating-system and temporary files
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+*.log
