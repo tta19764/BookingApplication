@@ -61,7 +61,5 @@ public sealed class BookingRepository(ApplicationDbContext dbContext, IMapper ma
     protected override IQueryable<BookingEntity> Ordered(IQueryable<BookingEntity> query) =>
         query.OrderBy(booking => booking.Id);
 
-    protected override Guid GetEntityId(BookingEntity entity) => entity.Id;
-
     protected override Guid GetModelId(Booking model) => model.Id;
 }
