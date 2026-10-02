@@ -1,5 +1,6 @@
 using BookingApp.Bll.IntegrationTests.Infrastructure;
-using BookingApp.Bll.Common.ConferenceHalls;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
+using BookingApp.Dal.SqlRepositories.Entities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +23,7 @@ public class AddHallTests(IntegrationTestWebAppFactory factory) : BaseIntegratio
         result.IsSuccess.Should().BeTrue();
 
         var hall = await DbContext
-            .Set<ConferenceHall>()
+            .Set<ConferenceHallEntity>()
             .AsNoTracking()
             .FirstOrDefaultAsync(conferenceHall => conferenceHall.Id == result.Value, cancellationToken);
 

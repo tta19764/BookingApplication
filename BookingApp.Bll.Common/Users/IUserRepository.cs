@@ -1,3 +1,5 @@
+using BookingApp.Bll.Common.Users.Models;
+
 namespace BookingApp.Bll.Common.Users;
 
 /// <summary>

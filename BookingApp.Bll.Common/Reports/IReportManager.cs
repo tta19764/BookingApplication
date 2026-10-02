@@ -1,5 +1,5 @@
-using BookingApp.Bll.Common.Abstractions;
-using BookingApp.Bll.Common.Models;
+using BookingApp.Bll.Common.Reports.Models;
+using BookingApp.Bll.Common.Shared;
 
 namespace BookingApp.Bll.Common.Reports;
 

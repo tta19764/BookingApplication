@@ -1,7 +1,7 @@
-using BookingApp.Bll.Common.Bookings;
+using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.Shared;
 
-namespace BookingApp.Bll.Common.ConferenceHalls;
+namespace BookingApp.Bll.Common.ConferenceHalls.Models;
 
 public class ConferenceHall
 {

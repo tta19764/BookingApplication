@@ -1,6 +1,6 @@
 # Infrastructure
 
-`BookingApp.Dal.SqlRepositories` реалізує зовнішні компоненти та засоби збереження даних, потрібні внутрішнім рівням.
+`BookingApp.Dal.PostgreSQLRepositories` реалізує зовнішні компоненти та засоби збереження даних, потрібні іншим рівням.
 
 ## Збереження даних
 
@@ -13,9 +13,9 @@
 
 ## Операційні сервіси
 
-- `DateTimeProvider` надає час UTC через абстракцію Application-рівня.
-- Quartz запускає завдання `CompleteBookingsJob`, яке обробляє обмежені пакети завершених у часі бронювань.
-- Реєстрація dependency injection зосереджена в `DependencyInjection` цього рівня.
+- Services реєструє .NET `TimeProvider.System`; окрема реалізація годинника не належить DAL.
+- Quartz і `CompleteBookingsJob` розміщені в Services та обробляють обмежені пакети завершених у часі бронювань.
+- DAL надає конкретні реалізації, а вся реєстрація dependency injection централізована в `BookingApp.Services.Web`.
 
 ## Конфігурація
 

@@ -1,3 +1,5 @@
+using BookingApp.Bll.Common.Bookings.Models;
+
 namespace BookingApp.Bll.Common.Bookings;
 
 /// <summary>

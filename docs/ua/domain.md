@@ -1,6 +1,6 @@
 # Domain
 
-`BookingApp.Bll.Common` містить прості бізнес-моделі й контракти, незалежні від ASP.NET Core та EF Core. Сутності збереження даних розміщені винятково в `BookingApp.Dal.SqlRepositories`.
+`BookingApp.Bll.Common` містить прості бізнес-моделі й контракти, незалежні від ASP.NET Core та EF Core. Сутності збереження даних розміщені винятково в `BookingApp.Dal.PostgreSQLRepositories`.
 
 ## Відповідальність
 

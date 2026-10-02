@@ -1,5 +1,7 @@
 using AutoMapper;
-using BookingApp.Bll.Common.Models;
+using BookingApp.Bll.Common.Bookings.Models;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
+using BookingApp.Bll.Common.Reports.Models;
 using BookingApp.Services.Web.Dtos;
 
 namespace BookingApp.Services.Web.Mappings;

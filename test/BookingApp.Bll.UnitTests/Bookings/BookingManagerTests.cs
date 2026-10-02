@@ -1,9 +1,10 @@
-using BookingApp.Bll.Abstractions.Clock;
-using BookingApp.Bll.Bookings;
-using BookingApp.Bll.Common.Abstractions;
+using BookingApp.Bll.Managers.Bookings;
+using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Bookings;
+using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.ConferenceHalls;
-using BookingApp.Bll.Common.Models;
+using BookingApp.Bll.Common.ConferenceHalls.Errors;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.UnitTests.Infrastructure;
 using FluentAssertions;
 using NSubstitute;
@@ -18,7 +19,7 @@ public class BookingManagerTests
         // Arrange
         var halls = Substitute.For<IConferenceHallRepository>();
         var bookings = Substitute.For<IBookingRepository>();
-        var clock = Substitute.For<IDateTimeProvider>();
+        var clock = Substitute.For<TimeProvider>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
         var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork);
         var hallId = Guid.NewGuid();
@@ -39,13 +40,13 @@ public class BookingManagerTests
         // Arrange
         var halls = Substitute.For<IConferenceHallRepository>();
         var bookings = Substitute.For<IBookingRepository>();
-        var clock = Substitute.For<IDateTimeProvider>();
+        var clock = Substitute.For<TimeProvider>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
         var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork);
         var hall = HallData.Create(Guid.NewGuid());
         var now = new DateTime(2026, 7, 22, 8, 0, 0, DateTimeKind.Utc);
         var cancellationToken = TestContext.Current.CancellationToken;
-        clock.UtcNow.Returns(now);
+        clock.GetUtcNow().Returns(new DateTimeOffset(now));
         halls.GetByIdAsync(hall.Id, cancellationToken).Returns(hall);
         bookings.HasOverlap(hall.Id, Arg.Any<DateRange>(), cancellationToken).Returns(false);
 

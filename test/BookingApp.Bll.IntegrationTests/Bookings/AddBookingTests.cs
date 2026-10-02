@@ -1,9 +1,11 @@
-using BookingApp.Bll.Common.Models;
-using BookingApp.Services.Web.Extensions;
+using BookingApp.Bll.Common.Bookings.Models;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
+using BookingApp.Services.Web.Services;
 using BookingApp.Bll.IntegrationTests.Infrastructure;
-using BookingApp.Bll.Common.Abstractions;
+using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.ConferenceHalls;
+using BookingApp.Dal.SqlRepositories.Entities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,8 +18,8 @@ public class AddBookingTests(IntegrationTestWebAppFactory factory) : BaseIntegra
     {
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
-        ConferenceHall hall = await DbContext
-            .Set<ConferenceHall>()
+        ConferenceHallEntity hall = await DbContext
+            .Set<ConferenceHallEntity>()
             .AsNoTracking()
             .FirstAsync(cancellationToken);
 
@@ -34,7 +36,7 @@ public class AddBookingTests(IntegrationTestWebAppFactory factory) : BaseIntegra
         result.Value.TotalPrice.Should().BeGreaterThan(result.Value.PriceForPeriod);
 
         var booking = await DbContext
-            .Set<Booking>()
+            .Set<BookingEntity>()
             .AsNoTracking()
             .FirstOrDefaultAsync(storedBooking => storedBooking.Id == result.Value.BookingId, cancellationToken);
 

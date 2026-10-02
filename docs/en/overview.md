@@ -50,6 +50,6 @@ dotnet run --project BookingApp.Services.Web
 
 ## Architecture
 
-The layer boundaries use separate representations: `Bll.Common/Models` contains business and read models, `Dal.SqlRepositories/Entities` contains EF Core persistence entities, and `Services.Web/Dtos` contains HTTP contracts. Explicit repository and DTO mappers prevent database and transport concerns from leaking into the business layer.
+The layer boundaries use separate representations: feature `Models` folders in `Bll.Common` contain business and read models, `Dal.PostgreSQLRepositories/Entities` contains EF Core persistence entities, and `Services.Web/Dtos` contains HTTP contracts. Explicit repository and DTO mappers prevent database and transport concerns from leaking into the business layer.
 
-Dependencies point inward: API and Infrastructure depend on Application and Domain, while Domain contains no transport or persistence concerns. Continue with the [Domain](domain.md), [Application](application.md), [Infrastructure](infrastructure.md), [API](api.md), and [Testing](testing.md) documents.
+`Services.Web` is the composition root and references every layer explicitly so all dependency injection registrations remain at the application boundary. Continue with the [Domain](domain.md), [Application](application.md), [Infrastructure](infrastructure.md), [API](api.md), and [Testing](testing.md) documents.

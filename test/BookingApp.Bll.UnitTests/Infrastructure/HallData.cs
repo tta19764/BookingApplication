@@ -1,4 +1,4 @@
-using BookingApp.Bll.Common.ConferenceHalls;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared;
 
 namespace BookingApp.Bll.UnitTests.Infrastructure;

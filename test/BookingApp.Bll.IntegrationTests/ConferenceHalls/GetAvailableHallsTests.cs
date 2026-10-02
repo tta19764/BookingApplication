@@ -1,6 +1,6 @@
-using BookingApp.Bll.Common.Models;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.IntegrationTests.Infrastructure;
-using BookingApp.Bll.Common.Abstractions;
+using BookingApp.Bll.Common.Shared;
 using FluentAssertions;
 
 namespace BookingApp.Bll.IntegrationTests.ConferenceHalls;

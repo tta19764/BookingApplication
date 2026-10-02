@@ -1,1 +1,1 @@
-global using BookingApp.Bll.Common.Abstractions;
+global using BookingApp.Bll.Common.Shared;

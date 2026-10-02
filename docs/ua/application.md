@@ -7,7 +7,7 @@
 - Публічні контракти `IBookingManager`, `IConferenceHallManager` та `IReportManager` оголошені в `BookingApp.Bll.Common`.
 - Їхні реалізації розміщені в `BookingApp.Bll`, а рівень Services залежить лише від контрактів Common.
 - Кожна функціональна область має одну реалізацію manager, методи якої безпосередньо виконують бізнес-сценарії.
-- BLL managers залежать від інтерфейсів репозиторіїв, `IUnitOfWork`, `IDateTimeProvider` та абстракції розрахунку вартості.
+- BLL managers залежать від інтерфейсів репозиторіїв, `IUnitOfWork`, .NET `TimeProvider` та абстракції розрахунку вартості.
 - Диспетчер запитів і handlers відсутні: Services безпосередньо викликає контракти managers.
 - Записи відповідей і mappers формують стабільні моделі читання.
 - AutoMapperConfig централізує зіставлення між моделями Common, сутностями DAL і DTO рівня Services.
