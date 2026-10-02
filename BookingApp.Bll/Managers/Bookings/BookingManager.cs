@@ -1,4 +1,3 @@
-using System.Globalization;
 using AutoMapper;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.Bookings.Events;
@@ -8,33 +7,35 @@ using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.ConferenceHalls.Errors;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared.Events;
-using BookingApp.Bll.Managers.Validation;
+using BookingApp.Bll.Common.Shared.Models;
+using BookingApp.Bll.Managers.Bookings.Validation;
+using BookingApp.Bll.Managers.Shared.Validation;
+using FluentValidation;
 
 namespace BookingApp.Bll.Managers.Bookings;
 
 public sealed class BookingManager(IConferenceHallRepository hallRepository, IBookingRepository bookingRepository,
     IPricingManager pricingManager, TimeProvider timeProvider, IUnitOfWork unitOfWork,
-    IDomainEventDispatcher domainEventDispatcher, IMapper mapper) : IBookingManager
+    IDomainEventDispatcher domainEventDispatcher, IMapper mapper,
+    IValidator<PaginationModel> paginationValidator,
+    IValidator<CreateBookingModel> createBookingValidator) : IBookingManager
 {
-    public async Task<Result<IReadOnlyCollection<BookingModel>>> GetBookingsAsync(int page, int pageSize, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<BookingModel>>> GetBookingsAsync(PaginationModel pagination,
+        CancellationToken cancellationToken)
     {
-        ManagerInputValidator.ValidatePage(page, pageSize);
-        var bookings = await bookingRepository.GetListPaginatedAsync(page, pageSize, cancellationToken);
+        await paginationValidator.ValidateForApplicationAsync(pagination, cancellationToken);
+        var bookings = await bookingRepository.GetListPaginatedAsync(pagination.Page, pagination.PageSize, cancellationToken);
         return Result.Success(mapper.Map<IReadOnlyCollection<BookingModel>>(bookings));
     }
 
-    public async Task<Result<BookingConfirmationModel>> AddBookingAsync(Guid hallId, Guid userId, DateOnly date,
-        string startTime, string endTime, IReadOnlyCollection<Amenity> amenities, CancellationToken cancellationToken)
+    public async Task<Result<BookingConfirmationModel>> AddBookingAsync(CreateBookingModel model,
+        CancellationToken cancellationToken)
     {
-        ManagerInputValidator.ValidatePeriod(hallId, date, startTime, endTime);
-        if (userId == Guid.Empty) throw new BookingApp.Bll.Common.Shared.Exceptions.ValidationException(
-            [new(nameof(userId), "User ID is required.")]);
-        var hall = await hallRepository.GetByIdAsync(hallId, cancellationToken);
+        await createBookingValidator.ValidateForApplicationAsync(model, cancellationToken);
+        var hall = await hallRepository.GetByIdAsync(model.HallId, cancellationToken);
         if (hall is null) return Result.Failure<BookingConfirmationModel>(ConferenceHallErrors.NotFound);
 
-        var duration = BookingPeriodFactory.Create(date,
-            TimeOnly.ParseExact(startTime, "HH:mm", CultureInfo.InvariantCulture),
-            TimeOnly.ParseExact(endTime, "HH:mm", CultureInfo.InvariantCulture));
+        var duration = BookingPeriodFactory.Create(model.Date, model.StartTime, model.EndTime);
         var utcNow = timeProvider.GetUtcNow().UtcDateTime;
         if (duration.Start <= utcNow) return Result.Failure<BookingConfirmationModel>(BookingErrors.StartsInPast);
 
@@ -43,11 +44,11 @@ public sealed class BookingManager(IConferenceHallRepository hallRepository, IBo
 
         try
         {
-            var pricing = pricingManager.CalculatePrice(hall, duration, amenities.Distinct());
+            var pricing = pricingManager.CalculatePrice(hall, duration, model.Amenities.Distinct());
             var booking = new Booking(Guid.NewGuid())
             {
                 ConferenceHallId = hall.Id,
-                UserId = userId,
+                UserId = model.UserId,
                 Duration = duration,
                 PriceForPeriod = pricing.PriceForPeriod,
                 AmenitiesUpCharge = pricing.AmenitiesUpCharge,

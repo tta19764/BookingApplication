@@ -26,7 +26,7 @@ The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and
 | Web API | **ASP.NET Core Minimal APIs** for HTTP endpoints and **ASP.NET API Versioning** for `/api/v1`. |
 | API documentation | **Swagger/OpenAPI** through Swashbuckle for interactive endpoint documentation. |
 | Application flow | Feature-oriented **BLL managers** that expose service-style business operations. |
-| Domain design | Layered architecture, anemic Common models, DAL entities, AutoMapper profiles, repository abstractions, and Result-based errors. |
+| Domain design | Layered architecture, anemic Common models, DAL entities, AutoMapper profiles, repository abstractions, FluentValidation, and Result-based errors. |
 | Persistence | **Entity Framework Core**, **Npgsql**, **PostgreSQL**, and EF Core migrations. |
 | Background work | **Quartz.NET** for automatically completing expired bookings. |
 | Logging | **Serilog** for structured logging and **Seq** for local log collection and inspection. |

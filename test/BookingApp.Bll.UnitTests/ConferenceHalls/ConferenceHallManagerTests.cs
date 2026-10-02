@@ -3,6 +3,8 @@ using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Managers.ConferenceHalls;
+using BookingApp.Bll.Managers.ConferenceHalls.Validation;
+using BookingApp.Bll.Managers.Shared.Validation;
 using FluentAssertions;
 using NSubstitute;
 
@@ -16,12 +18,14 @@ public class ConferenceHallManagerTests
         // Arrange
         var repository = Substitute.For<IConferenceHallRepository>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
-        var manager = new ConferenceHallManager(repository, unitOfWork, Substitute.For<IMapper>());
+        var manager = new ConferenceHallManager(repository, unitOfWork, Substitute.For<IMapper>(),
+            new CreateHallModelValidator(), new UpdateHallModelValidator(), new HallReferenceModelValidator(),
+            new FindAvailableHallsModelValidator(), new PaginationModelValidator());
         var cancellationToken = TestContext.Current.CancellationToken;
 
         // Act
-        Result<Guid> result = await manager.AddHallAsync("Hall A", 50, 2000m, "UAH",
-            [Amenity.Projector], cancellationToken);
+        var model = new CreateHallModel("Hall A", 50, 2000m, "UAH", [Amenity.Projector]);
+        Result<Guid> result = await manager.AddHallAsync(model, cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

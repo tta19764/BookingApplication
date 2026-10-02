@@ -8,6 +8,6 @@ namespace BookingApp.Services.Web.Endpoints.Bookings;
 public sealed record CreateBookingRequest(
     Guid HallId,
     DateOnly Date,
-    string StartTime,
-    string EndTime,
+    TimeOnly StartTime,
+    TimeOnly EndTime,
     IReadOnlyCollection<Amenity> Amenities);

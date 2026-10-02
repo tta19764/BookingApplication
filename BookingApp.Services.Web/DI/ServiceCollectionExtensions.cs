@@ -12,12 +12,19 @@ using BookingApp.Bll.Common.Reports;
 using BookingApp.Bll.Common.Users;
 using BookingApp.Bll.Managers.ConferenceHalls;
 using BookingApp.Bll.Managers.Reports;
+using BookingApp.Bll.Managers.Bookings.Validation;
+using BookingApp.Bll.Managers.ConferenceHalls.Validation;
+using BookingApp.Bll.Managers.Shared.Validation;
+using BookingApp.Bll.Common.Bookings.Models;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
+using BookingApp.Bll.Common.Shared.Models;
 using BookingApp.Dal.SqlRepositories;
 using BookingApp.Dal.SqlRepositories.Repositories;
 using BookingApp.Services.Web.Services.BackgroundJobs;
 using BookingApp.Services.Web.Services.DomainEvents;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
+using FluentValidation;
 
 namespace BookingApp.Services.Web.DI;
 
@@ -70,6 +77,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IConferenceHallManager, ConferenceHallManager>();
         services.AddScoped<IReportManager, ReportManager>();
         services.AddTransient<IPricingManager, PricingManager>();
+        services.AddTransient<IValidator<PaginationModel>, PaginationModelValidator>();
+        services.AddTransient<IValidator<CreateBookingModel>, CreateBookingModelValidator>();
+        services.AddTransient<IValidator<CreateHallModel>, CreateHallModelValidator>();
+        services.AddTransient<IValidator<UpdateHallModel>, UpdateHallModelValidator>();
+        services.AddTransient<IValidator<HallReferenceModel>, HallReferenceModelValidator>();
+        services.AddTransient<IValidator<FindAvailableHallsModel>, FindAvailableHallsModelValidator>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IDomainEventHandler<BookingApp.Bll.Common.Bookings.Events.BookingCreatedDomainEvent>,
             BookingCreatedEventHandler>();

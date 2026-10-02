@@ -9,6 +9,8 @@ using BookingApp.Bll.Common.ConferenceHalls.Errors;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared.Events;
 using BookingApp.Bll.UnitTests.Infrastructure;
+using BookingApp.Bll.Managers.Bookings.Validation;
+using BookingApp.Bll.Managers.Shared.Validation;
 using FluentAssertions;
 using NSubstitute;
 
@@ -26,14 +28,15 @@ public class BookingManagerTests
         var unitOfWork = Substitute.For<IUnitOfWork>();
         var events = Substitute.For<IDomainEventDispatcher>();
         var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork, events,
-            Substitute.For<IMapper>());
+            Substitute.For<IMapper>(), new PaginationModelValidator(), new CreateBookingModelValidator());
         var hallId = Guid.NewGuid();
         var cancellationToken = TestContext.Current.CancellationToken;
         halls.GetByIdAsync(hallId, cancellationToken).Returns((ConferenceHall?)null);
 
         // Act
-        Result<BookingConfirmationModel> result = await manager.AddBookingAsync(hallId, Guid.NewGuid(),
-            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)), "10:00", "11:00", [], cancellationToken);
+        var model = new CreateBookingModel(hallId, Guid.NewGuid(), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1)),
+            new TimeOnly(10, 0), new TimeOnly(11, 0), []);
+        Result<BookingConfirmationModel> result = await manager.AddBookingAsync(model, cancellationToken);
 
         // Assert
         result.Error.Should().Be(ConferenceHallErrors.NotFound);
@@ -49,7 +52,7 @@ public class BookingManagerTests
         var unitOfWork = Substitute.For<IUnitOfWork>();
         var events = Substitute.For<IDomainEventDispatcher>();
         var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork, events,
-            Substitute.For<IMapper>());
+            Substitute.For<IMapper>(), new PaginationModelValidator(), new CreateBookingModelValidator());
         var hall = HallData.Create(Guid.NewGuid());
         var now = new DateTime(2026, 7, 22, 8, 0, 0, DateTimeKind.Utc);
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -58,8 +61,9 @@ public class BookingManagerTests
         bookings.HasOverlap(hall.Id, Arg.Any<DateRange>(), cancellationToken).Returns(false);
 
         // Act
-        Result<BookingConfirmationModel> result = await manager.AddBookingAsync(hall.Id, Guid.NewGuid(),
-            DateOnly.FromDateTime(now.AddDays(1)), "10:00", "11:00", [Amenity.Projector], cancellationToken);
+        var model = new CreateBookingModel(hall.Id, Guid.NewGuid(), DateOnly.FromDateTime(now.AddDays(1)),
+            new TimeOnly(10, 0), new TimeOnly(11, 0), [Amenity.Projector]);
+        Result<BookingConfirmationModel> result = await manager.AddBookingAsync(model, cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

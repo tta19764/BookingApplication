@@ -1,6 +1,7 @@
 using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared;
+using BookingApp.Bll.Common.Shared.Models;
 
 namespace BookingApp.Bll.Common.Bookings;
 
@@ -10,16 +11,10 @@ namespace BookingApp.Bll.Common.Bookings;
 public interface IBookingManager
 {
     Task<Result<IReadOnlyCollection<BookingModel>>> GetBookingsAsync(
-        int page,
-        int pageSize,
+        PaginationModel pagination,
         CancellationToken cancellationToken);
 
     Task<Result<BookingConfirmationModel>> AddBookingAsync(
-        Guid hallId,
-        Guid userId,
-        DateOnly date,
-        string startTime,
-        string endTime,
-        IReadOnlyCollection<Amenity> amenities,
+        CreateBookingModel model,
         CancellationToken cancellationToken);
 }

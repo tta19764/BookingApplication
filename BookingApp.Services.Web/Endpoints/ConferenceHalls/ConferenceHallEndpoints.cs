@@ -2,6 +2,8 @@ using BookingApp.Services.Web.Dtos;
 using BookingApp.Services.Web.Mappings;
 using AutoMapper;
 using BookingApp.Bll.Common.ConferenceHalls;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
+using BookingApp.Bll.Common.Shared.Models;
 namespace BookingApp.Services.Web.Endpoints.ConferenceHalls;
 
 /// <summary>
@@ -64,7 +66,8 @@ public static class ConferenceHallEndpoints
         IMapper mapper,
         CancellationToken cancellationToken)
     {
-        var result = await hallManager.GetHallsAsync(request.Page, request.PageSize, cancellationToken);
+        var result = await hallManager.GetHallsAsync(
+            new PaginationModel(request.Page, request.PageSize), cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse(mapper.Map<IReadOnlyCollection<ConferenceHallDto>>))
@@ -76,13 +79,9 @@ public static class ConferenceHallEndpoints
         IConferenceHallManager hallManager,
         CancellationToken cancellationToken)
     {
-        var result = await hallManager.AddHallAsync(
-            request.Name,
-            request.Capacity,
-            request.HourlyRate,
-            request.CurrencyCode,
-            request.Amenities,
-            cancellationToken);
+        var model = new CreateHallModel(request.Name, request.Capacity, request.HourlyRate, request.CurrencyCode,
+            request.Amenities);
+        var result = await hallManager.AddHallAsync(model, cancellationToken);
 
         return result.IsSuccess
             ? Results.CreatedAtRoute(nameof(GetConferenceHall), new { hallId = result.Value, version = BookingAppApiVersions.V1RouteValue }, result.MapToApiResponse())
@@ -95,7 +94,7 @@ public static class ConferenceHallEndpoints
         IMapper mapper,
         CancellationToken cancellationToken)
     {
-        var result = await hallManager.GetHallAsync(hallId, cancellationToken);
+        var result = await hallManager.GetHallAsync(new HallReferenceModel(hallId), cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse(mapper.Map<ConferenceHallDto>))
@@ -108,13 +107,9 @@ public static class ConferenceHallEndpoints
         IConferenceHallManager hallManager,
         CancellationToken cancellationToken)
     {
-        var result = await hallManager.UpdateHallAsync(
-            hallId,
-            request.Name,
-            request.Capacity,
-            request.HourlyRate,
-            request.Amenities,
-            cancellationToken);
+        var model = new UpdateHallModel(hallId, request.Name, request.Capacity, request.HourlyRate,
+            request.Amenities);
+        var result = await hallManager.UpdateHallAsync(model, cancellationToken);
 
         if (result.IsSuccess)
         {
@@ -131,7 +126,7 @@ public static class ConferenceHallEndpoints
         IConferenceHallManager hallManager,
         CancellationToken cancellationToken)
     {
-        var result = await hallManager.RemoveHallAsync(hallId, cancellationToken);
+        var result = await hallManager.RemoveHallAsync(new HallReferenceModel(hallId), cancellationToken);
 
         return result.IsSuccess
             ? Results.NoContent()
@@ -144,12 +139,8 @@ public static class ConferenceHallEndpoints
         IMapper mapper,
         CancellationToken cancellationToken)
     {
-        var result = await hallManager.GetAvailableHallsAsync(
-            request.Date,
-            request.StartTime,
-            request.EndTime,
-            request.Capacity,
-            cancellationToken);
+        var model = new FindAvailableHallsModel(request.Date, request.StartTime, request.EndTime, request.Capacity);
+        var result = await hallManager.GetAvailableHallsAsync(model, cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse(mapper.Map<IEnumerable<ConferenceHallDto>>))

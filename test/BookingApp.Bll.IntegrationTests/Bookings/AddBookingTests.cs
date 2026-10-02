@@ -26,8 +26,9 @@ public class AddBookingTests(IntegrationTestWebAppFactory factory) : BaseIntegra
         DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
 
         // Act
-        Result<BookingConfirmationModel> result = await BookingManager.AddBookingAsync(hall.Id,
-            SeedDataExtensions.SeededUserId, date, "10:40", "12:10", [Amenity.Projector], cancellationToken);
+        var model = new CreateBookingModel(hall.Id, SeedDataExtensions.SeededUserId, date,
+            new TimeOnly(10, 40), new TimeOnly(12, 10), [Amenity.Projector]);
+        Result<BookingConfirmationModel> result = await BookingManager.AddBookingAsync(model, cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
