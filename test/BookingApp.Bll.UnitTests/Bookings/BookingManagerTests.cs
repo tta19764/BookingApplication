@@ -1,3 +1,4 @@
+using AutoMapper;
 using BookingApp.Bll.Managers.Bookings;
 using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Bookings;
@@ -24,7 +25,8 @@ public class BookingManagerTests
         var clock = Substitute.For<TimeProvider>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
         var events = Substitute.For<IDomainEventDispatcher>();
-        var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork, events);
+        var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork, events,
+            Substitute.For<IMapper>());
         var hallId = Guid.NewGuid();
         var cancellationToken = TestContext.Current.CancellationToken;
         halls.GetByIdAsync(hallId, cancellationToken).Returns((ConferenceHall?)null);
@@ -46,7 +48,8 @@ public class BookingManagerTests
         var clock = Substitute.For<TimeProvider>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
         var events = Substitute.For<IDomainEventDispatcher>();
-        var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork, events);
+        var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork, events,
+            Substitute.For<IMapper>());
         var hall = HallData.Create(Guid.NewGuid());
         var now = new DateTime(2026, 7, 22, 8, 0, 0, DateTimeKind.Utc);
         var cancellationToken = TestContext.Current.CancellationToken;

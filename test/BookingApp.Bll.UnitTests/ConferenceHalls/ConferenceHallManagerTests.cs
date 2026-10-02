@@ -1,3 +1,4 @@
+using AutoMapper;
 using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
@@ -15,7 +16,7 @@ public class ConferenceHallManagerTests
         // Arrange
         var repository = Substitute.For<IConferenceHallRepository>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
-        var manager = new ConferenceHallManager(repository, unitOfWork);
+        var manager = new ConferenceHallManager(repository, unitOfWork, Substitute.For<IMapper>());
         var cancellationToken = TestContext.Current.CancellationToken;
 
         // Act

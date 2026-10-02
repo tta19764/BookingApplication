@@ -1,5 +1,5 @@
 using System.Globalization;
-using BookingApp.Bll.Common.Shared;
+using AutoMapper;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.Bookings.Events;
 using BookingApp.Bll.Common.Bookings.Errors;
@@ -7,7 +7,6 @@ using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.ConferenceHalls.Errors;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
-using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Shared.Events;
 using BookingApp.Bll.Managers.Validation;
 
@@ -15,13 +14,13 @@ namespace BookingApp.Bll.Managers.Bookings;
 
 public sealed class BookingManager(IConferenceHallRepository hallRepository, IBookingRepository bookingRepository,
     IPricingManager pricingManager, TimeProvider timeProvider, IUnitOfWork unitOfWork,
-    IDomainEventDispatcher domainEventDispatcher) : IBookingManager
+    IDomainEventDispatcher domainEventDispatcher, IMapper mapper) : IBookingManager
 {
     public async Task<Result<IReadOnlyCollection<BookingModel>>> GetBookingsAsync(int page, int pageSize, CancellationToken cancellationToken)
     {
         ManagerInputValidator.ValidatePage(page, pageSize);
         var bookings = await bookingRepository.GetListPaginatedAsync(page, pageSize, cancellationToken);
-        return Result.Success<IReadOnlyCollection<BookingModel>>(bookings.Select(ToModel).ToList());
+        return Result.Success(mapper.Map<IReadOnlyCollection<BookingModel>>(bookings));
     }
 
     public async Task<Result<BookingConfirmationModel>> AddBookingAsync(Guid hallId, Guid userId, DateOnly date,
@@ -38,6 +37,7 @@ public sealed class BookingManager(IConferenceHallRepository hallRepository, IBo
             TimeOnly.ParseExact(endTime, "HH:mm", CultureInfo.InvariantCulture));
         var utcNow = timeProvider.GetUtcNow().UtcDateTime;
         if (duration.Start <= utcNow) return Result.Failure<BookingConfirmationModel>(BookingErrors.StartsInPast);
+
         if (await bookingRepository.HasOverlap(hall.Id, duration, cancellationToken))
             return Result.Failure<BookingConfirmationModel>(BookingErrors.Overlap);
 
@@ -83,8 +83,4 @@ public sealed class BookingManager(IConferenceHallRepository hallRepository, IBo
             return Result.Failure<BookingConfirmationModel>(new Error("Booking.InvalidPeriod", exception.Message));
         }
     }
-
-    private static BookingModel ToModel(Booking booking) => new(booking.Id, booking.ConferenceHallId, booking.UserId,
-        booking.Duration.Start, booking.Duration.End, booking.Status.ToString(), booking.PriceForPeriod.Amount,
-        booking.AmenitiesUpCharge.Amount, booking.TotalPrice.Amount, booking.TotalPrice.Currency.Code);
 }
