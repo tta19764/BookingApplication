@@ -1,6 +1,4 @@
 using BookingApp.Bll.Common.Models;
-using BookingApp.Bll.ConferenceHalls.GetAvailableHalls;
-using BookingApp.Bll.ConferenceHalls.GetHall;
 using BookingApp.Bll.IntegrationTests.Infrastructure;
 using BookingApp.Bll.Common.Abstractions;
 using FluentAssertions;
@@ -14,14 +12,11 @@ public class GetAvailableHallsTests(IntegrationTestWebAppFactory factory) : Base
     {
         // Arrange
         var cancellationToken = TestContext.Current.CancellationToken;
-        var query = new GetAvailableHallsRequest(
-            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2)),
-            "10:40",
-            "12:10",
-            30);
+        const int capacity = 30;
 
         // Act
-        Result<IEnumerable<HallModel>> result = await Sender.Send(query, cancellationToken);
+        Result<IEnumerable<HallModel>> result = await HallManager.GetAvailableHallsAsync(
+            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2)), "10:40", "12:10", capacity, cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -29,6 +24,6 @@ public class GetAvailableHallsTests(IntegrationTestWebAppFactory factory) : Base
         result.Value.Should().OnlyContain(hall =>
             hall.Id != Guid.Empty &&
             !string.IsNullOrWhiteSpace(hall.Name) &&
-            hall.Capacity >= query.Capacity);
+            hall.Capacity >= capacity);
     }
 }

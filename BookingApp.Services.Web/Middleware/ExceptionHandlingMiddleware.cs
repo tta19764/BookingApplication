@@ -1,4 +1,4 @@
-using BookingApp.Bll.Exceptions;
+using BookingApp.Bll.Common.Shared.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookingApp.Services.Web.Middleware;

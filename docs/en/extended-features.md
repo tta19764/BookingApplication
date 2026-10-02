@@ -26,7 +26,7 @@ URL-based versioning (`/api/v1`) allows future contracts to coexist. Swagger/Ope
 
 ## Validation and error handling
 
-FluentValidation and the manager dispatch flow centralize input checks. Application/domain failures use Result objects, while API middleware turns validation and unexpected failures into controlled responses and avoids leaking stack traces.
+Manager methods and model constructors enforce business inputs. Expected application failures use Result objects, while API middleware turns known and unexpected failures into controlled responses and avoids leaking stack traces.
 
 ## Observability
 
@@ -43,4 +43,3 @@ The solution separates Domain unit, Application unit, Application integration, a
 ## Operational foundation
 
 Docker Compose supplies the API, PostgreSQL, and Seq. Configuration is split by environment, timestamps are stored in UTC, and `IDateTimeProvider` makes time-dependent behavior testable.
-

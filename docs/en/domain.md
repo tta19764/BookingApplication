@@ -4,6 +4,8 @@
 
 ## Responsibilities
 
+- Every feature folder groups its `Models`, `Exceptions`, manager interface, and repository interface.
+
 - `ConferenceHall`, `Booking`, and `User` are anemic business models and do not inherit from a persistence entity base.
 - Public manager, repository, pricing, and unit-of-work interfaces define the boundaries implemented by BLL and DAL projects.
 - Value objects such as `Money`, `Currency`, `Name`, `Capacity`, and `DateRange` keep invalid primitive combinations out of business logic.
