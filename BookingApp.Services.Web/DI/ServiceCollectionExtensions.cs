@@ -6,6 +6,7 @@ using BookingApp.Bll.Managers.Bookings;
 using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Shared.Events;
 using BookingApp.Bll.Common.Bookings;
+using BookingApp.Bll.Common.Bookings.Events;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.Reports;
 using BookingApp.Bll.Common.Users;
@@ -76,15 +77,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBookingManager, BookingManager>();
         services.AddScoped<IConferenceHallManager, ConferenceHallManager>();
         services.AddScoped<IReportManager, ReportManager>();
+
         services.AddTransient<IPricingManager, PricingManager>();
-        services.AddTransient<IValidator<PaginationModel>, PaginationModelValidator>();
-        services.AddTransient<IValidator<CreateBookingModel>, CreateBookingModelValidator>();
-        services.AddTransient<IValidator<CreateHallModel>, CreateHallModelValidator>();
-        services.AddTransient<IValidator<UpdateHallModel>, UpdateHallModelValidator>();
-        services.AddTransient<IValidator<HallReferenceModel>, HallReferenceModelValidator>();
-        services.AddTransient<IValidator<FindAvailableHallsModel>, FindAvailableHallsModelValidator>();
+
+        services.AddValidatorsFromAssemblyContaining<CreateBookingModelValidator>(
+            ServiceLifetime.Transient);
+
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
-        services.AddScoped<IDomainEventHandler<BookingApp.Bll.Common.Bookings.Events.BookingCreatedDomainEvent>,
+        services.AddScoped<
+            IDomainEventHandler<BookingCreatedDomainEvent>,
             BookingCreatedEventHandler>();
     }
 
