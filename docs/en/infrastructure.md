@@ -1,6 +1,6 @@
 # Infrastructure layer
 
-`BookingApp.Infrastructure` implements external and persistence concerns required by the inner layers.
+`BookingApp.Dal.SqlRepositories` implements external and persistence concerns required by the inner layers.
 
 ## Persistence
 
@@ -19,7 +19,7 @@
 
 ## Configuration
 
-Development connection strings and job settings live in `BookingApp.Api/appsettings.Development.json`; Docker Compose overrides host-specific values. Secrets should be supplied by deployment configuration rather than committed settings in production.
+Development connection strings and job settings live in `BookingApp.Services.Web/appsettings.Development.json`; Docker Compose overrides host-specific values. Secrets should be supplied by deployment configuration rather than committed settings in production.
 
 Real repository mappings and database behavior are covered by both integration test projects using temporary PostgreSQL Testcontainers.
 

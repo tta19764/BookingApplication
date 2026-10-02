@@ -1,6 +1,6 @@
 # Domain layer
 
-`BookingApp.Domain` contains the business model and rules that must remain independent of ASP.NET Core and EF Core.
+`BookingApp.Bll.Common` contains the business model and rules that must remain independent of ASP.NET Core and EF Core.
 
 ## Responsibilities
 
@@ -20,5 +20,5 @@
 - A booking can only transition from an appropriate current status.
 - Persisted booking prices are snapshots and do not change when hall pricing changes later.
 
-The layer is verified directly by `BookingApp.Domain.UnitTests`; see [Testing](testing.md).
+The layer is verified directly by `BookingApp.Bll.Common.UnitTests`; see [Testing](testing.md).
 

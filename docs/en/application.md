@@ -1,24 +1,24 @@
 # Application layer
 
-`BookingApp.Application` coordinates use cases while keeping HTTP and database details outside the handlers.
+`BookingApp.Bll` coordinates use cases while keeping HTTP and database details outside the managers.
 
 ## Structure
 
-- Commands mutate state: add/update/remove a hall and create or change a booking.
-- Queries return hall lists, availability, bookings, and the booking summary report.
-- MediatR handlers depend on domain repositories, `IUnitOfWork`, `IDateTimeProvider`, and domain services.
-- FluentValidation validators reject malformed IDs, paging, capacity, currency, amenity, and time inputs before handlers execute.
-- Pipeline behaviors provide centralized validation and structured request logging.
+- manager requests mutate state: add/update/remove a hall and create or change a booking.
+- manager requests return hall lists, availability, bookings, and the booking summary report.
+- BLL managers depend on domain repositories, `IUnitOfWork`, `IDateTimeProvider`, and domain services.
+- FluentValidation validators reject malformed IDs, paging, capacity, currency, amenity, and time inputs before managers execute.
+- Manager dispatch provides centralized validation and structured request logging.
 - Response records and mappers expose stable application read models.
-- Domain event handlers host post-operation side effects such as event logging.
+- Domain event managers host post-operation side effects such as event logging.
 
 ## Booking workflow
 
-The create-booking handler loads the hall, builds a `DateRange`, rejects past or overlapping requests, delegates price calculation and reservation creation to the Domain layer, persists through the unit of work, and returns an immutable price breakdown.
+The booking manager loads the hall, builds a `DateRange`, rejects past or overlapping requests, delegates price calculation and reservation creation to the Domain layer, persists through the unit of work, and returns an immutable price breakdown.
 
 ## Reporting
 
-The booking summary query processes bookings in bounded pages, aggregates total revenue and counts, and groups results per hall without loading the entire table into memory.
+The booking summary manager processes bookings in bounded pages, aggregates total revenue and counts, and groups results per hall without loading the entire table into memory.
 
-Handlers are isolated with mocks in `BookingApp.Application.UnitTests` and exercised with real persistence in `BookingApp.Application.IntegrationTests`.
+Managers are isolated with mocks in `BookingApp.Bll.UnitTests` and exercised with real persistence in `BookingApp.Bll.IntegrationTests`.
 

@@ -45,7 +45,7 @@ API буде доступне на `http://localhost:8080`, Swagger — на `/s
 Для локального запуску надайте PostgreSQL на `localhost:5432` та виконайте:
 
 ```powershell
-dotnet run --project BookingApp.Api
+dotnet run --project BookingApp.Services.Web
 ```
 
 ## Архітектура
