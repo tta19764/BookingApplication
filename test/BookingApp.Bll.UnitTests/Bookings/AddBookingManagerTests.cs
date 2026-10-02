@@ -32,7 +32,7 @@ public class AddBookingManagerTests
         _handler = new AddBookingManager(
             _hallRepositoryMock,
             _bookingRepositoryMock,
-            new PricingService(),
+            new PricingManager(),
             dateTimeProviderMock,
             _unitOfWorkMock);
     }

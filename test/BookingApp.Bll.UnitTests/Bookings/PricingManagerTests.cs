@@ -7,9 +7,9 @@ using Xunit;
 
 namespace BookingApp.Bll.UnitTests.Bookings;
 
-public class PricingServiceTests
+public class PricingManagerTests
 {
-    private readonly PricingService _sut = new();
+    private readonly PricingManager _sut = new();
     private readonly ConferenceHall _hall = new(
         Guid.NewGuid(),
         new Name("Test Hall"),

@@ -15,7 +15,7 @@ namespace BookingApp.Bll.Bookings.AddBooking;
 public class AddBookingManager(
     IConferenceHallRepository hallRepository,
     IBookingRepository bookingRepository,
-    PricingService pricingService,
+    IPricingManager pricingManager,
     IDateTimeProvider dateTimeProvider,
     IUnitOfWork unitOfWork) : IRequestManager<AddBookingRequest, Result<BookingConfirmationModel>>
 {
@@ -48,7 +48,7 @@ public class AddBookingManager(
 
         try
         {
-            var pricing = pricingService.CalculatePrice(hall, duration, request.Amenities.Distinct());
+            var pricing = pricingManager.CalculatePrice(hall, duration, request.Amenities.Distinct());
             var booking = new Booking(Guid.NewGuid())
             {
                 ConferenceHallId = hall.Id,

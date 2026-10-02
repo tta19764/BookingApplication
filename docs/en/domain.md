@@ -7,7 +7,7 @@
 - `ConferenceHall` owns its name, capacity, hourly price, amenities, and booking metadata.
 - `Booking` controls reservation creation and state transitions: Reserved, Rejected, Completed, and Cancelled.
 - Value objects such as `Money`, `Currency`, `Name`, `Capacity`, and `DateRange` keep invalid primitive combinations out of business logic.
-- The BLL `PricingService` splits a booking at tariff boundaries, applies modifiers, and adds supported amenities.
+- `IPricingManager` is declared in Common, while the BLL `PricingManager` implements tariff boundaries, modifiers, and amenity pricing.
 - Domain events describe reservation and status changes without coupling entities to side effects.
 - Repository and unit-of-work interfaces define persistence needs without choosing a database.
 - `Result` and domain error catalogs represent expected business failures explicitly.
@@ -21,4 +21,3 @@
 - Persisted booking prices are snapshots and do not change when hall pricing changes later.
 
 The layer is verified directly by `BookingApp.Bll.Common.UnitTests`; see [Testing](testing.md).
-
