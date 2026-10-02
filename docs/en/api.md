@@ -1,6 +1,6 @@
 # API layer
 
-`BookingApp.Api` is the HTTP entry point. It uses ASP.NET Core Minimal APIs under `/api/v1`, maps application results to a consistent response envelope, and publishes Swagger documentation in Development.
+`BookingApp.Services.Web` is the HTTP entry point. It uses ASP.NET Core Minimal APIs under `/api/v1`, maps application results to a consistent response envelope, and publishes Swagger documentation in Development.
 
 ## Endpoints
 
@@ -30,4 +30,4 @@ GET    /api/v1/reports/bookings-summary
 
 The current API uses a seeded user. Production deployment should add authentication, authorization policies, secret management, rate limiting, and environment-specific trust/proxy configuration.
 
-The reusable Postman collection under `test/Postman/` provides an additional manual workflow. Automated HTTP behavior is covered by `BookingApp.Api.IntegrationTests`.
+The reusable Postman collection under `test/Postman/` provides an additional manual workflow. Automated HTTP behavior is covered by `BookingApp.Services.Web.IntegrationTests`.

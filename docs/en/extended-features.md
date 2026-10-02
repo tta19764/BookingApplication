@@ -26,11 +26,11 @@ URL-based versioning (`/api/v1`) allows future contracts to coexist. Swagger/Ope
 
 ## Validation and error handling
 
-FluentValidation and MediatR pipeline behavior centralize input checks. Application/domain failures use Result objects, while API middleware turns validation and unexpected failures into controlled responses and avoids leaking stack traces.
+FluentValidation and the manager dispatch flow centralize input checks. Application/domain failures use Result objects, while API middleware turns validation and unexpected failures into controlled responses and avoids leaking stack traces.
 
 ## Observability
 
-Serilog adds structured request and application logs. Docker Compose includes Seq so developers can search and inspect logs without additional setup. Domain-event handlers log booking lifecycle events.
+Serilog adds structured request and application logs. Docker Compose includes Seq so developers can search and inspect logs without additional setup. Domain-event managers log booking lifecycle events.
 
 ## Seed data and repeatable startup
 

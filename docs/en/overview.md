@@ -45,7 +45,7 @@ This exposes the API on `http://localhost:8080`, Swagger on `/swagger`, PostgreS
 For local execution, provide PostgreSQL at `localhost:5432` and run:
 
 ```powershell
-dotnet run --project BookingApp.Api
+dotnet run --project BookingApp.Services.Web
 ```
 
 ## Architecture
