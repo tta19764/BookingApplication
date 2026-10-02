@@ -5,7 +5,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using BookingApp.Services.Web.Dtos;
-using BookingApp.Services.Web.Endpoints.ConferenceHalls;
+using BookingApp.Services.Web.Dtos.Requests;
 using BookingApp.Services.Web.IntegrationTests.Infrastructure;
 using FluentAssertions;
 

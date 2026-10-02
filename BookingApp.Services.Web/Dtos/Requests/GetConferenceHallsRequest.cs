@@ -1,4 +1,4 @@
-namespace BookingApp.Services.Web.Endpoints.ConferenceHalls;
+namespace BookingApp.Services.Web.Dtos.Requests;
 
 /// <summary>
 /// Request-string pagination request for conference hall lists.

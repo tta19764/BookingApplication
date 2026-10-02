@@ -1,6 +1,6 @@
 # API layer
 
-`BookingApp.Services.Web` is the HTTP entry point. It uses ASP.NET Core Minimal APIs under `/api/v1`, maps application results to a consistent response envelope, and publishes Swagger documentation in Development.
+`BookingApp.Services.Web` is the HTTP entry point. It uses versioned ASP.NET Core MVC controllers under `/api/v1`, maps application results to a consistent response envelope, and publishes Swagger documentation in Development. Controllers depend only on manager interfaces and mapping services; they never access repositories directly.
 
 ## Endpoints
 

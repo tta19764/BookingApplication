@@ -1,6 +1,6 @@
 using BookingApp.Bll.Common.ConferenceHalls.Models;
 
-namespace BookingApp.Services.Web.Endpoints.Bookings;
+namespace BookingApp.Services.Web.Dtos.Requests;
 
 /// <summary>
 /// Request body for creating a booking for the seeded user.

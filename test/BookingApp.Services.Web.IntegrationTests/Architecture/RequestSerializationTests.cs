@@ -1,5 +1,5 @@
 using System.Text.Json;
-using BookingApp.Services.Web.Endpoints.Bookings;
+using BookingApp.Services.Web.Dtos.Requests;
 using FluentAssertions;
 
 namespace BookingApp.Services.Web.IntegrationTests.Architecture;
