@@ -1,4 +1,4 @@
-# Domain layer
+# Common layer
 
 `BookingApp.Bll.Common` contains plain business models and contracts that remain independent of ASP.NET Core and EF Core. Persistence entities belong exclusively to `BookingApp.Dal.PostgreSQLRepositories`.
 
@@ -19,7 +19,7 @@
 - A booking period has a valid start and end and uses UTC timestamps in persistence.
 - Pricing accepts a single calendar day between 06:00 and 23:00 at minute precision.
 - Only amenities supported by the selected hall can be purchased.
-- A booking can only transition from an appropriate current status.
+- Booking lifecycle timestamps and status are persisted together when the completion job updates an expired reservation.
 - Persisted booking prices are snapshots and do not change when hall pricing changes later.
 
 The layer is verified directly by `BookingApp.Bll.Common.UnitTests`; see [Testing](testing.md).

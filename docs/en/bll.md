@@ -1,4 +1,4 @@
-# Application layer
+# BLL layer
 
 `BookingApp.Bll` coordinates use cases while keeping HTTP and database details outside the managers.
 
@@ -11,8 +11,8 @@
 - FluentValidation validators live in BLL and validate input shape, ranges, identifiers, and supported values before a manager performs a use case.
 - BLL managers depend on repository interfaces, `IUnitOfWork`, .NET `TimeProvider`, validators, and pricing abstractions.
 - There is no request/handler dispatcher; Services calls manager contracts directly.
-- Response records and mappers expose stable application read models.
-- AutoMapperConfig centralizes mapping between Common models, DAL entities, and Services DTOs.
+- Response records and the BLL AutoMapper profile expose stable application read models.
+- Validators are discovered from the BLL assembly; manager and repository registrations remain explicit in the Services composition root.
 
 ## Booking workflow
 
