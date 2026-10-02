@@ -13,11 +13,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.0.0" />
+      <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
       <PackageReference Include="AutoMapper" Version="16.2.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
-      <PackageReference Include="Quartz.Extensions.Hosting" Version="3.18.2" />
+      <PackageReference Include="Quartz.Extensions.Hosting" Version="3.20.0" />
     </ItemGroup>
 
 </Project>
