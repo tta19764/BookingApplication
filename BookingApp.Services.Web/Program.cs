@@ -1,5 +1,4 @@
 using BookingApp.Services.Web.DI;
-using BookingApp.Services.Web.Endpoints;
 using BookingApp.Services.Web.Services;
 using Serilog;
 
@@ -28,6 +27,6 @@ app.UseRequestContextLogging();
 
 app.UseCustomExceptionManager();
 
-app.MapEndpoints();
+app.MapControllers();
 
 app.Run();

@@ -2,7 +2,7 @@
 
 Booking Application is a versioned REST API for managing conference halls and reservations. Clients can maintain a hall catalog, search availability, book halls with optional services, receive time-based price calculations, and read revenue analytics.
 
-The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and Dal.PostgreSQLRepositories projects. It is built with .NET 10, ASP.NET Core Minimal APIs, EF Core, PostgreSQL, Quartz, Swagger, Serilog, xUnit, and Testcontainers.
+The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and Dal.PostgreSQLRepositories projects. It is built with .NET 10, ASP.NET Core MVC controllers, EF Core, PostgreSQL, Quartz, Swagger, Serilog, xUnit, and Testcontainers.
 
 Українська: Booking Application — це REST API для керування конференц-залами та бронюваннями. Система підтримує каталог залів, пошук доступності, додаткові послуги, розрахунок вартості за часовими тарифами й аналітику доходу. Рішення побудоване за принципами layered architecture.
 
@@ -23,7 +23,7 @@ The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and
 | Area | Technologies and purpose |
 | --- | --- |
 | Runtime and language | **.NET 10** and **C#** for the application and test projects. |
-| Web API | **ASP.NET Core Minimal APIs** for HTTP endpoints and **ASP.NET API Versioning** for `/api/v1`. |
+| Web API | **ASP.NET Core MVC controllers** for HTTP endpoints and **ASP.NET API Versioning** for `/api/v1`. |
 | API documentation | **Swagger/OpenAPI** through Swashbuckle for interactive endpoint documentation. |
 | Application flow | Feature-oriented **BLL managers** that expose service-style business operations. |
 | Domain design | Layered architecture, anemic Common models, DAL entities, AutoMapper profiles, repository abstractions, FluentValidation, and Result-based errors. |

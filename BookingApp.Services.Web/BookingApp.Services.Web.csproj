@@ -36,10 +36,4 @@
       </Content>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Endpoints\Bookings\" />
-      <Folder Include="Endpoints\ConferenceHalls\" />
-      <Folder Include="Endpoints\Reports\" />
-    </ItemGroup>
-
 </Project>

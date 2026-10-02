@@ -1,4 +1,4 @@
-namespace BookingApp.Services.Web.Endpoints.ConferenceHalls;
+namespace BookingApp.Services.Web.Dtos.Requests;
 
 /// <summary>
 /// Request parameters for finding available conference halls.

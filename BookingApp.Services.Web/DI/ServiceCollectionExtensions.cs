@@ -1,5 +1,4 @@
 using Asp.Versioning;
-using BookingApp.Services.Web.Endpoints;
 using BookingApp.Services.Web.Configuration;
 using BookingApp.Services.Web.Mappings;
 using System.Text.Json.Serialization;
@@ -39,17 +38,17 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApi(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddProblemDetails();
-        services.AddEndpointsApiExplorer();
+        services
+            .AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
         services.AddAutoMapper(_ => { }, typeof(AutoMapperConfig), typeof(BookingApp.Bll.Mappings.AutoMapperConfig),
             typeof(BookingApp.Dal.SqlRepositories.Mappings.AutoMapperConfig));
 
         AddBusinessLogic(services);
         AddDataAccess(services, configuration);
-
-        services.ConfigureHttpJsonOptions(options =>
-        {
-            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        });
 
         services
             .AddApiVersioning(options =>
@@ -59,6 +58,7 @@ public static class ServiceCollectionExtensions
                 options.ReportApiVersions = true;
                 options.ApiVersionReader = new UrlSegmentApiVersionReader();
             })
+            .AddMvc()
             .AddApiExplorer(options =>
             {
                 options.GroupNameFormat = "'v'V";
@@ -91,8 +91,6 @@ public static class ServiceCollectionExtensions
     private static void AddDataAccess(IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton(TimeProvider.System);
-        services.AddScoped<EntityChangeTracker>();
-
         var connectionString = configuration.GetConnectionString("Database")
             ?? throw new InvalidOperationException("The Database connection string is not configured.");
 

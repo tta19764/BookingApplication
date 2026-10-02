@@ -1,7 +1,7 @@
 using Asp.Versioning;
 using System.Globalization;
 
-namespace BookingApp.Services.Web.Endpoints;
+namespace BookingApp.Services.Web.Configuration;
 
 /// <summary>
 /// API version constants used by endpoint registrations.
