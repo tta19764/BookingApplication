@@ -58,8 +58,7 @@ public sealed class BookingRepository(ApplicationDbContext dbContext, IMapper ma
         return entities.Select(ToModel).ToList();
     }
 
-    protected override IQueryable<BookingEntity> Ordered(IQueryable<BookingEntity> query) =>
-        query.OrderBy(booking => booking.Id);
+    public void Update(Booking booking) => UpdateEntity(booking.Id, booking);
 
-    protected override Guid GetModelId(Booking model) => model.Id;
+    public void Remove(Booking booking) => RemoveEntity(booking.Id);
 }

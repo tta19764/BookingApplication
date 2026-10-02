@@ -24,8 +24,13 @@ public abstract class Repository<TEntity, TModel>(
         if (page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
         if (pageSize <= 0) throw new ArgumentOutOfRangeException(nameof(pageSize));
 
-        var entities = await Ordered(DbSet.AsNoTracking())
-            .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        var entities = await DbSet
+            .AsNoTracking()
+            .OrderBy(entity => entity.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
         return mapper.Map<IReadOnlyCollection<TModel>>(entities);
     }
 
@@ -34,27 +39,21 @@ public abstract class Repository<TEntity, TModel>(
         DbSet.Add(mapper.Map<TEntity>(model));
     }
 
-    public virtual void Update(TModel model)
+    protected void UpdateEntity(Guid id, TModel model)
     {
-        var id = GetModelId(model);
         var entity = DbSet.Find(id)
             ?? throw new InvalidOperationException($"{typeof(TEntity).Name} with ID '{id}' was not found.");
 
         mapper.Map(model, entity);
     }
 
-    public virtual void Remove(TModel model)
+    protected void RemoveEntity(Guid id)
     {
-        var id = GetModelId(model);
         var entity = DbSet.Find(id)
             ?? throw new InvalidOperationException($"{typeof(TEntity).Name} with ID '{id}' was not found.");
 
         DbSet.Remove(entity);
     }
-
-    protected abstract IQueryable<TEntity> Ordered(IQueryable<TEntity> query);
-
-    protected abstract Guid GetModelId(TModel model);
 
     protected TModel ToModel(TEntity entity) => mapper.Map<TModel>(entity);
 }

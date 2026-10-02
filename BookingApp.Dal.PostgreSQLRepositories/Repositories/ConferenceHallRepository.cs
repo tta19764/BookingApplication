@@ -31,8 +31,7 @@ public sealed class ConferenceHallRepository(ApplicationDbContext dbContext, IMa
         return entities.Select(ToModel);
     }
 
-    protected override IQueryable<ConferenceHallEntity> Ordered(IQueryable<ConferenceHallEntity> query) =>
-        query.OrderBy(hall => hall.Id);
+    public void Update(ConferenceHall hall) => UpdateEntity(hall.Id, hall);
 
-    protected override Guid GetModelId(ConferenceHall model) => model.Id;
+    public void Remove(ConferenceHall hall) => RemoveEntity(hall.Id);
 }
