@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using BookingApp.Dal.SqlRepositories.Entities;
 
 namespace BookingApp.Dal.SqlRepositories.Repositories;
 
 public abstract class Repository<TEntity, TModel>(
     ApplicationDbContext dbContext,
     IMapper mapper)
-    where TEntity : class
+    where TEntity : Entity
 {
     protected readonly DbContext DbContext = dbContext;
     protected readonly DbSet<TEntity> DbSet = dbContext.Set<TEntity>();
@@ -36,8 +37,8 @@ public abstract class Repository<TEntity, TModel>(
     public virtual void Update(TModel model)
     {
         var id = GetModelId(model);
-        var entity = DbSet.Local.FirstOrDefault(item => GetEntityId(item) == id)
-            ?? throw new InvalidOperationException("The entity must be loaded before it can be updated.");
+        var entity = DbSet.Find(id)
+            ?? throw new InvalidOperationException($"{typeof(TEntity).Name} with ID '{id}' was not found.");
 
         mapper.Map(model, entity);
     }
@@ -45,14 +46,13 @@ public abstract class Repository<TEntity, TModel>(
     public virtual void Remove(TModel model)
     {
         var id = GetModelId(model);
-        var entity = DbSet.Local.FirstOrDefault(item => GetEntityId(item) == id)
-            ?? throw new InvalidOperationException("The entity must be loaded before it can be removed.");
+        var entity = DbSet.Find(id)
+            ?? throw new InvalidOperationException($"{typeof(TEntity).Name} with ID '{id}' was not found.");
+
         DbSet.Remove(entity);
     }
 
     protected abstract IQueryable<TEntity> Ordered(IQueryable<TEntity> query);
-
-    protected abstract Guid GetEntityId(TEntity entity);
 
     protected abstract Guid GetModelId(TModel model);
 

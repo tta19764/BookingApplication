@@ -34,7 +34,5 @@ public sealed class ConferenceHallRepository(ApplicationDbContext dbContext, IMa
     protected override IQueryable<ConferenceHallEntity> Ordered(IQueryable<ConferenceHallEntity> query) =>
         query.OrderBy(hall => hall.Id);
 
-    protected override Guid GetEntityId(ConferenceHallEntity entity) => entity.Id;
-
     protected override Guid GetModelId(ConferenceHall model) => model.Id;
 }

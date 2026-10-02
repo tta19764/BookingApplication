@@ -11,7 +11,5 @@ public sealed class UserRepository(ApplicationDbContext dbContext, IMapper mappe
     protected override IQueryable<UserEntity> Ordered(IQueryable<UserEntity> query) =>
         query.OrderBy(user => user.Id);
 
-    protected override Guid GetEntityId(UserEntity entity) => entity.Id;
-
     protected override Guid GetModelId(User model) => model.Id;
 }
