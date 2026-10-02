@@ -10,7 +10,7 @@
 - FluentValidation validators reject malformed IDs, paging, capacity, currency, amenity, and time inputs before managers execute.
 - Manager dispatch provides centralized validation and structured request logging.
 - Response records and mappers expose stable application read models.
-- Domain event managers host post-operation side effects such as event logging.
+- AutoMapperConfig centralizes mapping between Common models, DAL entities, and Services DTOs.
 
 ## Booking workflow
 

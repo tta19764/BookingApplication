@@ -1,10 +1,11 @@
+using BookingApp.Bll.Bookings;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.Shared;
 using FluentAssertions;
 using Xunit;
 
-namespace BookingApp.Bll.Common.UnitTests.Bookings;
+namespace BookingApp.Bll.UnitTests.Bookings;
 
 public class PricingServiceTests
 {

@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using BookingApp.Bll.Common.Abstractions;
+using AutoMapper;
 
 namespace BookingApp.Dal.SqlRepositories.Repositories;
 
 public abstract class Repository<TEntity, TModel>(
     ApplicationDbContext dbContext,
-    EntityChangeTracker changeTracker)
+    EntityChangeTracker changeTracker,
+    IMapper mapper)
     where TEntity : class
     where TModel : Entity
 {
@@ -26,13 +28,12 @@ public abstract class Repository<TEntity, TModel>(
 
         var entities = await Ordered(DbSet.AsNoTracking())
             .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
-        return entities.Select(ToModel).ToList();
+        return mapper.Map<IReadOnlyCollection<TModel>>(entities);
     }
 
     public virtual void Add(TModel model)
     {
-        changeTracker.TrackEvents(model);
-        DbSet.Add(ToEntity(model));
+        DbSet.Add(mapper.Map<TEntity>(model));
     }
 
     public virtual void Remove(TModel model)
@@ -45,11 +46,10 @@ public abstract class Repository<TEntity, TModel>(
 
     protected TModel Track(TEntity entity)
     {
-        var model = ToModel(entity);
+        var model = mapper.Map<TModel>(entity);
         changeTracker.Track(() =>
         {
-            changeTracker.TrackEvents(model);
-            UpdateEntity(entity, model);
+            mapper.Map(model, entity);
         });
         return model;
     }
@@ -57,7 +57,5 @@ public abstract class Repository<TEntity, TModel>(
     protected abstract IQueryable<TEntity> Ordered(IQueryable<TEntity> query);
     protected abstract Guid GetEntityId(TEntity entity);
     protected abstract Guid GetModelId(TModel model);
-    protected abstract TEntity ToEntity(TModel model);
-    protected abstract TModel ToModel(TEntity entity);
-    protected abstract void UpdateEntity(TEntity entity, TModel model);
+    protected TModel ToModel(TEntity entity) => mapper.Map<TModel>(entity);
 }

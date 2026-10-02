@@ -18,7 +18,7 @@ public class GetAvailableHallsManager(IConferenceHallRepository hallRepository)
         GetAvailableHallsRequest request,
         CancellationToken cancellationToken)
     {
-        var duration = DateRange.Create(
+        var duration = BookingApp.Bll.Bookings.BookingPeriodFactory.Create(
             request.Date,
             TimeOnly.ParseExact(request.StartTime, "HH:mm", CultureInfo.InvariantCulture),
             TimeOnly.ParseExact(request.EndTime, "HH:mm", CultureInfo.InvariantCulture));

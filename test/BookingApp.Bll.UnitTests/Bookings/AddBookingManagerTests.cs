@@ -1,3 +1,4 @@
+using BookingApp.Bll.Bookings;
 using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Abstractions.Clock;
 using BookingApp.Bll.Bookings.AddBooking;

@@ -6,7 +6,7 @@
 
 - `ApplicationDbContext` is the EF Core unit of work.
 - PostgreSQL repositories implement hall, booking, and user repository contracts.
-- Entity configurations map aggregates and value objects, including monetary precision, UTC booking timestamps, amenity conversion, relationships, and deletion behavior.
+- Entity configurations map DAL entities and value objects, including monetary precision, UTC booking timestamps, amenity conversion, relationships, and deletion behavior.
 - Migrations version the relational schema.
 - Availability and overlap checks are translated into database queries.
 - Report reads are paginated and deterministic.

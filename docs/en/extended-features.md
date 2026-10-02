@@ -18,7 +18,7 @@ In addition to the five required mutations/search operations, the API exposes ha
 
 ## Booking lifecycle automation
 
-Bookings have explicit Reserved, Rejected, Completed, and Cancelled states with domain events. A Quartz background job finds expired reserved bookings in bounded batches and completes them automatically.
+Bookings have explicit Reserved, Rejected, Completed, and Cancelled states. A Quartz background job finds expired reserved bookings in bounded batches and completes them automatically.
 
 ## Versioning and API documentation
 

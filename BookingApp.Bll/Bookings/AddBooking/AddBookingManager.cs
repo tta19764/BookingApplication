@@ -1,3 +1,4 @@
+using BookingApp.Bll.Bookings;
 using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Abstractions.Clock;
 using BookingApp.Bll.Abstractions.Messaging;
@@ -29,7 +30,7 @@ public class AddBookingManager(
             return Result.Failure<BookingConfirmationModel>(ConferenceHallErrors.NotFound);
         }
 
-        var duration = DateRange.Create(
+        var duration = BookingPeriodFactory.Create(
             request.Date,
             TimeOnly.ParseExact(request.StartTime, "HH:mm", CultureInfo.InvariantCulture),
             TimeOnly.ParseExact(request.EndTime, "HH:mm", CultureInfo.InvariantCulture));
@@ -47,13 +48,19 @@ public class AddBookingManager(
 
         try
         {
-            var booking = Booking.Reserve(
-                hall,
-                request.Amenities.Distinct(),
-                request.UserId,
-                duration,
-                dateTimeProvider.UtcNow,
-                pricingService);
+            var pricing = pricingService.CalculatePrice(hall, duration, request.Amenities.Distinct());
+            var booking = new Booking(Guid.NewGuid())
+            {
+                ConferenceHallId = hall.Id,
+                UserId = request.UserId,
+                Duration = duration,
+                PriceForPeriod = pricing.PriceForPeriod,
+                AmenitiesUpCharge = pricing.AmenitiesUpCharge,
+                TotalPrice = pricing.TotalPrice,
+                Status = BookingStatus.Reserved,
+                CreatedOnUtc = dateTimeProvider.UtcNow
+            };
+            hall.LastBookedOnUtc = dateTimeProvider.UtcNow;
 
             bookingRepository.Add(booking);
 

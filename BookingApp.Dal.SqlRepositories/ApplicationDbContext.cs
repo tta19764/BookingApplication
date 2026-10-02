@@ -10,7 +10,6 @@ namespace BookingApp.Dal.SqlRepositories;
 /// </summary>
 public sealed class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,
-    BookingApp.Bll.Abstractions.Events.IDomainEventDispatcher domainEventDispatcher,
     EntityChangeTracker entityChangeTracker)
     : DbContext(options), IUnitOfWork
 {
@@ -37,16 +36,6 @@ public sealed class ApplicationDbContext(
         entityChangeTracker.Apply();
         var result = await base.SaveChangesAsync(cancellationToken);
 
-        // Events are published after the transaction has persisted entity state.
-        await PublishDomainEventsAsync(cancellationToken);
-
         return result;
-    }
-
-    private async Task PublishDomainEventsAsync(CancellationToken cancellationToken)
-    {
-        var domainEvents = entityChangeTracker.DomainEvents.ToList();
-        entityChangeTracker.ClearEvents();
-        await domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
     }
 }

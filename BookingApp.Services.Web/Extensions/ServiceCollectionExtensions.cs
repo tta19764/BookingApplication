@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using BookingApp.Services.Web.Endpoints;
 using BookingApp.Services.Web.OpenApi;
+using BookingApp.Services.Web.Mappings;
 using System.Text.Json.Serialization;
 
 namespace BookingApp.Services.Web.Extensions;
@@ -17,6 +18,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddProblemDetails();
         services.AddEndpointsApiExplorer();
+        services.AddAutoMapper(configuration => { }, typeof(AutoMapperConfig));
 
         services.ConfigureHttpJsonOptions(options =>
         {

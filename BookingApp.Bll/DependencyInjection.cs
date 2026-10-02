@@ -1,4 +1,4 @@
-using BookingApp.Bll.Abstractions.Events;
+using BookingApp.Bll.Bookings;
 using BookingApp.Bll.Abstractions.Messaging;
 using BookingApp.Bll.Common.Bookings;
 using FluentValidation;
@@ -20,7 +20,6 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(applicationAssembly);
         services.AddScoped<IManagerDispatcher, ManagerDispatcher>();
-        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
         RegisterManagers(services, applicationAssembly.DefinedTypes);
 
@@ -33,11 +32,7 @@ public static class DependencyInjection
         IServiceCollection services,
         IEnumerable<System.Reflection.TypeInfo> applicationTypes)
     {
-        var handlerDefinitions = new[]
-        {
-            typeof(IRequestManager<,>),
-            typeof(IDomainEventManager<>)
-        };
+        var handlerDefinitions = new[] { typeof(IRequestManager<,>) };
 
         foreach (var implementationType in applicationTypes.Where(type => type is { IsClass: true, IsAbstract: false }))
         {
