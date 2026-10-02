@@ -1,4 +1,4 @@
-# Infrastructure layer
+# DAL layer
 
 `BookingApp.Dal.PostgreSQLRepositories` implements external and persistence concerns required by the other layers.
 
@@ -11,7 +11,7 @@
 - Migrations version the relational schema.
 - Availability and overlap checks are translated into database queries.
 - Report reads are paginated and deterministic.
-- Updates are explicit repository operations. Repositories map changed Common models back to already tracked DAL entities before the Unit of Work saves; there is no hidden save-time change synchronizer.
+- Updates are explicit repository operations. EF Core `Find` reuses a locally tracked entity or loads it by ID, after which AutoMapper applies the changed Common model before the Unit of Work saves. There is no hidden save-time change synchronizer.
 
 ## Operational services
 

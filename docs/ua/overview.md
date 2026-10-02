@@ -30,7 +30,7 @@ Booking Application керує орендою конференц-залів. К�
 
 ## Початкові дані
 
-У середовищі розробки створюються `Hall A` (50 місць, 2000 UAH/год), `Hall B` (100, 3500), `Hall C` (30, 1500) і користувач `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa`. Автентифікація не входить до поточного обсягу, тому Endpoint бронювання використовує цього користувача.
+У середовищі розробки створюються `Hall A` (50 місць, 2000 UAH/год), `Hall B` (100, 3500), `Hall C` (30, 1500) і користувач `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa`. Автентифікація не входить до поточного обсягу, тому контролер бронювання використовує цього користувача.
 
 ## Запуск
 
@@ -52,4 +52,4 @@ dotnet run --project BookingApp.Services.Web
 
 Межі рівнів використовують окремі представлення: функціональні папки `Models` у `Bll.Common` містять бізнес-моделі та моделі читання, `Dal.PostgreSQLRepositories/Entities` містить сутності EF Core, а `Services.Web/Dtos` — контракти HTTP. Явне зіставлення в репозиторіях і на рівні Services не дозволяє деталям бази даних та передачі даних проникати до бізнес-логіки.
 
-`Services.Web` є коренем композиції та має явні посилання на всі рівні, тому вся реєстрація dependency injection залишається на межі застосунку. Докладніше: [Domain](domain.md), [Application](application.md), [Infrastructure](infrastructure.md), [API](api.md), [Тестування](testing.md).
+`Services.Web` є коренем композиції та має явні посилання на всі рівні, тому вся реєстрація dependency injection залишається на межі застосунку. Докладніше: [Common](domain.md), [BLL](application.md), [DAL](infrastructure.md), [API](api.md), [Тестування](testing.md), [Рефакторинг](refactoring.md).

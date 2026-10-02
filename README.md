@@ -11,12 +11,13 @@ The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and
 | Subject | English | Українська |
 | --- | --- | --- |
 | Project overview, business rules, setup, and API | [Overview](docs/en/overview.md) | [Огляд](docs/ua/overview.md) |
-| Domain layer | [Domain](docs/en/domain.md) | [Доменний рівень](docs/ua/domain.md) |
-| Application layer | [Application](docs/en/application.md) | [Прикладний рівень](docs/ua/application.md) |
-| Infrastructure layer | [Infrastructure](docs/en/infrastructure.md) | [Інфраструктурний рівень](docs/ua/infrastructure.md) |
+| Common layer | [Common](docs/en/domain.md) | [Рівень Common](docs/ua/domain.md) |
+| BLL layer | [BLL](docs/en/application.md) | [Рівень BLL](docs/ua/application.md) |
+| DAL layer | [DAL](docs/en/infrastructure.md) | [Рівень DAL](docs/ua/infrastructure.md) |
 | API layer | [API](docs/en/api.md) | [Рівень API](docs/ua/api.md) |
 | Test projects and strategy | [Testing](docs/en/testing.md) | [Тестування](docs/ua/testing.md) |
 | Features added beyond the assignment | [Extended features](docs/en/extended-features.md) | [Розширені можливості](docs/ua/extended-features.md) |
+| Layered architecture refactoring | [Refactoring](docs/en/refactoring.md) | [Рефакторинг](docs/ua/refactoring.md) |
 
 ## Technologies and tools / Технології та інструменти
 
