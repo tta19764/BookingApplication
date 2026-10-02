@@ -5,6 +5,6 @@ namespace BookingApp.Services.Web.Endpoints.ConferenceHalls;
 /// </summary>
 public sealed record GetAvailableConferenceHallsRequest(
     DateOnly Date,
-    string StartTime,
-    string EndTime,
+    TimeOnly StartTime,
+    TimeOnly EndTime,
     int Capacity);

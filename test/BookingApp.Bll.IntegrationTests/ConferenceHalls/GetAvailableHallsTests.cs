@@ -15,8 +15,9 @@ public class GetAvailableHallsTests(IntegrationTestWebAppFactory factory) : Base
         const int capacity = 30;
 
         // Act
-        Result<IEnumerable<HallModel>> result = await HallManager.GetAvailableHallsAsync(
-            DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2)), "10:40", "12:10", capacity, cancellationToken);
+        var model = new FindAvailableHallsModel(DateOnly.FromDateTime(DateTime.UtcNow.AddDays(2)),
+            new TimeOnly(10, 40), new TimeOnly(12, 10), capacity);
+        Result<IEnumerable<HallModel>> result = await HallManager.GetAvailableHallsAsync(model, cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

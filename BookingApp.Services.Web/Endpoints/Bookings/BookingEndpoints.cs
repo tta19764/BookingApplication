@@ -3,6 +3,8 @@ using BookingApp.Services.Web.Mappings;
 using BookingApp.Services.Web.Services;
 using AutoMapper;
 using BookingApp.Bll.Common.Bookings;
+using BookingApp.Bll.Common.Bookings.Models;
+using BookingApp.Bll.Common.Shared.Models;
 
 namespace BookingApp.Services.Web.Endpoints.Bookings;
 
@@ -42,7 +44,8 @@ public static class BookingEndpoints
         IMapper mapper,
         CancellationToken cancellationToken)
     {
-        var result = await bookingManager.GetBookingsAsync(request.Page, request.PageSize, cancellationToken);
+        var result = await bookingManager.GetBookingsAsync(
+            new PaginationModel(request.Page, request.PageSize), cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse(mapper.Map<IReadOnlyCollection<BookingDto>>))
@@ -55,14 +58,9 @@ public static class BookingEndpoints
         IMapper mapper,
         CancellationToken cancellationToken)
     {
-        var result = await bookingManager.AddBookingAsync(
-            request.HallId,
-            SeedDataExtensions.SeededUserId,
-            request.Date,
-            request.StartTime,
-            request.EndTime,
-            request.Amenities,
-            cancellationToken);
+        var model = new CreateBookingModel(request.HallId, SeedDataExtensions.SeededUserId, request.Date,
+            request.StartTime, request.EndTime, request.Amenities);
+        var result = await bookingManager.AddBookingAsync(model, cancellationToken);
 
         if (result.IsSuccess)
         {

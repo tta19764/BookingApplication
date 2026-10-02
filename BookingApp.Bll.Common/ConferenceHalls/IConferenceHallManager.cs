@@ -1,5 +1,6 @@
 using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared;
+using BookingApp.Bll.Common.Shared.Models;
 
 namespace BookingApp.Bll.Common.ConferenceHalls;
 
@@ -9,34 +10,22 @@ namespace BookingApp.Bll.Common.ConferenceHalls;
 public interface IConferenceHallManager
 {
     Task<Result<Guid>> AddHallAsync(
-        string name,
-        int capacity,
-        decimal hourlyRate,
-        string currencyCode,
-        IReadOnlyCollection<Amenity> amenities,
+        CreateHallModel model,
         CancellationToken cancellationToken);
 
     Task<Result<IReadOnlyCollection<HallModel>>> GetHallsAsync(
-        int page,
-        int pageSize,
+        PaginationModel pagination,
         CancellationToken cancellationToken);
 
-    Task<Result<HallModel>> GetHallAsync(Guid hallId, CancellationToken cancellationToken);
+    Task<Result<HallModel>> GetHallAsync(HallReferenceModel model, CancellationToken cancellationToken);
 
     Task<Result> UpdateHallAsync(
-        Guid hallId,
-        string name,
-        int capacity,
-        decimal hourlyRate,
-        IReadOnlyCollection<Amenity> amenities,
+        UpdateHallModel model,
         CancellationToken cancellationToken);
 
-    Task<Result> RemoveHallAsync(Guid hallId, CancellationToken cancellationToken);
+    Task<Result> RemoveHallAsync(HallReferenceModel model, CancellationToken cancellationToken);
 
     Task<Result<IEnumerable<HallModel>>> GetAvailableHallsAsync(
-        DateOnly date,
-        string startTime,
-        string endTime,
-        int capacity,
+        FindAvailableHallsModel model,
         CancellationToken cancellationToken);
 }

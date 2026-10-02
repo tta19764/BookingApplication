@@ -16,8 +16,8 @@ public class AddHallTests(IntegrationTestWebAppFactory factory) : BaseIntegratio
         var name = $"Integration Hall {Guid.NewGuid():N}";
 
         // Act
-        var result = await HallManager.AddHallAsync(name, 42, 1800m, "UAH",
-            [Amenity.Projector, Amenity.WiFi], cancellationToken);
+        var model = new CreateHallModel(name, 42, 1800m, "UAH", [Amenity.Projector, Amenity.WiFi]);
+        var result = await HallManager.AddHallAsync(model, cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
