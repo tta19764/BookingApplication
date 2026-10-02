@@ -1,5 +1,5 @@
+using BookingApp.Application.Abstractions.Events;
 using BookingApp.Domain.Bookings.Events;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace BookingApp.Application.Bookings.AddBooking;
@@ -8,7 +8,7 @@ namespace BookingApp.Application.Bookings.AddBooking;
 /// Handles post-reservation application side effects.
 /// </summary>
 public class BookingReservedDomainEventHandler(
-    ILogger<BookingReservedDomainEventHandler> logger) : INotificationHandler<BookingReservedDomainEvent>
+    ILogger<BookingReservedDomainEventHandler> logger) : IDomainEventHandler<BookingReservedDomainEvent>
 {
     public Task Handle(BookingReservedDomainEvent notification, CancellationToken cancellationToken)
     {

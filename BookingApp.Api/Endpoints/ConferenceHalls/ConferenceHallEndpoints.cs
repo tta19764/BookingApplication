@@ -6,7 +6,7 @@ using BookingApp.Application.ConferenceHalls.GetHall;
 using BookingApp.Application.ConferenceHalls.GetHalls;
 using BookingApp.Application.ConferenceHalls.RemoveHall;
 using BookingApp.Application.ConferenceHalls.UpdateHall;
-using MediatR;
+using BookingApp.Application.Abstractions.Messaging;
 namespace BookingApp.Api.Endpoints.ConferenceHalls;
 
 /// <summary>
@@ -65,10 +65,10 @@ public static class ConferenceHallEndpoints
 
     public static async Task<IResult> GetConferenceHalls(
         [AsParameters] GetConferenceHallsRequest request,
-        ISender sender,
+        IApplicationDispatcher dispatcher,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(
+        var result = await dispatcher.Send(
             new GetHallsQuery(request.Page, request.PageSize),
             cancellationToken);
 
@@ -79,10 +79,10 @@ public static class ConferenceHallEndpoints
 
     public static async Task<IResult> CreateConferenceHall(
         AddHallCommand command,
-        ISender sender,
+        IApplicationDispatcher dispatcher,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command, cancellationToken);
+        var result = await dispatcher.Send(command, cancellationToken);
 
         return result.IsSuccess
             ? Results.CreatedAtRoute(nameof(GetConferenceHall), new { hallId = result.Value, version = BookingAppApiVersions.V1RouteValue }, result.MapToApiResponse())
@@ -91,10 +91,10 @@ public static class ConferenceHallEndpoints
 
     public static async Task<IResult> GetConferenceHall(
         Guid hallId,
-        ISender sender,
+        IApplicationDispatcher dispatcher,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetHallQuery(hallId), cancellationToken);
+        var result = await dispatcher.Send(new GetHallQuery(hallId), cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse())
@@ -104,7 +104,7 @@ public static class ConferenceHallEndpoints
     public static async Task<IResult> UpdateConferenceHall(
         Guid hallId,
         UpdateConferenceHallRequest request,
-        ISender sender,
+        IApplicationDispatcher dispatcher,
         CancellationToken cancellationToken)
     {
         var command = new UpdateHallCommand(
@@ -114,7 +114,7 @@ public static class ConferenceHallEndpoints
             request.HourlyRate,
             request.Amenities);
 
-        var result = await sender.Send(command, cancellationToken);
+        var result = await dispatcher.Send(command, cancellationToken);
 
         if (result.IsSuccess)
         {
@@ -128,10 +128,10 @@ public static class ConferenceHallEndpoints
 
     public static async Task<IResult> DeleteConferenceHall(
         Guid hallId,
-        ISender sender,
+        IApplicationDispatcher dispatcher,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new RemoveHallCommand(hallId), cancellationToken);
+        var result = await dispatcher.Send(new RemoveHallCommand(hallId), cancellationToken);
 
         return result.IsSuccess
             ? Results.NoContent()
@@ -140,7 +140,7 @@ public static class ConferenceHallEndpoints
 
     public static async Task<IResult> GetAvailableConferenceHalls(
         [AsParameters] GetAvailableConferenceHallsRequest request,
-        ISender sender,
+        IApplicationDispatcher dispatcher,
         CancellationToken cancellationToken)
     {
         var query = new GetAvailableHallsQuery(
@@ -149,7 +149,7 @@ public static class ConferenceHallEndpoints
             request.EndTime,
             request.Capacity);
 
-        var result = await sender.Send(query, cancellationToken);
+        var result = await dispatcher.Send(query, cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse())

@@ -1,5 +1,5 @@
+using BookingApp.Application.Abstractions.Events;
 using BookingApp.Domain.Bookings.Events;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace BookingApp.Application.Bookings.RejectBooking;
@@ -8,7 +8,7 @@ namespace BookingApp.Application.Bookings.RejectBooking;
 /// Handles post-rejection application side effects.
 /// </summary>
 public class BookingRejectedDomainEventHandler(
-    ILogger<BookingRejectedDomainEventHandler> logger) : INotificationHandler<BookingRejectedDomainEvent>
+    ILogger<BookingRejectedDomainEventHandler> logger) : IDomainEventHandler<BookingRejectedDomainEvent>
 {
     public Task Handle(BookingRejectedDomainEvent notification, CancellationToken cancellationToken)
     {

@@ -2,7 +2,7 @@ using BookingApp.Api.Contracts;
 using BookingApp.Api.Extensions;
 using BookingApp.Application.Bookings.AddBooking;
 using BookingApp.Application.Bookings.GetBookings;
-using MediatR;
+using BookingApp.Application.Abstractions.Messaging;
 
 namespace BookingApp.Api.Endpoints.Bookings;
 
@@ -38,10 +38,10 @@ public static class BookingEndpoints
 
     public static async Task<IResult> GetBookings(
         [AsParameters] GetBookingsRequest request,
-        ISender sender,
+        IApplicationDispatcher dispatcher,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(
+        var result = await dispatcher.Send(
             new GetBookingsQuery(request.Page, request.PageSize),
             cancellationToken);
 
@@ -52,7 +52,7 @@ public static class BookingEndpoints
 
     public static async Task<IResult> CreateBooking(
         CreateBookingRequest request,
-        ISender sender,
+        IApplicationDispatcher dispatcher,
         CancellationToken cancellationToken)
     {
         var command = new AddBookingCommand(
@@ -63,7 +63,7 @@ public static class BookingEndpoints
             request.EndTime,
             request.Amenities);
 
-        var result = await sender.Send(command, cancellationToken);
+        var result = await dispatcher.Send(command, cancellationToken);
 
         if (result.IsSuccess)
         {

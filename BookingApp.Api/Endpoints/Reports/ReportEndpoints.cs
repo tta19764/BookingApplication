@@ -1,7 +1,7 @@
 using BookingApp.Api.Contracts;
 using BookingApp.Api.Extensions;
 using BookingApp.Application.Reports.GetBookingSummary;
-using MediatR;
+using BookingApp.Application.Abstractions.Messaging;
 
 namespace BookingApp.Api.Endpoints.Reports;
 
@@ -28,10 +28,10 @@ public static class ReportEndpoints
     }
 
     public static async Task<IResult> GetBookingSummary(
-        ISender sender,
+        IApplicationDispatcher dispatcher,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetBookingSummaryQuery(), cancellationToken);
+        var result = await dispatcher.Send(new GetBookingSummaryQuery(), cancellationToken);
 
         return Results.Ok(result.MapToApiResponse());
     }

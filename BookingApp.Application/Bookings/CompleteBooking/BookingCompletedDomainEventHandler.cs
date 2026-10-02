@@ -1,5 +1,5 @@
+using BookingApp.Application.Abstractions.Events;
 using BookingApp.Domain.Bookings.Events;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace BookingApp.Application.Bookings.CompleteBooking;
@@ -8,7 +8,7 @@ namespace BookingApp.Application.Bookings.CompleteBooking;
 /// Handles post-completion application side effects.
 /// </summary>
 public class BookingCompletedDomainEventHandler(
-    ILogger<BookingCompletedDomainEventHandler> logger) : INotificationHandler<BookingCompletedDomainEvent>
+    ILogger<BookingCompletedDomainEventHandler> logger) : IDomainEventHandler<BookingCompletedDomainEvent>
 {
     public Task Handle(BookingCompletedDomainEvent notification, CancellationToken cancellationToken)
     {

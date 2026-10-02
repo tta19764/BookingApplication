@@ -1,5 +1,4 @@
 ﻿using BookingApp.Domain.Abstractions;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -10,7 +9,7 @@ namespace BookingApp.Infrastructure;
 /// </summary>
 public sealed class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,
-    IPublisher publisher)
+    BookingApp.Application.Abstractions.Events.IDomainEventDispatcher domainEventDispatcher)
     : DbContext(options), IUnitOfWork
 {
     private static readonly JsonSerializerSettings JsonSerializerSettings = new()
@@ -36,12 +35,12 @@ public sealed class ApplicationDbContext(
         var result = await base.SaveChangesAsync(cancellationToken);
         
         // Events are published after the transaction has persisted entity state.
-        await PublishDomainEventsAsync();
+        await PublishDomainEventsAsync(cancellationToken);
         
         return result;
     }
 
-    private async Task PublishDomainEventsAsync()
+    private async Task PublishDomainEventsAsync(CancellationToken cancellationToken)
     {
         // Copy and clear events before publishing so handlers cannot publish the same event twice.
         var domainEvents = ChangeTracker
@@ -57,9 +56,6 @@ public sealed class ApplicationDbContext(
             })
             .ToList();
         
-        foreach (var domainEvent in domainEvents)
-        {
-            await publisher.Publish(domainEvent);
-        }
+        await domainEventDispatcher.DispatchAsync(domainEvents, cancellationToken);
     }
 }
