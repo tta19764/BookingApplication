@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Abstractions.Messaging;
 using BookingApp.Bll.ConferenceHalls.GetHall;
 using BookingApp.Bll.Common.Abstractions;
@@ -11,9 +12,9 @@ namespace BookingApp.Bll.ConferenceHalls.GetAvailableHalls;
 /// Finds available halls and maps them to hall response models.
 /// </summary>
 public class GetAvailableHallsManager(IConferenceHallRepository hallRepository)
-    : IRequestManager<GetAvailableHallsRequest, Result<IEnumerable<HallResponse>>>
+    : IRequestManager<GetAvailableHallsRequest, Result<IEnumerable<HallModel>>>
 {
-    public async Task<Result<IEnumerable<HallResponse>>> Handle(
+    public async Task<Result<IEnumerable<HallModel>>> Handle(
         GetAvailableHallsRequest request,
         CancellationToken cancellationToken)
     {
@@ -28,6 +29,6 @@ public class GetAvailableHallsManager(IConferenceHallRepository hallRepository)
             new Capacity(request.Capacity),
             cancellationToken);
 
-        return Result.Success(halls.Select(HallMapper.ToResponse));
+        return Result.Success(halls.Select(HallMapper.ToModel));
     }
 }

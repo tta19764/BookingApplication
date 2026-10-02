@@ -23,7 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
         RegisterManagers(services, applicationAssembly.DefinedTypes);
-        
+
         services.AddTransient<PricingService>();
 
         return services;

@@ -1,3 +1,4 @@
+using BookingApp.Dal.SqlRepositories.Entities;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -8,9 +9,9 @@ namespace BookingApp.Dal.SqlRepositories.Configurations;
 /// <summary>
 /// EF Core mapping for booking persistence.
 /// </summary>
-public class BookingConfiguration : IEntityTypeConfiguration<Booking>
+public class BookingEntityConfiguration : IEntityTypeConfiguration<BookingEntity>
 {
-    public void Configure(EntityTypeBuilder<Booking> builder)
+    public void Configure(EntityTypeBuilder<BookingEntity> builder)
     {
         builder.ToTable("bookings");
 
@@ -76,8 +77,8 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
     }
 
     private static void ConfigureMoney(
-        EntityTypeBuilder<Booking> builder,
-        System.Linq.Expressions.Expression<Func<Booking, Money?>> navigationExpression,
+        EntityTypeBuilder<BookingEntity> builder,
+        System.Linq.Expressions.Expression<Func<BookingEntity, Money?>> navigationExpression,
         string columnPrefix)
     {
         // Money values are stored as amount plus currency columns to preserve the domain value object.

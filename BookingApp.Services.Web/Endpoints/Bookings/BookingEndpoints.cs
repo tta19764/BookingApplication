@@ -1,5 +1,7 @@
 using BookingApp.Services.Web.Contracts;
+using BookingApp.Services.Web.Dtos;
 using BookingApp.Services.Web.Extensions;
+using BookingApp.Services.Web.Mappings;
 using BookingApp.Bll.Bookings.AddBooking;
 using BookingApp.Bll.Bookings.GetBookings;
 using BookingApp.Bll.Abstractions.Messaging;
@@ -23,15 +25,15 @@ public static class BookingEndpoints
         group.MapGet(string.Empty, GetBookings)
             .WithName(nameof(GetBookings))
             .WithSummary("Get bookings by page")
-            .Produces<ApiResponse<IReadOnlyCollection<BookingResponse>>>()
-            .Produces<ApiResponse<IReadOnlyCollection<BookingResponse>>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<IReadOnlyCollection<BookingDto>>>()
+            .Produces<ApiResponse<IReadOnlyCollection<BookingDto>>>(StatusCodes.Status400BadRequest);
 
         group.MapPost(string.Empty, CreateBooking)
             .WithName(nameof(CreateBooking))
             .WithSummary("Create a booking for the seeded user")
-            .Produces<ApiResponse<BookingConfirmationResponse>>(StatusCodes.Status201Created)
-            .Produces<ApiResponse<BookingConfirmationResponse>>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse<BookingConfirmationResponse>>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse<BookingConfirmationDto>>(StatusCodes.Status201Created)
+            .Produces<ApiResponse<BookingConfirmationDto>>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<BookingConfirmationDto>>(StatusCodes.Status404NotFound);
 
         return builder;
     }
@@ -46,8 +48,10 @@ public static class BookingEndpoints
             cancellationToken);
 
         return result.IsSuccess
-            ? Results.Ok(result.MapToApiResponse())
-            : Results.BadRequest(result.MapToApiResponse());
+            ? Results.Ok(result.MapToApiResponse(models =>
+                (IReadOnlyCollection<BookingDto>)models.Select(DtoMapper.ToDto).ToList()))
+            : Results.BadRequest(result.MapToApiResponse(models =>
+                (IReadOnlyCollection<BookingDto>)models.Select(DtoMapper.ToDto).ToList()));
     }
 
     public static async Task<IResult> CreateBooking(
@@ -67,11 +71,11 @@ public static class BookingEndpoints
 
         if (result.IsSuccess)
         {
-            return Results.Created($"/api/v{BookingAppApiVersions.V1RouteValue}/bookings/{result.Value.BookingId}", result.MapToApiResponse());
+            return Results.Created($"/api/v{BookingAppApiVersions.V1RouteValue}/bookings/{result.Value.BookingId}", result.MapToApiResponse(DtoMapper.ToDto));
         }
 
         return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
-            ? Results.NotFound(result.MapToApiResponse())
-            : Results.BadRequest(result.MapToApiResponse());
+            ? Results.NotFound(result.MapToApiResponse(DtoMapper.ToDto))
+            : Results.BadRequest(result.MapToApiResponse(DtoMapper.ToDto));
     }
 }

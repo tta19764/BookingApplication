@@ -26,6 +26,8 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
         builder.HasIndex(role => role.Name)
             .IsUnique();
 
+        builder.Ignore(role => role.Users);
+
         builder.HasMany(role => role.Permissions)
             .WithMany()
             .UsingEntity<RolePermission>();

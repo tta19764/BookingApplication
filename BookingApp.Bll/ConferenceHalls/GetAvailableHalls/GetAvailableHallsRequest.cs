@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Abstractions.Messaging;
 using BookingApp.Bll.ConferenceHalls.GetHall;
 
@@ -10,4 +11,4 @@ public record GetAvailableHallsRequest(
     DateOnly Date,
     string StartTime,
     string EndTime,
-    int Capacity) : IManagerRequest<Result<IEnumerable<HallResponse>>>;
+    int Capacity) : IManagerRequest<Result<IEnumerable<HallModel>>>;

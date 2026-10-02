@@ -1,67 +1,63 @@
-﻿using BookingApp.Bll.Common.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using BookingApp.Bll.Common.Abstractions;
 
 namespace BookingApp.Dal.SqlRepositories.Repositories;
 
-/// <summary>
-/// Base EF Core repository for aggregate roots with a Guid identifier.
-/// </summary>
-public abstract class Repository<T>(ApplicationDbContext dbContext)
-    where T : Entity
+public abstract class Repository<TEntity, TModel>(
+    ApplicationDbContext dbContext,
+    EntityChangeTracker changeTracker)
+    where TEntity : class
+    where TModel : Entity
 {
     protected readonly DbContext DbContext = dbContext;
-    protected readonly DbSet<T> DbSet = dbContext.Set<T>();
+    protected readonly DbSet<TEntity> DbSet = dbContext.Set<TEntity>();
 
-    /// <summary>
-    /// Finds an entity by identifier.
-    /// </summary>
-    public async Task<T?> GetByIdAsync(
-        Guid id,
-        CancellationToken cancellationToken = default)
+    public async Task<TModel?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await DbSet
-            .FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
+        var entity = await DbSet.FindAsync([id], cancellationToken);
+        return entity is null ? default : Track(entity);
     }
 
-    /// <summary>
-    /// Returns a deterministic page of entities ordered by identifier.
-    /// </summary>
-    public async Task<IReadOnlyCollection<T>> GetListPaginatedAsync(
-        int page,
-        int pageSize,
-        CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<TModel>> GetListPaginatedAsync(
+        int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        if (page <= 0)
+        if (page <= 0) throw new ArgumentOutOfRangeException(nameof(page));
+        if (pageSize <= 0) throw new ArgumentOutOfRangeException(nameof(pageSize));
+
+        var entities = await Ordered(DbSet.AsNoTracking())
+            .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        return entities.Select(ToModel).ToList();
+    }
+
+    public virtual void Add(TModel model)
+    {
+        changeTracker.TrackEvents(model);
+        DbSet.Add(ToEntity(model));
+    }
+
+    public virtual void Remove(TModel model)
+    {
+        var id = GetModelId(model);
+        var entity = DbSet.Local.FirstOrDefault(item => GetEntityId(item) == id)
+            ?? throw new InvalidOperationException("The entity must be loaded before it can be removed.");
+        DbSet.Remove(entity);
+    }
+
+    protected TModel Track(TEntity entity)
+    {
+        var model = ToModel(entity);
+        changeTracker.Track(() =>
         {
-            throw new ArgumentOutOfRangeException(nameof(page), "Page must be greater than zero.");
-        }
-
-        if (pageSize <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(pageSize), "Page size must be greater than zero.");
-        }
-
-        return await DbSet
-            .AsNoTracking()
-            .OrderBy(entity => entity.Id)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
+            changeTracker.TrackEvents(model);
+            UpdateEntity(entity, model);
+        });
+        return model;
     }
 
-    /// <summary>
-    /// Adds an entity to the current persistence context.
-    /// </summary>
-    public virtual void Add(T entity)
-    {
-        DbContext.Add(entity);
-    }
-    
-    /// <summary>
-    /// Removes an entity from the current persistence context.
-    /// </summary>
-    public virtual void Remove(T entity)
-    {
-        DbContext.Remove(entity);
-    }
+    protected abstract IQueryable<TEntity> Ordered(IQueryable<TEntity> query);
+    protected abstract Guid GetEntityId(TEntity entity);
+    protected abstract Guid GetModelId(TModel model);
+    protected abstract TEntity ToEntity(TModel model);
+    protected abstract TModel ToModel(TEntity entity);
+    protected abstract void UpdateEntity(TEntity entity, TModel model);
 }

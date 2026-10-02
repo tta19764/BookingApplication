@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -42,7 +43,7 @@ public sealed class RequiredApiMethodsTests(IntegrationTestWebAppFactory factory
         // Assert
         hallId.Should().NotBeEmpty();
 
-        HallResponse hall = await GetHallAsync(hallId);
+        HallModel hall = await GetHallAsync(hallId);
         hall.Id.Should().Be(hallId);
         hall.Capacity.Should().Be(48);
         hall.HourlyRate.Should().Be(2100m);
@@ -69,7 +70,7 @@ public sealed class RequiredApiMethodsTests(IntegrationTestWebAppFactory factory
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        HallResponse hall = await GetHallAsync(hallId);
+        HallModel hall = await GetHallAsync(hallId);
         hall.Name.Should().Be(request.Name);
         hall.Capacity.Should().Be(request.Capacity);
         hall.HourlyRate.Should().Be(request.HourlyRate);
@@ -129,7 +130,7 @@ public sealed class RequiredApiMethodsTests(IntegrationTestWebAppFactory factory
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        ApiResponse<List<HallResponse>> body = await ReadAsync<List<HallResponse>>(response);
+        ApiResponse<List<HallModel>> body = await ReadAsync<List<HallModel>>(response);
         body.Data.Should().NotBeNull();
         body.Data.Should().ContainSingle(hall => hall.Id == availableHallId);
         body.Data.Should().NotContain(hall => hall.Id == bookedHallId);
@@ -160,8 +161,8 @@ public sealed class RequiredApiMethodsTests(IntegrationTestWebAppFactory factory
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        ApiResponse<BookingConfirmationResponse> body =
-            await ReadAsync<BookingConfirmationResponse>(response);
+        ApiResponse<BookingConfirmationModel> body =
+            await ReadAsync<BookingConfirmationModel>(response);
 
         body.Data.Should().NotBeNull();
         body.Data.BookingId.Should().NotBeEmpty();
@@ -194,14 +195,14 @@ public sealed class RequiredApiMethodsTests(IntegrationTestWebAppFactory factory
         return body.Data;
     }
 
-    private async Task<HallResponse> GetHallAsync(Guid hallId)
+    private async Task<HallModel> GetHallAsync(Guid hallId)
     {
         using HttpResponseMessage response = await _client.GetAsync(
             $"{HallsUrl}/{hallId}",
             TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        ApiResponse<HallResponse> body = await ReadAsync<HallResponse>(response);
+        ApiResponse<HallModel> body = await ReadAsync<HallModel>(response);
         body.Data.Should().NotBeNull();
         return body.Data;
     }

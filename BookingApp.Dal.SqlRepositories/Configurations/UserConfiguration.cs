@@ -1,3 +1,4 @@
+using BookingApp.Dal.SqlRepositories.Entities;
 using BookingApp.Bll.Common.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -7,9 +8,9 @@ namespace BookingApp.Dal.SqlRepositories.Configurations;
 /// <summary>
 /// EF Core mapping for application users and their role assignments.
 /// </summary>
-public class UserConfiguration : IEntityTypeConfiguration<User>
+public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<UserEntity> builder)
     {
         builder.ToTable("users");
 
@@ -47,7 +48,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         // Roles are exposed as a read-only collection backed by a private field on the aggregate.
         builder.HasMany(user => user.Roles)
-            .WithMany(role => role.Users)
+            .WithMany()
             .UsingEntity<Dictionary<string, object>>(
                 "user_roles",
                 rightBuilder => rightBuilder
@@ -56,7 +57,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                     .HasForeignKey("role_id")
                     .OnDelete(DeleteBehavior.Cascade),
                 leftBuilder => leftBuilder
-                    .HasOne<User>()
+                    .HasOne<UserEntity>()
                     .WithMany()
                     .HasForeignKey("user_id")
                     .OnDelete(DeleteBehavior.Cascade),
@@ -70,9 +71,5 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             // Force EF to use the backing field instead of the defensive-copy Roles property.
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.HasMany(user => user.Bookings)
-            .WithOne(booking => booking.User)
-            .HasForeignKey(booking => booking.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -50,5 +50,6 @@ dotnet run --project BookingApp.Services.Web
 
 ## Architecture
 
-Dependencies point inward: API and Infrastructure depend on Application and Domain, while Domain contains no transport or persistence concerns. Continue with the [Domain](domain.md), [Application](application.md), [Infrastructure](infrastructure.md), [API](api.md), and [Testing](testing.md) documents.
+The layer boundaries use separate representations: `Bll.Common/Models` contains business and read models, `Dal.SqlRepositories/Entities` contains EF Core persistence entities, and `Services.Web/Dtos` contains HTTP contracts. Explicit repository and DTO mappers prevent database and transport concerns from leaking into the business layer.
 
+Dependencies point inward: API and Infrastructure depend on Application and Domain, while Domain contains no transport or persistence concerns. Continue with the [Domain](domain.md), [Application](application.md), [Infrastructure](infrastructure.md), [API](api.md), and [Testing](testing.md) documents.

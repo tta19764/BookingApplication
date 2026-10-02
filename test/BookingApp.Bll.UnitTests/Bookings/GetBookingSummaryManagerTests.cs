@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Reports.GetBookingSummary;
 using BookingApp.Bll.UnitTests.Infrastructure;
 using BookingApp.Bll.Common.Abstractions;
@@ -38,7 +39,7 @@ public class GetBookingSummaryManagerTests
                 [thirdBooking]));
 
         // Act
-        Result<BookingSummaryResponse> result = await _handler.Handle(new GetBookingSummaryRequest(), cancellationToken);
+        Result<BookingSummaryModel> result = await _handler.Handle(new GetBookingSummaryRequest(), cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

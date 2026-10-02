@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Abstractions.Messaging;
 using BookingApp.Bll.Common.ConferenceHalls;
 
@@ -12,4 +13,4 @@ public record AddBookingRequest(
     DateOnly Date,
     string StartTime,
     string EndTime,
-    IReadOnlyCollection<Amenity> Amenities) : IManagerRequest<Result<BookingConfirmationResponse>>;
+    IReadOnlyCollection<Amenity> Amenities) : IManagerRequest<Result<BookingConfirmationModel>>;

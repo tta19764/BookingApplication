@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.ConferenceHalls.GetAvailableHalls;
 using BookingApp.Bll.ConferenceHalls.GetHall;
 using BookingApp.Bll.IntegrationTests.Infrastructure;
@@ -20,7 +21,7 @@ public class GetAvailableHallsTests(IntegrationTestWebAppFactory factory) : Base
             30);
 
         // Act
-        Result<IEnumerable<HallResponse>> result = await Sender.Send(query, cancellationToken);
+        Result<IEnumerable<HallModel>> result = await Sender.Send(query, cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

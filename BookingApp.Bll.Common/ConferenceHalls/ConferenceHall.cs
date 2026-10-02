@@ -4,9 +4,9 @@ using BookingApp.Bll.Common.Shared;
 
 namespace BookingApp.Bll.Common.ConferenceHalls;
 
-public sealed class ConferenceHall : Entity
+public class ConferenceHall : Entity
 {
-    private ConferenceHall()
+    protected ConferenceHall()
     {
     }
 
@@ -21,10 +21,10 @@ public sealed class ConferenceHall : Entity
     public Name Name { get; private set; } = null!;
     public Capacity Seats { get; private set; } = null!;
     public Money Price { get; private set; } = null!;
-    public DateTime? LastBookedOnUtc { get; internal set; }
+    public DateTime? LastBookedOnUtc { get; protected internal set; }
 
     public List<Amenity> Amenities { get; private set; } = [];
-    
+
     public ICollection<Booking> Bookings { get; private set; } = new List<Booking>();
 
     public void Update(Name name, Capacity seats, Money price, IEnumerable<Amenity> amenities)
@@ -38,5 +38,19 @@ public sealed class ConferenceHall : Entity
     public bool SupportsAmenity(Amenity amenity)
     {
         return Amenities.Contains(amenity);
+    }
+
+    public static ConferenceHall Restore(
+        Guid id,
+        Name name,
+        Capacity seats,
+        Money price,
+        IEnumerable<Amenity> amenities,
+        DateTime? lastBookedOnUtc)
+    {
+        return new ConferenceHall(id, name, seats, price, amenities.ToList())
+        {
+            LastBookedOnUtc = lastBookedOnUtc
+        };
     }
 }

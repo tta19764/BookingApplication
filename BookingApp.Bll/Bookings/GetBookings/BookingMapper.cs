@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Common.Bookings;
 
 namespace BookingApp.Bll.Bookings.GetBookings;
@@ -10,9 +11,9 @@ internal static class BookingMapper
     /// <summary>
     /// Converts a persisted booking into an API-safe response model.
     /// </summary>
-    internal static BookingResponse ToResponse(Booking booking)
+    internal static BookingModel ToModel(Booking booking)
     {
-        return new BookingResponse(
+        return new BookingModel(
             booking.Id,
             booking.ConferenceHallId,
             booking.UserId,
