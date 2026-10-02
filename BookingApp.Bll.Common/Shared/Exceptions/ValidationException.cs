@@ -1,4 +1,4 @@
-namespace BookingApp.Bll.Exceptions;
+namespace BookingApp.Bll.Common.Shared.Exceptions;
 
 /// <summary>
 /// Exception thrown when application request validation fails.

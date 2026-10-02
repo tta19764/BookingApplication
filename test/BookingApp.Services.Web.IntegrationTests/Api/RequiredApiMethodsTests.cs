@@ -5,9 +5,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using BookingApp.Services.Web.Contracts;
 using BookingApp.Services.Web.Endpoints.ConferenceHalls;
-using BookingApp.Bll.Bookings.AddBooking;
-using BookingApp.Bll.ConferenceHalls.AddHall;
-using BookingApp.Bll.ConferenceHalls.GetHall;
 using BookingApp.Services.Web.IntegrationTests.Infrastructure;
 using BookingApp.Bll.Common.ConferenceHalls;
 using FluentAssertions;
@@ -175,7 +172,7 @@ public sealed class RequiredApiMethodsTests(IntegrationTestWebAppFactory factory
 
     private async Task<Guid> CreateHallAsync(int capacity = 35, decimal hourlyRate = 1900m)
     {
-        var command = new AddHallRequest(
+        var command = new CreateConferenceHallRequest(
             $"API Integration Hall {Guid.NewGuid():N}",
             capacity,
             hourlyRate,

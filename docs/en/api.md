@@ -21,7 +21,7 @@ GET    /api/v1/reports/bookings-summary
 ## Cross-cutting behavior
 
 - URL-segment API versioning and versioned Swagger documents.
-- FluentValidation failures returned as HTTP 400 problem details.
+- Invalid business input is returned as controlled HTTP problem details.
 - Result-to-HTTP mapping for successful, not-found, and business-rule responses.
 - Central exception handling prevents internal exception details from leaking to clients.
 - Request-context logging through Serilog and Seq.

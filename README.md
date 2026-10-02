@@ -2,7 +2,7 @@
 
 Booking Application is a versioned REST API for managing conference halls and reservations. Clients can maintain a hall catalog, search availability, book halls with optional services, receive time-based price calculations, and read revenue analytics.
 
-The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and Dal.SqlRepositories projects. It is built with .NET 10, ASP.NET Core Minimal APIs, EF Core, PostgreSQL, FluentValidation, Quartz, Swagger, Serilog, xUnit, and Testcontainers.
+The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and Dal.SqlRepositories projects. It is built with .NET 10, ASP.NET Core Minimal APIs, EF Core, PostgreSQL, Quartz, Swagger, Serilog, xUnit, and Testcontainers.
 
 Українська: Booking Application — це REST API для керування конференц-залами та бронюваннями. Система підтримує каталог залів, пошук доступності, додаткові послуги, розрахунок вартості за часовими тарифами й аналітику доходу. Рішення побудоване за принципами layered architecture.
 
@@ -25,8 +25,7 @@ The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and
 | Runtime and language | **.NET 10** and **C#** for the application and test projects. |
 | Web API | **ASP.NET Core Minimal APIs** for HTTP endpoints and **ASP.NET API Versioning** for `/api/v1`. |
 | API documentation | **Swagger/OpenAPI** through Swashbuckle for interactive endpoint documentation. |
-| Application flow | **BLL managers for request execution, validation and logging. |
-| Validation | **FluentValidation** for centralized request and command validation. |
+| Application flow | Feature-oriented **BLL managers** that expose service-style business operations. |
 | Domain design | Layered architecture, anemic Common models, DAL entities, AutoMapper profiles, repository abstractions, and Result-based errors. |
 | Persistence | **Entity Framework Core**, **Npgsql**, **PostgreSQL**, and EF Core migrations. |
 | Background work | **Quartz.NET** for automatically completing expired bookings. |

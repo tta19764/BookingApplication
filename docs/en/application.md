@@ -6,10 +6,9 @@
 
 - Public feature contracts (`IBookingManager`, `IConferenceHallManager`, and `IReportManager`) are declared in `BookingApp.Bll.Common`.
 - Their implementations live in `BookingApp.Bll`; the Services layer depends only on the Common contracts.
-- Internal operation requests and managers implement individual use cases and stay hidden from the Services layer.
+- Each feature has one service-style manager implementation whose methods implement the feature's use cases directly.
 - BLL managers depend on repository interfaces, `IUnitOfWork`, `IDateTimeProvider`, and pricing abstractions.
-- FluentValidation validators reject malformed IDs, paging, capacity, currency, amenity, and time inputs before managers execute.
-- Manager dispatch provides centralized validation and structured request logging.
+- There is no request/handler dispatcher; Services calls manager contracts directly.
 - Response records and mappers expose stable application read models.
 - AutoMapperConfig centralizes mapping between Common models, DAL entities, and Services DTOs.
 

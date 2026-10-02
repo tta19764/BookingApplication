@@ -1,6 +1,5 @@
 using BookingApp.Bll.Common.Models;
 using BookingApp.Services.Web.Extensions;
-using BookingApp.Bll.Bookings.AddBooking;
 using BookingApp.Bll.IntegrationTests.Infrastructure;
 using BookingApp.Bll.Common.Abstractions;
 using BookingApp.Bll.Common.Bookings;
@@ -24,16 +23,9 @@ public class AddBookingTests(IntegrationTestWebAppFactory factory) : BaseIntegra
 
         DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
 
-        var command = new AddBookingRequest(
-            hall.Id,
-            SeedDataExtensions.SeededUserId,
-            date,
-            "10:40",
-            "12:10",
-            [Amenity.Projector]);
-
         // Act
-        Result<BookingConfirmationModel> result = await Sender.Send(command, cancellationToken);
+        Result<BookingConfirmationModel> result = await BookingManager.AddBookingAsync(hall.Id,
+            SeedDataExtensions.SeededUserId, date, "10:40", "12:10", [Amenity.Projector], cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
