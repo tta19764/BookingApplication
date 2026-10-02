@@ -1,20 +1,21 @@
-using BookingApp.Bll.Common.Abstractions;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Users;
 
 namespace BookingApp.Bll.Common.Bookings;
 
-public class Booking : Entity
+public class Booking
 {
     public Booking()
     {
     }
 
-    public Booking(Guid id) : base(id)
+    public Booking(Guid id)
     {
+        Id = id;
     }
 
+    public Guid Id { get; set; }
     public Guid ConferenceHallId { get; set; }
     public Guid UserId { get; set; }
     public DateRange Duration { get; set; } = null!;
