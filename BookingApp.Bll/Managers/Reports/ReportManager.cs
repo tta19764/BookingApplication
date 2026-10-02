@@ -16,7 +16,7 @@ public sealed class ReportManager(IBookingRepository bookingRepository) : IRepor
         var totalBookings = 0;
         var totalRevenue = 0m;
         var summaries = new Dictionary<Guid, HallBookingSummaryModel>();
-        await foreach (var bookings in bookingRepository.List(PageSize, cancellationToken))
+        await foreach (var bookings in bookingRepository.ListAsync(PageSize, cancellationToken))
         {
             totalBookings += bookings.Count;
             totalRevenue += bookings.Sum(x => x.TotalPrice.Amount);

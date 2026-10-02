@@ -5,7 +5,6 @@ namespace BookingApp.Dal.SqlRepositories.Repositories;
 
 public abstract class Repository<TEntity, TModel>(
     ApplicationDbContext dbContext,
-    EntityChangeTracker changeTracker,
     IMapper mapper)
     where TEntity : class
 {
@@ -15,7 +14,7 @@ public abstract class Repository<TEntity, TModel>(
     public async Task<TModel?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var entity = await DbSet.FindAsync([id], cancellationToken);
-        return entity is null ? default : Track(entity);
+        return entity is null ? default : mapper.Map<TModel>(entity);
     }
 
     public async Task<IReadOnlyCollection<TModel>> GetListPaginatedAsync(
@@ -34,6 +33,15 @@ public abstract class Repository<TEntity, TModel>(
         DbSet.Add(mapper.Map<TEntity>(model));
     }
 
+    public virtual void Update(TModel model)
+    {
+        var id = GetModelId(model);
+        var entity = DbSet.Local.FirstOrDefault(item => GetEntityId(item) == id)
+            ?? throw new InvalidOperationException("The entity must be loaded before it can be updated.");
+
+        mapper.Map(model, entity);
+    }
+
     public virtual void Remove(TModel model)
     {
         var id = GetModelId(model);
@@ -42,18 +50,11 @@ public abstract class Repository<TEntity, TModel>(
         DbSet.Remove(entity);
     }
 
-    protected TModel Track(TEntity entity)
-    {
-        var model = mapper.Map<TModel>(entity);
-        changeTracker.Track(() =>
-        {
-            mapper.Map(model, entity);
-        });
-        return model;
-    }
-
     protected abstract IQueryable<TEntity> Ordered(IQueryable<TEntity> query);
+
     protected abstract Guid GetEntityId(TEntity entity);
+
     protected abstract Guid GetModelId(TModel model);
+
     protected TModel ToModel(TEntity entity) => mapper.Map<TModel>(entity);
 }

@@ -1,14 +1,67 @@
+using System.Runtime.CompilerServices;
+using AutoMapper;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Dal.SqlRepositories.Entities;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
+
 namespace BookingApp.Dal.SqlRepositories.Repositories;
 
-public sealed class BookingRepository(ApplicationDbContext db, EntityChangeTracker tracker, IMapper mapper) : Repository<BookingEntity, Booking>(db, tracker, mapper), IBookingRepository
+public sealed class BookingRepository(ApplicationDbContext dbContext, IMapper mapper)
+    : Repository<BookingEntity, Booking>(dbContext, mapper), IBookingRepository
 {
-    public Task<bool> HasOverlap(Guid id, DateRange r, CancellationToken ct = default) => DbSet.AnyAsync(x => x.ConferenceHallId == id && x.Duration.Start < r.End && x.Duration.End > r.Start, ct);
-    public async IAsyncEnumerable<IReadOnlyCollection<Booking>> List(int size, [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct = default) { for (var p = 0; ; p++) { var x = await DbSet.AsNoTracking().OrderBy(x => x.Id).Skip(p * size).Take(size).ToListAsync(ct); if (x.Count == 0) yield break; yield return x.Select(ToModel).ToList(); } }
-    public async Task<IReadOnlyCollection<Booking>> GetReservedBookingsDueForCompletion(DateTime now, int size, CancellationToken ct = default) { var x = await DbSet.Where(x => x.Status == BookingStatus.Reserved && x.Duration.End <= now).OrderBy(x => x.Duration.End).Take(size).ToListAsync(ct); return x.Select(Track).ToList(); }
-    protected override IQueryable<BookingEntity> Ordered(IQueryable<BookingEntity> q) => q.OrderBy(x => x.Id); protected override Guid GetEntityId(BookingEntity x) => x.Id; protected override Guid GetModelId(Booking x) => x.Id;
+    public Task<bool> HasOverlapAsync(
+        Guid conferenceHallId,
+        DateRange duration,
+        CancellationToken cancellationToken = default)
+    {
+        return DbSet.AnyAsync(
+            booking => booking.ConferenceHallId == conferenceHallId &&
+                       booking.Duration.Start < duration.End &&
+                       booking.Duration.End > duration.Start,
+            cancellationToken);
+    }
+
+    public async IAsyncEnumerable<IReadOnlyCollection<Booking>> ListAsync(
+        int pageSize,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        for (var page = 0; ; page++)
+        {
+            var entities = await DbSet
+                .AsNoTracking()
+                .OrderBy(booking => booking.Id)
+                .Skip(page * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            if (entities.Count == 0)
+            {
+                yield break;
+            }
+
+            yield return entities.Select(ToModel).ToList();
+        }
+    }
+
+    public async Task<IReadOnlyCollection<Booking>> GetReservedBookingsDueForCompletionAsync(
+        DateTime utcNow,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var entities = await DbSet
+            .Where(booking => booking.Status == BookingStatus.Reserved && booking.Duration.End <= utcNow)
+            .OrderBy(booking => booking.Duration.End)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return entities.Select(ToModel).ToList();
+    }
+
+    protected override IQueryable<BookingEntity> Ordered(IQueryable<BookingEntity> query) =>
+        query.OrderBy(booking => booking.Id);
+
+    protected override Guid GetEntityId(BookingEntity entity) => entity.Id;
+
+    protected override Guid GetModelId(Booking model) => model.Id;
 }

@@ -39,7 +39,7 @@ public sealed class BookingManager(IConferenceHallRepository hallRepository, IBo
         var utcNow = timeProvider.GetUtcNow().UtcDateTime;
         if (duration.Start <= utcNow) return Result.Failure<BookingConfirmationModel>(BookingErrors.StartsInPast);
 
-        if (await bookingRepository.HasOverlap(hall.Id, duration, cancellationToken))
+        if (await bookingRepository.HasOverlapAsync(hall.Id, duration, cancellationToken))
             return Result.Failure<BookingConfirmationModel>(BookingErrors.Overlap);
 
         try
@@ -57,6 +57,7 @@ public sealed class BookingManager(IConferenceHallRepository hallRepository, IBo
                 CreatedOnUtc = utcNow
             };
             hall.LastBookedOnUtc = utcNow;
+            hallRepository.Update(hall);
             bookingRepository.Add(booking);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -61,6 +61,7 @@ public sealed class ConferenceHallManager(
         hall.Seats = new Capacity(model.Capacity);
         hall.Price = new Money(model.HourlyRate, Currency.Uah);
         hall.Amenities = model.Amenities.Distinct().ToList();
+        hallRepository.Update(hall);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
@@ -80,7 +81,10 @@ public sealed class ConferenceHallManager(
     {
         await findAvailableHallsValidator.ValidateForApplicationAsync(model, cancellationToken);
         var duration = BookingPeriodFactory.Create(model.Date, model.StartTime, model.EndTime);
-        var halls = await hallRepository.GetAvailableConferenceHalls(duration, new Capacity(model.Capacity), cancellationToken);
+        var halls = await hallRepository.GetAvailableConferenceHallsAsync(
+            duration,
+            new Capacity(model.Capacity),
+            cancellationToken);
         return Result.Success(mapper.Map<IEnumerable<HallModel>>(halls));
     }
 }
