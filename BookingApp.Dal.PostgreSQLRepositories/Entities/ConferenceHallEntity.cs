@@ -4,9 +4,8 @@ using BookingApp.Bll.Common.Shared;
 
 namespace BookingApp.Dal.SqlRepositories.Entities;
 
-public sealed class ConferenceHallEntity
+public sealed class ConferenceHallEntity : Entity
 {
-    public Guid Id { get; set; }
     public Name Name { get; set; } = null!;
     public Capacity Seats { get; set; } = null!;
     public Money Price { get; set; } = null!;

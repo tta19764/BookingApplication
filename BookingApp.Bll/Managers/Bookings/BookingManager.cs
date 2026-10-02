@@ -1,18 +1,21 @@
 using System.Globalization;
 using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Bookings;
+using BookingApp.Bll.Common.Bookings.Events;
 using BookingApp.Bll.Common.Bookings.Errors;
 using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.ConferenceHalls.Errors;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared;
+using BookingApp.Bll.Common.Shared.Events;
 using BookingApp.Bll.Managers.Validation;
 
 namespace BookingApp.Bll.Managers.Bookings;
 
 public sealed class BookingManager(IConferenceHallRepository hallRepository, IBookingRepository bookingRepository,
-    IPricingManager pricingManager, TimeProvider timeProvider, IUnitOfWork unitOfWork) : IBookingManager
+    IPricingManager pricingManager, TimeProvider timeProvider, IUnitOfWork unitOfWork,
+    IDomainEventDispatcher domainEventDispatcher) : IBookingManager
 {
     public async Task<Result<IReadOnlyCollection<BookingModel>>> GetBookingsAsync(int page, int pageSize, CancellationToken cancellationToken)
     {
@@ -55,6 +58,17 @@ public sealed class BookingManager(IConferenceHallRepository hallRepository, IBo
             hall.LastBookedOnUtc = utcNow;
             bookingRepository.Add(booking);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await domainEventDispatcher.DispatchAsync(
+                new BookingCreatedDomainEvent(
+                    booking.Id,
+                    booking.ConferenceHallId,
+                    booking.UserId,
+                    booking.TotalPrice.Amount,
+                    booking.TotalPrice.Currency.Code,
+                    utcNow),
+                cancellationToken);
+
             return Result.Success(new BookingConfirmationModel(booking.Id, booking.ConferenceHallId,
                 booking.Duration.Start, booking.Duration.End, booking.PriceForPeriod.Amount,
                 booking.AmenitiesUpCharge.Amount, booking.TotalPrice.Amount, booking.TotalPrice.Currency.Code));

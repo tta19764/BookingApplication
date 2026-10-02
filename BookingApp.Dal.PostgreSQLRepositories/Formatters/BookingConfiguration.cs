@@ -3,7 +3,7 @@ using BookingApp.Dal.SqlRepositories.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BookingApp.Dal.SqlRepositories.Configurations;
+namespace BookingApp.Dal.SqlRepositories.Formatters;
 
 /// <summary>
 /// EF Core mapping for booking persistence.

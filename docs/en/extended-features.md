@@ -30,7 +30,7 @@ Manager methods and model constructors enforce business inputs. Expected applica
 
 ## Observability
 
-Serilog adds structured request and application logs. Docker Compose includes Seq so developers can search and inspect logs without additional setup. Domain-event managers log booking lifecycle events.
+Serilog adds structured request and application logs. Docker Compose includes Seq so developers can search and inspect logs without additional setup. Services domain-event handlers log booking lifecycle events.
 
 ## Seed data and repeatable startup
 

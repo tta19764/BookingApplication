@@ -2,7 +2,7 @@ using BookingApp.Bll.Common.Users.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BookingApp.Dal.SqlRepositories.Configurations;
+namespace BookingApp.Dal.SqlRepositories.Formatters;
 
 /// <summary>
 /// EF Core mapping for roles and their permission assignments.
