@@ -19,6 +19,11 @@ public interface IConferenceHallRepository
     void Add(ConferenceHall hall);
 
     /// <summary>
+    /// Applies changes from a previously loaded hall to its tracked persistence entity.
+    /// </summary>
+    void Update(ConferenceHall hall);
+
+    /// <summary>
     /// Returns one page of halls ordered by identifier.
     /// </summary>
     Task<IReadOnlyCollection<ConferenceHall>> GetListPaginatedAsync(
@@ -34,5 +39,8 @@ public interface IConferenceHallRepository
     /// <summary>
     /// Returns halls that can seat the requested capacity and have no overlapping bookings.
     /// </summary>
-    Task<IEnumerable<ConferenceHall>> GetAvailableConferenceHalls(DateRange dateRange, Capacity seats, CancellationToken cancellationToken = default);
+    Task<IEnumerable<ConferenceHall>> GetAvailableConferenceHallsAsync(
+        DateRange dateRange,
+        Capacity seats,
+        CancellationToken cancellationToken = default);
 }

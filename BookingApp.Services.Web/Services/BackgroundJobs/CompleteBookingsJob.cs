@@ -27,7 +27,7 @@ public sealed class CompleteBookingsJob(
         while (!context.CancellationToken.IsCancellationRequested)
         {
             var utcNow = timeProvider.GetUtcNow().UtcDateTime;
-            var bookings = await bookingRepository.GetReservedBookingsDueForCompletion(
+            var bookings = await bookingRepository.GetReservedBookingsDueForCompletionAsync(
                 utcNow,
                 pageSize,
                 context.CancellationToken);
@@ -46,11 +46,11 @@ public sealed class CompleteBookingsJob(
 
                 booking.Status = BookingStatus.Completed;
                 booking.CompletedOnUtc = utcNow;
-
-                await unitOfWork.SaveChangesAsync(context.CancellationToken);
-
+                bookingRepository.Update(booking);
                 completedCount++;
             }
+
+            await unitOfWork.SaveChangesAsync(context.CancellationToken);
 
             // A short batch means there is no remaining page to fetch for this run.
             if (bookings.Count < pageSize)

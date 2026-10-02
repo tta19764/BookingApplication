@@ -14,7 +14,7 @@ public class ReportManagerTests
     {
         // Arrange
         var repository = Substitute.For<IBookingRepository>();
-        repository.List(Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(EmptyPages());
+        repository.ListAsync(Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(EmptyPages());
         var manager = new ReportManager(repository);
 
         // Act

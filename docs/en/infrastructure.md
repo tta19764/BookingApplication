@@ -11,6 +11,7 @@
 - Migrations version the relational schema.
 - Availability and overlap checks are translated into database queries.
 - Report reads are paginated and deterministic.
+- Updates are explicit repository operations. Repositories map changed Common models back to already tracked DAL entities before the Unit of Work saves; there is no hidden save-time change synchronizer.
 
 ## Operational services
 

@@ -58,7 +58,7 @@ public class BookingManagerTests
         var cancellationToken = TestContext.Current.CancellationToken;
         clock.GetUtcNow().Returns(new DateTimeOffset(now));
         halls.GetByIdAsync(hall.Id, cancellationToken).Returns(hall);
-        bookings.HasOverlap(hall.Id, Arg.Any<DateRange>(), cancellationToken).Returns(false);
+        bookings.HasOverlapAsync(hall.Id, Arg.Any<DateRange>(), cancellationToken).Returns(false);
 
         // Act
         var model = new CreateBookingModel(hall.Id, Guid.NewGuid(), DateOnly.FromDateTime(now.AddDays(1)),
@@ -68,6 +68,7 @@ public class BookingManagerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         bookings.Received(1).Add(Arg.Is<Booking>(booking => booking.Id == result.Value.BookingId));
+        halls.Received(1).Update(hall);
         await unitOfWork.Received(1).SaveChangesAsync(cancellationToken);
         await events.Received(1).DispatchAsync(
             Arg.Is<BookingCreatedDomainEvent>(domainEvent => domainEvent.BookingId == result.Value.BookingId),
