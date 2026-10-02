@@ -58,7 +58,7 @@ public class GetBookingSummaryManagerTests
             TimeOnly.Parse(startTime),
             TimeOnly.Parse(endTime));
 
-        var pricing = new PricingService().CalculatePrice(hall, duration, [Amenity.Projector]);
+        var pricing = new PricingManager().CalculatePrice(hall, duration, [Amenity.Projector]);
         return new Booking(Guid.NewGuid())
         {
             ConferenceHallId = hall.Id,

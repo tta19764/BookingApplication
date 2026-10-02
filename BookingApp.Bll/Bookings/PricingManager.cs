@@ -7,7 +7,7 @@ namespace BookingApp.Bll.Bookings;
 /// <summary>
 /// Calculates booking prices from hall hourly rate, time-based modifiers, and selected amenities.
 /// </summary>
-public sealed class PricingService
+public sealed class PricingManager : IPricingManager
 {
     private static readonly int[] Boundaries = [6, 9, 12, 14, 18, 23];
 

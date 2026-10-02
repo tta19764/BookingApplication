@@ -23,7 +23,7 @@ public static class DependencyInjection
 
         RegisterManagers(services, applicationAssembly.DefinedTypes);
 
-        services.AddTransient<PricingService>();
+        services.AddTransient<IPricingManager, PricingManager>();
 
         return services;
     }
