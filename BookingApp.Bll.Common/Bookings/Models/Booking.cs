@@ -1,8 +1,8 @@
-using BookingApp.Bll.Common.ConferenceHalls;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared;
-using BookingApp.Bll.Common.Users;
+using BookingApp.Bll.Common.Users.Models;
 
-namespace BookingApp.Bll.Common.Bookings;
+namespace BookingApp.Bll.Common.Bookings.Models;
 
 public class Booking
 {

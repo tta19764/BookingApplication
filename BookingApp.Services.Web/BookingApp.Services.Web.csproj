@@ -25,8 +25,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\BookingApp.Bll.Common\BookingApp.Bll.Common.csproj" />
       <ProjectReference Include="..\BookingApp.Bll\BookingApp.Bll.csproj" />
-      <ProjectReference Include="..\BookingApp.Dal.SqlRepositories\BookingApp.Dal.SqlRepositories.csproj" />
+      <ProjectReference Include="..\BookingApp.Dal.PostgreSQLRepositories\BookingApp.Dal.PostgreSQLRepositories.csproj" />
     </ItemGroup>
 
     <ItemGroup>

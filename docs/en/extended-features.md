@@ -42,4 +42,4 @@ The solution separates Domain unit, Application unit, Application integration, a
 
 ## Operational foundation
 
-Docker Compose supplies the API, PostgreSQL, and Seq. Configuration is split by environment, timestamps are stored in UTC, and `IDateTimeProvider` makes time-dependent behavior testable.
+Docker Compose supplies the API, PostgreSQL, and Seq. Configuration is split by environment, timestamps are stored in UTC, and .NET `TimeProvider` keeps time-dependent behavior testable.

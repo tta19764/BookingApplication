@@ -1,4 +1,4 @@
-namespace BookingApp.Bll.Common.Models;
+namespace BookingApp.Bll.Common.Bookings.Models;
 
 /// <summary>
 /// Booking confirmation returned after a successful reservation, including the price breakdown.

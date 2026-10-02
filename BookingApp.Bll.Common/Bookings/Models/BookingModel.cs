@@ -1,4 +1,4 @@
-namespace BookingApp.Bll.Common.Models;
+namespace BookingApp.Bll.Common.Bookings.Models;
 
 /// <summary>
 /// Booking read model used by paginated booking queries.

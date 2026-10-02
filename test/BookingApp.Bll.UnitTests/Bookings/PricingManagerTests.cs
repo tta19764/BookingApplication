@@ -1,6 +1,8 @@
-using BookingApp.Bll.Bookings;
+using BookingApp.Bll.Managers.Bookings;
 using BookingApp.Bll.Common.Bookings;
+using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.ConferenceHalls;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared;
 using FluentAssertions;
 using Xunit;

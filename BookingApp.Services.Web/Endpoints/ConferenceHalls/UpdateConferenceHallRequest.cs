@@ -1,4 +1,4 @@
-using BookingApp.Bll.Common.ConferenceHalls;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
 
 namespace BookingApp.Services.Web.Endpoints.ConferenceHalls;
 

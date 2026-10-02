@@ -1,6 +1,4 @@
-using BookingApp.Bll.Common.ConferenceHalls;
-
-namespace BookingApp.Bll.Common.Models;
+namespace BookingApp.Bll.Common.ConferenceHalls.Models;
 
 /// <summary>
 /// Amenity data exposed to API consumers, including its fixed price.

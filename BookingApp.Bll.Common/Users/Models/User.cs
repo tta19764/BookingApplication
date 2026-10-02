@@ -1,6 +1,6 @@
-using BookingApp.Bll.Common.Bookings;
+using BookingApp.Bll.Common.Bookings.Models;
 
-namespace BookingApp.Bll.Common.Users;
+namespace BookingApp.Bll.Common.Users.Models;
 
 public class User
 {

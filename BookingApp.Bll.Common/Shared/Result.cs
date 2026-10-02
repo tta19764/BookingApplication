@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace BookingApp.Bll.Common.Abstractions;
+namespace BookingApp.Bll.Common.Shared;
 
 public class Result
 {

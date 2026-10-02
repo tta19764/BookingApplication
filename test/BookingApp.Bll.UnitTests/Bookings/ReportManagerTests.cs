@@ -1,6 +1,7 @@
 using BookingApp.Bll.Common.Bookings;
-using BookingApp.Bll.Common.Models;
-using BookingApp.Bll.Reports;
+using BookingApp.Bll.Common.Bookings.Models;
+using BookingApp.Bll.Common.Reports.Models;
+using BookingApp.Bll.Managers.Reports;
 using FluentAssertions;
 using NSubstitute;
 

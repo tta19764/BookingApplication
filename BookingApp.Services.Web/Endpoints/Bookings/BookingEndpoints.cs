@@ -1,7 +1,6 @@
-using BookingApp.Services.Web.Contracts;
 using BookingApp.Services.Web.Dtos;
-using BookingApp.Services.Web.Extensions;
 using BookingApp.Services.Web.Mappings;
+using BookingApp.Services.Web.Services;
 using AutoMapper;
 using BookingApp.Bll.Common.Bookings;
 

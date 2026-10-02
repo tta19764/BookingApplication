@@ -1,4 +1,5 @@
-using BookingApp.Bll.Common.Bookings;
+using BookingApp.Bll.Common.Bookings.Models;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
 
 namespace BookingApp.Bll.Common.ConferenceHalls;
 

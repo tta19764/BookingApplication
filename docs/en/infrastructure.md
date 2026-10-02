@@ -1,6 +1,6 @@
 # Infrastructure layer
 
-`BookingApp.Dal.SqlRepositories` implements external and persistence concerns required by the inner layers.
+`BookingApp.Dal.PostgreSQLRepositories` implements external and persistence concerns required by the other layers.
 
 ## Persistence
 
@@ -13,13 +13,12 @@
 
 ## Operational services
 
-- `DateTimeProvider` supplies UTC time behind an application abstraction.
-- Quartz schedules `CompleteBookingsJob`, which processes bounded batches of expired reservations.
-- Dependency injection registration is centralized in the layer's `DependencyInjection` class.
+- Services registers .NET `TimeProvider.System`; no clock implementation belongs to DAL.
+- Quartz and `CompleteBookingsJob` live in Services and process bounded batches of expired reservations.
+- The DAL exposes concrete implementations; dependency injection is composed centrally by `BookingApp.Services.Web`.
 
 ## Configuration
 
 Development connection strings and job settings live in `BookingApp.Services.Web/appsettings.Development.json`; Docker Compose overrides host-specific values. Secrets should be supplied by deployment configuration rather than committed settings in production.
 
 Real repository mappings and database behavior are covered by both integration test projects using temporary PostgreSQL Testcontainers.
-

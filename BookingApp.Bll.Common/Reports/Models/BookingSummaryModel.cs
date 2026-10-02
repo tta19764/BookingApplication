@@ -1,4 +1,4 @@
-namespace BookingApp.Bll.Common.Models;
+namespace BookingApp.Bll.Common.Reports.Models;
 
 /// <summary>
 /// Booking analytics summary across all halls.

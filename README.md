@@ -2,7 +2,7 @@
 
 Booking Application is a versioned REST API for managing conference halls and reservations. Clients can maintain a hall catalog, search availability, book halls with optional services, receive time-based price calculations, and read revenue analytics.
 
-The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and Dal.SqlRepositories projects. It is built with .NET 10, ASP.NET Core Minimal APIs, EF Core, PostgreSQL, Quartz, Swagger, Serilog, xUnit, and Testcontainers.
+The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and Dal.PostgreSQLRepositories projects. It is built with .NET 10, ASP.NET Core Minimal APIs, EF Core, PostgreSQL, Quartz, Swagger, Serilog, xUnit, and Testcontainers.
 
 Українська: Booking Application — це REST API для керування конференц-залами та бронюваннями. Система підтримує каталог залів, пошук доступності, додаткові послуги, розрахунок вартості за часовими тарифами й аналітику доходу. Рішення побудоване за принципами layered architecture.
 

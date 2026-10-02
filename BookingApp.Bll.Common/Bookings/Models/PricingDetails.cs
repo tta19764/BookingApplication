@@ -1,6 +1,6 @@
 using BookingApp.Bll.Common.Shared;
 
-namespace BookingApp.Bll.Common.Bookings;
+namespace BookingApp.Bll.Common.Bookings.Models;
 
 /// <summary>
 /// Detailed price breakdown for a hall booking.

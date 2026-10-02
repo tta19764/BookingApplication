@@ -1,6 +1,6 @@
 # Domain layer
 
-`BookingApp.Bll.Common` contains plain business models and contracts that remain independent of ASP.NET Core and EF Core. Persistence entities belong exclusively to `BookingApp.Dal.SqlRepositories`.
+`BookingApp.Bll.Common` contains plain business models and contracts that remain independent of ASP.NET Core and EF Core. Persistence entities belong exclusively to `BookingApp.Dal.PostgreSQLRepositories`.
 
 ## Responsibilities
 

@@ -1,6 +1,7 @@
-using BookingApp.Bll.Common.Abstractions;
+using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.ConferenceHalls;
-using BookingApp.Bll.ConferenceHalls;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
+using BookingApp.Bll.Managers.ConferenceHalls;
 using FluentAssertions;
 using NSubstitute;
 

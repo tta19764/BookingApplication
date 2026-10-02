@@ -7,7 +7,7 @@
 - Public feature contracts (`IBookingManager`, `IConferenceHallManager`, and `IReportManager`) are declared in `BookingApp.Bll.Common`.
 - Their implementations live in `BookingApp.Bll`; the Services layer depends only on the Common contracts.
 - Each feature has one service-style manager implementation whose methods implement the feature's use cases directly.
-- BLL managers depend on repository interfaces, `IUnitOfWork`, `IDateTimeProvider`, and pricing abstractions.
+- BLL managers depend on repository interfaces, `IUnitOfWork`, .NET `TimeProvider`, and pricing abstractions.
 - There is no request/handler dispatcher; Services calls manager contracts directly.
 - Response records and mappers expose stable application read models.
 - AutoMapperConfig centralizes mapping between Common models, DAL entities, and Services DTOs.

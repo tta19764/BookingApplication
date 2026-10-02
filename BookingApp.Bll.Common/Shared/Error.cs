@@ -1,4 +1,4 @@
-namespace BookingApp.Bll.Common.Abstractions;
+namespace BookingApp.Bll.Common.Shared;
 
 /// <summary>
 /// Domain or application error code and message returned by failed results.

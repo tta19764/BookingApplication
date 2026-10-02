@@ -1,6 +1,6 @@
-using BookingApp.Services.Web.Extensions;
-using BookingApp.Bll;
-using BookingApp.Dal.SqlRepositories;
+using BookingApp.Services.Web.DI;
+using BookingApp.Services.Web.Endpoints;
+using BookingApp.Services.Web.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,8 +9,6 @@ builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddApi(builder.Configuration);
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 

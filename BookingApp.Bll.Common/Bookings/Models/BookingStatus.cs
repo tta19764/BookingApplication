@@ -1,4 +1,4 @@
-namespace BookingApp.Bll.Common.Bookings;
+namespace BookingApp.Bll.Common.Bookings.Models;
 
 public enum BookingStatus
 {

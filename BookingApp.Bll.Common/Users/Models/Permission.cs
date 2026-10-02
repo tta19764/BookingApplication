@@ -1,4 +1,4 @@
-namespace BookingApp.Bll.Common.Users;
+namespace BookingApp.Bll.Common.Users.Models;
 
 public sealed class Permission(int id, string name)
 {

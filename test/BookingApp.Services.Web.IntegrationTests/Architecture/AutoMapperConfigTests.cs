@@ -1,7 +1,5 @@
 using AutoMapper;
-using BookingApp.Bll;
-using BookingApp.Dal.SqlRepositories;
-using BookingApp.Services.Web.Extensions;
+using BookingApp.Services.Web.DI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,8 +20,6 @@ public sealed class AutoMapperConfigTests
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddApi(configuration);
-        services.AddApplication();
-        services.AddInfrastructure(configuration);
 
         // Act
         using var provider = services.BuildServiceProvider();

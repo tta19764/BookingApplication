@@ -1,6 +1,6 @@
 using BookingApp.Bll.Common.Shared;
 
-namespace BookingApp.Bll.Common.ConferenceHalls;
+namespace BookingApp.Bll.Common.ConferenceHalls.Models;
 
 /// <summary>
 /// Fixed catalog of optional services that can be attached to a hall booking.

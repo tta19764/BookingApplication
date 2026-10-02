@@ -1,12 +1,12 @@
-using BookingApp.Bll.Common.Models;
+using BookingApp.Bll.Common.Bookings.Models;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using BookingApp.Services.Web.Contracts;
+using BookingApp.Services.Web.Dtos;
 using BookingApp.Services.Web.Endpoints.ConferenceHalls;
 using BookingApp.Services.Web.IntegrationTests.Infrastructure;
-using BookingApp.Bll.Common.ConferenceHalls;
 using FluentAssertions;
 
 namespace BookingApp.Services.Web.IntegrationTests.Api;

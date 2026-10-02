@@ -1,6 +1,6 @@
-using BookingApp.Bll.Common.Abstractions;
-using BookingApp.Bll.Common.ConferenceHalls;
-using BookingApp.Bll.Common.Models;
+using BookingApp.Bll.Common.Bookings.Models;
+using BookingApp.Bll.Common.ConferenceHalls.Models;
+using BookingApp.Bll.Common.Shared;
 
 namespace BookingApp.Bll.Common.Bookings;
 
