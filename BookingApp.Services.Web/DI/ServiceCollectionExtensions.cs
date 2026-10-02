@@ -5,6 +5,7 @@ using BookingApp.Services.Web.Mappings;
 using System.Text.Json.Serialization;
 using BookingApp.Bll.Managers.Bookings;
 using BookingApp.Bll.Common.Shared;
+using BookingApp.Bll.Common.Shared.Events;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.Reports;
@@ -14,6 +15,7 @@ using BookingApp.Bll.Managers.Reports;
 using BookingApp.Dal.SqlRepositories;
 using BookingApp.Dal.SqlRepositories.Repositories;
 using BookingApp.Services.Web.Services.BackgroundJobs;
+using BookingApp.Services.Web.Services.DomainEvents;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 
@@ -67,6 +69,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IConferenceHallManager, ConferenceHallManager>();
         services.AddScoped<IReportManager, ReportManager>();
         services.AddTransient<IPricingManager, PricingManager>();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddScoped<IDomainEventHandler<BookingApp.Bll.Common.Bookings.Events.BookingCreatedDomainEvent>,
+            BookingCreatedEventHandler>();
     }
 
     private static void AddDataAccess(IServiceCollection services, IConfiguration configuration)

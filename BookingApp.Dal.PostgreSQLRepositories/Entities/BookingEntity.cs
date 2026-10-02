@@ -3,9 +3,8 @@ using BookingApp.Bll.Common.Shared;
 
 namespace BookingApp.Dal.SqlRepositories.Entities;
 
-public sealed class BookingEntity
+public sealed class BookingEntity : Entity
 {
-    public Guid Id { get; set; }
     public Guid ConferenceHallId { get; set; }
     public Guid UserId { get; set; }
     public DateRange Duration { get; set; } = null!;

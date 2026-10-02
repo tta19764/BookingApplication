@@ -1,10 +1,12 @@
 using BookingApp.Bll.Managers.Bookings;
 using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Bookings;
+using BookingApp.Bll.Common.Bookings.Events;
 using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.ConferenceHalls.Errors;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
+using BookingApp.Bll.Common.Shared.Events;
 using BookingApp.Bll.UnitTests.Infrastructure;
 using FluentAssertions;
 using NSubstitute;
@@ -21,7 +23,8 @@ public class BookingManagerTests
         var bookings = Substitute.For<IBookingRepository>();
         var clock = Substitute.For<TimeProvider>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
-        var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork);
+        var events = Substitute.For<IDomainEventDispatcher>();
+        var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork, events);
         var hallId = Guid.NewGuid();
         var cancellationToken = TestContext.Current.CancellationToken;
         halls.GetByIdAsync(hallId, cancellationToken).Returns((ConferenceHall?)null);
@@ -42,7 +45,8 @@ public class BookingManagerTests
         var bookings = Substitute.For<IBookingRepository>();
         var clock = Substitute.For<TimeProvider>();
         var unitOfWork = Substitute.For<IUnitOfWork>();
-        var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork);
+        var events = Substitute.For<IDomainEventDispatcher>();
+        var manager = new BookingManager(halls, bookings, new PricingManager(), clock, unitOfWork, events);
         var hall = HallData.Create(Guid.NewGuid());
         var now = new DateTime(2026, 7, 22, 8, 0, 0, DateTimeKind.Utc);
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -58,5 +62,8 @@ public class BookingManagerTests
         result.IsSuccess.Should().BeTrue();
         bookings.Received(1).Add(Arg.Is<Booking>(booking => booking.Id == result.Value.BookingId));
         await unitOfWork.Received(1).SaveChangesAsync(cancellationToken);
+        await events.Received(1).DispatchAsync(
+            Arg.Is<BookingCreatedDomainEvent>(domainEvent => domainEvent.BookingId == result.Value.BookingId),
+            cancellationToken);
     }
 }

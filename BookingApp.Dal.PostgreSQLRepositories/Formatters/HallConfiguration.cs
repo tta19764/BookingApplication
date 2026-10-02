@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BookingApp.Dal.SqlRepositories.Configurations;
+namespace BookingApp.Dal.SqlRepositories.Formatters;
 
 /// <summary>
 /// EF Core mapping for conference hall persistence.
