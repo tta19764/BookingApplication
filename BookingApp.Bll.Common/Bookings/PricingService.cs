@@ -27,7 +27,7 @@ public sealed class PricingService
                     $"Hall '{hall.Name}' does not support '{amenity}'.");
             }
         }
-        
+
         var priceForPeriod = CalculatePriceForPeriod(hall.Price, period);
 
         var amenitiesUpCharge = CalculateAmenitiesPrice(

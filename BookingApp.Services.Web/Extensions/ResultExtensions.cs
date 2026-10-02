@@ -18,6 +18,15 @@ public static class ResultExtensions
             : new ApiResponse<T> { Error = result.Error };
     }
 
+    public static ApiResponse<TDto> MapToApiResponse<TModel, TDto>(
+        this Result<TModel> result,
+        Func<TModel, TDto> map)
+    {
+        return result.IsSuccess
+            ? new ApiResponse<TDto> { Data = map(result.Value) }
+            : new ApiResponse<TDto> { Error = result.Error };
+    }
+
     /// <summary>
     /// Converts an untyped result into an API response with no payload.
     /// </summary>

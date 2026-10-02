@@ -1,11 +1,11 @@
 using BookingApp.Bll.Common.ConferenceHalls;
 
-namespace BookingApp.Bll.ConferenceHalls.GetHall;
+namespace BookingApp.Bll.Common.Models;
 
 /// <summary>
 /// Amenity data exposed to API consumers, including its fixed price.
 /// </summary>
-public sealed record AmenityResponse(
+public sealed record AmenityModel(
     Amenity Type,
     string Name,
     decimal Price,
@@ -14,10 +14,10 @@ public sealed record AmenityResponse(
 /// <summary>
 /// Conference hall read model used by hall queries.
 /// </summary>
-public sealed record HallResponse(
+public sealed record HallModel(
     Guid Id,
     string Name,
     int Capacity,
     decimal HourlyRate,
     string Currency,
-    IReadOnlyCollection<AmenityResponse> Amenities);
+    IReadOnlyCollection<AmenityModel> Amenities);

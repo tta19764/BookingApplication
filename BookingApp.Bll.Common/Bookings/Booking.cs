@@ -6,13 +6,13 @@ using BookingApp.Bll.Common.Users;
 
 namespace BookingApp.Bll.Common.Bookings;
 
-public sealed class Booking : Entity
+public class Booking : Entity
 {
-    private Booking()
+    protected Booking()
     {
     }
 
-    private Booking(
+    protected Booking(
         Guid id,
         Guid conferenceHallId,
         Guid userId,
@@ -33,7 +33,7 @@ public sealed class Booking : Entity
         Status = status;
         CreatedOnUtc = createdOnUtc;
     }
-    
+
     public Guid ConferenceHallId { get; private set; }
 
     public Guid UserId { get; private set; }
@@ -81,7 +81,7 @@ public sealed class Booking : Entity
             pricingDetails.TotalPrice,
             BookingStatus.Reserved,
             utcNow);
-        
+
         booking.RaiseDomainEvent(new BookingReservedDomainEvent(booking.Id));
 
         // Keep the hall's operational metadata in sync with the successful reservation.
@@ -139,5 +139,28 @@ public sealed class Booking : Entity
         RaiseDomainEvent(new BookingCancelledDomainEvent(Id));
 
         return Result.Success();
+    }
+
+    public static Booking Restore(
+        Guid id,
+        Guid conferenceHallId,
+        Guid userId,
+        DateRange duration,
+        Money priceForPeriod,
+        Money amenitiesUpCharge,
+        Money totalPrice,
+        BookingStatus status,
+        DateTime createdOnUtc,
+        DateTime? rejectedOnUtc,
+        DateTime? completedOnUtc,
+        DateTime? cancelledOnUtc)
+    {
+        return new Booking(id, conferenceHallId, userId, duration, priceForPeriod,
+            amenitiesUpCharge, totalPrice, status, createdOnUtc)
+        {
+            RejectedOnUtc = rejectedOnUtc,
+            CompletedOnUtc = completedOnUtc,
+            CancelledOnUtc = cancelledOnUtc
+        };
     }
 }

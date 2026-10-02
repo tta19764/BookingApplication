@@ -50,7 +50,7 @@ public static class AmenityExtensions
                 _ => throw new ArgumentOutOfRangeException(nameof(amenity))
             };
         }
-        
+
         throw new NotSupportedException($"Currency '{currency}' is not supported.");
     }
 }

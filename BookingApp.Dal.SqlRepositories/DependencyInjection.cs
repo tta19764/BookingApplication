@@ -30,7 +30,7 @@ public static class DependencyInjection
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
 
         AddPersistence(services, configuration);
-        
+
         AddBackgroundJobs(services, configuration);
 
         return services;
@@ -40,19 +40,20 @@ public static class DependencyInjection
     {
         // Quartz reads this options object both when scheduling the job and when the job executes.
         services.Configure<CompleteBookingsOptions>(configuration.GetSection(CompleteBookingsOptions.SectionName));
-        
+
         services.AddQuartz();
 
         services.AddQuartzHostedService(options =>
         {
             options.WaitForJobsToComplete = true;
         });
-        
+
         services.ConfigureOptions<CompleteBookingsJobSettings>();
     }
 
     private static void AddPersistence(IServiceCollection services, IConfiguration configuration)
     {
+        services.AddScoped<EntityChangeTracker>();
         var connectionString =
             configuration.GetConnectionString("Database") ??
             throw new ArgumentNullException(nameof(configuration));
@@ -70,7 +71,7 @@ public static class DependencyInjection
 
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<ApplicationDbContext>());
     }
-    
+
     public static void AddApiVersioning(IServiceCollection services, IConfiguration configuration)
     {
         services
@@ -86,4 +87,5 @@ public static class DependencyInjection
                 options.GroupNameFormat = "'v'V";
                 options.SubstituteApiVersionInUrl = true;
             });
-    }}
+    }
+}

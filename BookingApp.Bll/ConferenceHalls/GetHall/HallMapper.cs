@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Common.ConferenceHalls;
 
 namespace BookingApp.Bll.ConferenceHalls.GetHall;
@@ -10,9 +11,9 @@ internal static class HallMapper
     /// <summary>
     /// Converts a conference hall into a response model with amenity prices.
     /// </summary>
-    internal static HallResponse ToResponse(ConferenceHall hall)
+    internal static HallModel ToModel(ConferenceHall hall)
     {
-        return new HallResponse(
+        return new HallModel(
             hall.Id,
             hall.Name.Value,
             hall.Seats.Value,
@@ -24,7 +25,7 @@ internal static class HallMapper
                     // Response models include resolved amenity prices so callers do not duplicate catalog logic.
                     var price = amenity.GetPrice(hall.Price.Currency);
 
-                    return new AmenityResponse(
+                    return new AmenityModel(
                         amenity,
                         GetDisplayName(amenity),
                         price.Amount,

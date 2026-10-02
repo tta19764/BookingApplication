@@ -1,5 +1,7 @@
 using BookingApp.Services.Web.Contracts;
+using BookingApp.Services.Web.Dtos;
 using BookingApp.Services.Web.Extensions;
+using BookingApp.Services.Web.Mappings;
 using BookingApp.Bll.Reports.GetBookingSummary;
 using BookingApp.Bll.Abstractions.Messaging;
 
@@ -22,7 +24,7 @@ public static class ReportEndpoints
         group.MapGet("bookings-summary", GetBookingSummary)
             .WithName(nameof(GetBookingSummary))
             .WithSummary("Get booking revenue summary")
-            .Produces<ApiResponse<BookingSummaryResponse>>();
+            .Produces<ApiResponse<BookingSummaryDto>>();
 
         return builder;
     }
@@ -33,6 +35,6 @@ public static class ReportEndpoints
     {
         var result = await dispatcher.Send(new GetBookingSummaryRequest(), cancellationToken);
 
-        return Results.Ok(result.MapToApiResponse());
+        return Results.Ok(result.MapToApiResponse(DtoMapper.ToDto));
     }
 }

@@ -1,9 +1,9 @@
-namespace BookingApp.Bll.Bookings.AddBooking;
+namespace BookingApp.Bll.Common.Models;
 
 /// <summary>
 /// Booking confirmation returned after a successful reservation, including the price breakdown.
 /// </summary>
-public sealed record BookingConfirmationResponse(
+public sealed record BookingConfirmationModel(
     Guid BookingId,
     Guid HallId,
     DateTime Start,

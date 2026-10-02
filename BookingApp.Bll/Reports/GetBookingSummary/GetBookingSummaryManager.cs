@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Abstractions.Messaging;
 using BookingApp.Bll.Common.Abstractions;
 using BookingApp.Bll.Common.Bookings;
@@ -9,17 +10,17 @@ namespace BookingApp.Bll.Reports.GetBookingSummary;
 /// Builds a booking summary report grouped by conference hall.
 /// </summary>
 public class GetBookingSummaryManager(IBookingRepository bookingRepository)
-    : IRequestManager<GetBookingSummaryRequest, Result<BookingSummaryResponse>>
+    : IRequestManager<GetBookingSummaryRequest, Result<BookingSummaryModel>>
 {
     private const int PageSize = 500;
 
-    public async Task<Result<BookingSummaryResponse>> Handle(
+    public async Task<Result<BookingSummaryModel>> Handle(
         GetBookingSummaryRequest request,
         CancellationToken cancellationToken)
     {
         var totalBookings = 0;
         var totalRevenue = 0m;
-        var hallSummaries = new Dictionary<Guid, HallBookingSummaryResponse>();
+        var hallSummaries = new Dictionary<Guid, HallBookingSummaryModel>();
 
         await foreach (var bookings in bookingRepository.List(PageSize, cancellationToken))
         {
@@ -43,14 +44,14 @@ public class GetBookingSummaryManager(IBookingRepository bookingRepository)
                     continue;
                 }
 
-                hallSummaries[group.Key] = new HallBookingSummaryResponse(
+                hallSummaries[group.Key] = new HallBookingSummaryModel(
                     group.Key,
                     bookingCount,
                     revenue);
             }
         }
 
-        var response = new BookingSummaryResponse(
+        var response = new BookingSummaryModel(
             totalBookings,
             totalRevenue,
             Currency.Uah.Code,

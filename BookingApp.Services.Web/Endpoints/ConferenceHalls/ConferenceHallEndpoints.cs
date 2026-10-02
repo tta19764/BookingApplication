@@ -1,5 +1,7 @@
 using BookingApp.Services.Web.Contracts;
+using BookingApp.Services.Web.Dtos;
 using BookingApp.Services.Web.Extensions;
+using BookingApp.Services.Web.Mappings;
 using BookingApp.Bll.ConferenceHalls.AddHall;
 using BookingApp.Bll.ConferenceHalls.GetAvailableHalls;
 using BookingApp.Bll.ConferenceHalls.GetHall;
@@ -32,14 +34,14 @@ public static class ConferenceHallEndpoints
         group.MapGet(string.Empty, GetConferenceHalls)
             .WithName(nameof(GetConferenceHalls))
             .WithSummary("Get conference halls by page")
-            .Produces<ApiResponse<IReadOnlyCollection<HallResponse>>>()
-            .Produces<ApiResponse<IReadOnlyCollection<HallResponse>>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<IReadOnlyCollection<ConferenceHallDto>>>()
+            .Produces<ApiResponse<IReadOnlyCollection<ConferenceHallDto>>>(StatusCodes.Status400BadRequest);
 
         group.MapGet("{hallId:guid}", GetConferenceHall)
             .WithName(nameof(GetConferenceHall))
             .WithSummary("Get conference hall details")
-            .Produces<ApiResponse<HallResponse>>()
-            .Produces<ApiResponse<HallResponse>>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse<ConferenceHallDto>>()
+            .Produces<ApiResponse<ConferenceHallDto>>(StatusCodes.Status404NotFound);
 
         group.MapPut("{hallId:guid}", UpdateConferenceHall)
             .WithName(nameof(UpdateConferenceHall))
@@ -57,8 +59,8 @@ public static class ConferenceHallEndpoints
         group.MapGet("available", GetAvailableConferenceHalls)
             .WithName(nameof(GetAvailableConferenceHalls))
             .WithSummary("Find available conference halls")
-            .Produces<ApiResponse<IEnumerable<HallResponse>>>()
-            .Produces<ApiResponse<IEnumerable<HallResponse>>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<IEnumerable<ConferenceHallDto>>>()
+            .Produces<ApiResponse<IEnumerable<ConferenceHallDto>>>(StatusCodes.Status400BadRequest);
 
         return builder;
     }
@@ -73,8 +75,10 @@ public static class ConferenceHallEndpoints
             cancellationToken);
 
         return result.IsSuccess
-            ? Results.Ok(result.MapToApiResponse())
-            : Results.BadRequest(result.MapToApiResponse());
+            ? Results.Ok(result.MapToApiResponse(models =>
+                (IReadOnlyCollection<ConferenceHallDto>)models.Select(DtoMapper.ToDto).ToList()))
+            : Results.BadRequest(result.MapToApiResponse(models =>
+                (IReadOnlyCollection<ConferenceHallDto>)models.Select(DtoMapper.ToDto).ToList()));
     }
 
     public static async Task<IResult> CreateConferenceHall(
@@ -97,8 +101,8 @@ public static class ConferenceHallEndpoints
         var result = await dispatcher.Send(new GetHallRequest(hallId), cancellationToken);
 
         return result.IsSuccess
-            ? Results.Ok(result.MapToApiResponse())
-            : Results.NotFound(result.MapToApiResponse());
+            ? Results.Ok(result.MapToApiResponse(DtoMapper.ToDto))
+            : Results.NotFound(result.MapToApiResponse(DtoMapper.ToDto));
     }
 
     public static async Task<IResult> UpdateConferenceHall(
@@ -152,7 +156,7 @@ public static class ConferenceHallEndpoints
         var result = await dispatcher.Send(query, cancellationToken);
 
         return result.IsSuccess
-            ? Results.Ok(result.MapToApiResponse())
-            : Results.BadRequest(result.MapToApiResponse());
+            ? Results.Ok(result.MapToApiResponse(models => models.Select(DtoMapper.ToDto)))
+            : Results.BadRequest(result.MapToApiResponse(models => models.Select(DtoMapper.ToDto)));
     }
 }

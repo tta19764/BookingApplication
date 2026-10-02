@@ -1,9 +1,9 @@
-namespace BookingApp.Bll.Bookings.GetBookings;
+namespace BookingApp.Bll.Common.Models;
 
 /// <summary>
 /// Booking read model used by paginated booking queries.
 /// </summary>
-public sealed record BookingResponse(
+public sealed record BookingModel(
     Guid Id,
     Guid HallId,
     Guid UserId,

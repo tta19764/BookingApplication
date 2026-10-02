@@ -5,7 +5,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace BookingApp.Services.Web.OpenApi;
 
-public sealed  class ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider): IConfigureNamedOptions<SwaggerGenOptions>
+public sealed class ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider) : IConfigureNamedOptions<SwaggerGenOptions>
 {
     public void Configure(SwaggerGenOptions options)
     {
@@ -22,12 +22,12 @@ public sealed  class ConfigureSwaggerOptions(IApiVersionDescriptionProvider prov
             Title = $"BookingApp.Services.Web v{description.ApiVersion}",
             Version = description.ApiVersion.ToString()
         };
-        
+
         if (description.IsDeprecated)
         {
             info.Description = "This version has been deprecated and is no longer supported.";
         }
-        
+
         return info;
     }
 

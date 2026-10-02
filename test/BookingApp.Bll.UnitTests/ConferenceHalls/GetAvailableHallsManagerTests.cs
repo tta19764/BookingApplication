@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.ConferenceHalls.GetAvailableHalls;
 using BookingApp.Bll.ConferenceHalls.GetHall;
 using BookingApp.Bll.UnitTests.Infrastructure;
@@ -36,7 +37,7 @@ public class GetAvailableHallsManagerTests
             .Returns([hall]);
 
         // Act
-        Result<IEnumerable<HallResponse>> result =
+        Result<IEnumerable<HallModel>> result =
             await _handler.Handle(query, cancellationToken);
 
         // Assert

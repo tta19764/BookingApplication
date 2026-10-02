@@ -50,4 +50,6 @@ dotnet run --project BookingApp.Services.Web
 
 ## Архітектура
 
+Межі рівнів використовують окремі представлення: `Bll.Common/Models` містить бізнес-моделі та моделі читання, `Dal.SqlRepositories/Entities` містить сутності EF Core, а `Services.Web/Dtos` — контракти HTTP. Явне зіставлення в репозиторіях і на рівні Services не дозволяє деталям бази даних та передачі даних проникати до бізнес-логіки.
+
 Залежності спрямовані всередину: API та Infrastructure залежать від Application і Domain, тоді як Domain не містить деталей HTTP або бази даних. Докладніше: [Domain](domain.md), [Application](application.md), [Infrastructure](infrastructure.md), [API](api.md), [Тестування](testing.md).

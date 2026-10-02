@@ -110,7 +110,7 @@ public class ExceptionHandlingMiddleware(
                 "Resource Not Found",
                 "The requested resource was not found.",
                 null),
-            
+
             TaskCanceledException => new ExceptionDetails(
                 StatusCodes.Status408RequestTimeout,
                 "RequestTimeout",

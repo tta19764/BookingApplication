@@ -52,7 +52,7 @@ public static class ApplicationBuilderExtensions
 
         return app;
     }
-    
+
     public static void ApplyMigrations(this IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.CreateScope();

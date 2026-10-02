@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Abstractions.Clock;
 using BookingApp.Bll.Bookings.AddBooking;
 using BookingApp.Bll.UnitTests.Infrastructure;
@@ -47,7 +48,7 @@ public class AddBookingManagerTests
             .Returns((ConferenceHall?)null);
 
         // Act
-        Result<BookingConfirmationResponse> result = await _handler.Handle(command, cancellationToken);
+        Result<BookingConfirmationModel> result = await _handler.Handle(command, cancellationToken);
 
         // Assert
         result.Error.Should().Be(ConferenceHallErrors.NotFound);
@@ -66,7 +67,7 @@ public class AddBookingManagerTests
             .Returns(hall);
 
         // Act
-        Result<BookingConfirmationResponse> result = await _handler.Handle(command, cancellationToken);
+        Result<BookingConfirmationModel> result = await _handler.Handle(command, cancellationToken);
 
         // Assert
         result.Error.Should().Be(BookingErrors.StartsInPast);
@@ -89,7 +90,7 @@ public class AddBookingManagerTests
             .Returns(true);
 
         // Act
-        Result<BookingConfirmationResponse> result = await _handler.Handle(command, cancellationToken);
+        Result<BookingConfirmationModel> result = await _handler.Handle(command, cancellationToken);
 
         // Assert
         result.Error.Should().Be(BookingErrors.Overlap);
@@ -112,7 +113,7 @@ public class AddBookingManagerTests
             .Returns(false);
 
         // Act
-        Result<BookingConfirmationResponse> result = await _handler.Handle(command, cancellationToken);
+        Result<BookingConfirmationModel> result = await _handler.Handle(command, cancellationToken);
 
         // Assert
         result.Error.Code.Should().Be("Booking.UnsupportedAmenity");
@@ -135,7 +136,7 @@ public class AddBookingManagerTests
             .Returns(false);
 
         // Act
-        Result<BookingConfirmationResponse> result = await _handler.Handle(command, cancellationToken);
+        Result<BookingConfirmationModel> result = await _handler.Handle(command, cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

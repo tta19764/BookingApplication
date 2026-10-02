@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Abstractions.Messaging;
 using BookingApp.Bll.Common.Abstractions;
 using BookingApp.Bll.Common.Bookings;
@@ -8,9 +9,9 @@ namespace BookingApp.Bll.Bookings.GetBookings;
 /// Handles paginated booking list queries.
 /// </summary>
 public sealed class GetBookingsManager(IBookingRepository bookingRepository)
-    : IRequestManager<GetBookingsRequest, Result<IReadOnlyCollection<BookingResponse>>>
+    : IRequestManager<GetBookingsRequest, Result<IReadOnlyCollection<BookingModel>>>
 {
-    public async Task<Result<IReadOnlyCollection<BookingResponse>>> Handle(
+    public async Task<Result<IReadOnlyCollection<BookingModel>>> Handle(
         GetBookingsRequest request,
         CancellationToken cancellationToken)
     {
@@ -20,9 +21,9 @@ public sealed class GetBookingsManager(IBookingRepository bookingRepository)
             cancellationToken);
 
         var response = bookings
-            .Select(BookingMapper.ToResponse)
+            .Select(BookingMapper.ToModel)
             .ToList();
 
-        return Result.Success<IReadOnlyCollection<BookingResponse>>(response);
+        return Result.Success<IReadOnlyCollection<BookingModel>>(response);
     }
 }

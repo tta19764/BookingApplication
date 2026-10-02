@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Abstractions.Messaging;
 using BookingApp.Bll.ConferenceHalls.GetHall;
 using BookingApp.Bll.Common.Abstractions;
@@ -9,9 +10,9 @@ namespace BookingApp.Bll.ConferenceHalls.GetHalls;
 /// Handles paginated conference hall list queries.
 /// </summary>
 public sealed class GetHallsManager(IConferenceHallRepository hallRepository)
-    : IRequestManager<GetHallsRequest, Result<IReadOnlyCollection<HallResponse>>>
+    : IRequestManager<GetHallsRequest, Result<IReadOnlyCollection<HallModel>>>
 {
-    public async Task<Result<IReadOnlyCollection<HallResponse>>> Handle(
+    public async Task<Result<IReadOnlyCollection<HallModel>>> Handle(
         GetHallsRequest request,
         CancellationToken cancellationToken)
     {
@@ -21,9 +22,9 @@ public sealed class GetHallsManager(IConferenceHallRepository hallRepository)
             cancellationToken);
 
         var response = halls
-            .Select(HallMapper.ToResponse)
+            .Select(HallMapper.ToModel)
             .ToList();
 
-        return Result.Success<IReadOnlyCollection<HallResponse>>(response);
+        return Result.Success<IReadOnlyCollection<HallModel>>(response);
     }
 }

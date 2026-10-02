@@ -12,7 +12,7 @@ public record DateRange
     public DateTime Start { get; init; }
 
     public DateTime End { get; init; }
-    
+
     public TimeSpan Duration => End - Start;
 
     /// <summary>
@@ -58,7 +58,7 @@ public record DateRange
         {
             throw new ArgumentException("End time must be after start time.");
         }
-            
+
         return new DateRange
         {
             Start = start,

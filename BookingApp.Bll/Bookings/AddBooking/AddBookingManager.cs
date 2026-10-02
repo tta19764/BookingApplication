@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Abstractions.Clock;
 using BookingApp.Bll.Abstractions.Messaging;
 using BookingApp.Bll.Common.Abstractions;
@@ -15,9 +16,9 @@ public class AddBookingManager(
     IBookingRepository bookingRepository,
     PricingService pricingService,
     IDateTimeProvider dateTimeProvider,
-    IUnitOfWork unitOfWork) : IRequestManager<AddBookingRequest, Result<BookingConfirmationResponse>>
+    IUnitOfWork unitOfWork) : IRequestManager<AddBookingRequest, Result<BookingConfirmationModel>>
 {
-    public async Task<Result<BookingConfirmationResponse>> Handle(
+    public async Task<Result<BookingConfirmationModel>> Handle(
         AddBookingRequest request,
         CancellationToken cancellationToken)
     {
@@ -25,7 +26,7 @@ public class AddBookingManager(
 
         if (hall is null)
         {
-            return Result.Failure<BookingConfirmationResponse>(ConferenceHallErrors.NotFound);
+            return Result.Failure<BookingConfirmationModel>(ConferenceHallErrors.NotFound);
         }
 
         var duration = DateRange.Create(
@@ -35,13 +36,13 @@ public class AddBookingManager(
 
         if (duration.Start <= dateTimeProvider.UtcNow)
         {
-            return Result.Failure<BookingConfirmationResponse>(BookingErrors.StartsInPast);
+            return Result.Failure<BookingConfirmationModel>(BookingErrors.StartsInPast);
         }
 
         // Prevent double-booking before creating the reservation aggregate.
         if (await bookingRepository.HasOverlap(hall.Id, duration, cancellationToken))
         {
-            return Result.Failure<BookingConfirmationResponse>(BookingErrors.Overlap);
+            return Result.Failure<BookingConfirmationModel>(BookingErrors.Overlap);
         }
 
         try
@@ -58,7 +59,7 @@ public class AddBookingManager(
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return Result.Success(new BookingConfirmationResponse(
+            return Result.Success(new BookingConfirmationModel(
                 booking.Id,
                 booking.ConferenceHallId,
                 booking.Duration.Start,
@@ -71,13 +72,13 @@ public class AddBookingManager(
         catch (ArgumentException)
         {
             // Domain amenity failures are returned as application results instead of leaking exceptions to API callers.
-            return Result.Failure<BookingConfirmationResponse>(
+            return Result.Failure<BookingConfirmationModel>(
                 new Error("Booking.UnsupportedAmenity", "The hall does not support one or more selected amenities"));
         }
         catch (InvalidOperationException exception)
         {
             // Pricing rejects periods outside allowed business hours.
-            return Result.Failure<BookingConfirmationResponse>(
+            return Result.Failure<BookingConfirmationModel>(
                 new Error("Booking.InvalidPeriod", exception.Message));
         }
     }

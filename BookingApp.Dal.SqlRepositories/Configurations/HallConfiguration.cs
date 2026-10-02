@@ -1,3 +1,4 @@
+using BookingApp.Dal.SqlRepositories.Entities;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +10,9 @@ namespace BookingApp.Dal.SqlRepositories.Configurations;
 /// <summary>
 /// EF Core mapping for conference hall persistence.
 /// </summary>
-public class HallConfiguration : IEntityTypeConfiguration<ConferenceHall>
+public class HallConfiguration : IEntityTypeConfiguration<ConferenceHallEntity>
 {
-    public void Configure(EntityTypeBuilder<ConferenceHall> builder)
+    public void Configure(EntityTypeBuilder<ConferenceHallEntity> builder)
     {
         builder.ToTable("conference_halls");
 
@@ -73,9 +74,5 @@ public class HallConfiguration : IEntityTypeConfiguration<ConferenceHall>
             .HasColumnName("amenities")
             .IsRequired();
 
-        builder.HasMany(hall => hall.Bookings)
-            .WithOne(booking => booking.ConferenceHall)
-            .HasForeignKey(booking => booking.ConferenceHallId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

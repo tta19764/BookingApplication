@@ -18,7 +18,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwaggerDocumentation();
     app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
-    
+
     app.ApplyMigrations();
 
     app.SeedData();

@@ -37,7 +37,7 @@ public class BookingTests : BaseTest
         var user = User.Create(new FirstName("John"), new LastName("Doe"), new Email("john@doe.com"));
         var price = new Money(100.0m, Currency.Uah);
         var duration = DateRange.Create(new DateTime(2026, 7, 20, 10, 0, 0), new DateTime(2026, 7, 20, 12, 0, 0));
-        var hall = new ConferenceHall(Guid.NewGuid(), new Name("Test Hall"), new Capacity(10), price,[]);
+        var hall = new ConferenceHall(Guid.NewGuid(), new Name("Test Hall"), new Capacity(10), price, []);
         var booking = Booking.Reserve(hall, [], user.Id, duration, DateTime.UtcNow, new PricingService());
 
         // Act

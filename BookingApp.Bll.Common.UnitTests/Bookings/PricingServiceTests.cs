@@ -174,7 +174,7 @@ public class PricingServiceTests
         period.Start.Should().Be(new DateTime(2026, 7, 20, 10, 40, 0));
         period.End.Should().Be(new DateTime(2026, 7, 20, 14, 15, 0));
     }
-    
+
     [Fact]
     public void CalculatePrice_ShouldThrowException_WhenInvalidAmenityIsProvided()
     {

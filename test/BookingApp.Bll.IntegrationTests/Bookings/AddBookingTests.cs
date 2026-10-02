@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Models;
 using BookingApp.Services.Web.Extensions;
 using BookingApp.Bll.Bookings.AddBooking;
 using BookingApp.Bll.IntegrationTests.Infrastructure;
@@ -32,7 +33,7 @@ public class AddBookingTests(IntegrationTestWebAppFactory factory) : BaseIntegra
             [Amenity.Projector]);
 
         // Act
-        Result<BookingConfirmationResponse> result = await Sender.Send(command, cancellationToken);
+        Result<BookingConfirmationModel> result = await Sender.Send(command, cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
