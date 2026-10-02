@@ -1,5 +1,5 @@
+using BookingApp.Application.Abstractions.Messaging;
 using BookingApp.Infrastructure;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BookingApp.Application.IntegrationTests.Infrastructure;
@@ -8,14 +8,14 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppF
 {
     private readonly IServiceScope _scope;
 
-    protected readonly ISender Sender;
+    protected readonly IApplicationDispatcher Sender;
     protected readonly ApplicationDbContext DbContext;
 
     protected BaseIntegrationTest(IntegrationTestWebAppFactory factory)
     {
         _scope = factory.Services.CreateScope();
 
-        Sender = _scope.ServiceProvider.GetRequiredService<ISender>();
+        Sender = _scope.ServiceProvider.GetRequiredService<IApplicationDispatcher>();
         DbContext = _scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     }
 
