@@ -1,4 +1,5 @@
 using System.Globalization;
+using AutoMapper;
 using BookingApp.Bll.Managers.Bookings;
 using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Bookings;
@@ -6,12 +7,11 @@ using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.ConferenceHalls.Errors;
 using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
-using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Managers.Validation;
 
 namespace BookingApp.Bll.Managers.ConferenceHalls;
 
-public sealed class ConferenceHallManager(IConferenceHallRepository hallRepository, IUnitOfWork unitOfWork)
+public sealed class ConferenceHallManager(IConferenceHallRepository hallRepository, IUnitOfWork unitOfWork, IMapper mapper)
     : IConferenceHallManager
 {
     public async Task<Result<Guid>> AddHallAsync(string name, int capacity, decimal hourlyRate, string currencyCode,
@@ -29,14 +29,16 @@ public sealed class ConferenceHallManager(IConferenceHallRepository hallReposito
     {
         ManagerInputValidator.ValidatePage(page, pageSize);
         var halls = await hallRepository.GetListPaginatedAsync(page, pageSize, cancellationToken);
-        return Result.Success<IReadOnlyCollection<HallModel>>(halls.Select(ToModel).ToList());
+        return Result.Success(mapper.Map<IReadOnlyCollection<HallModel>>(halls));
     }
 
     public async Task<Result<HallModel>> GetHallAsync(Guid hallId, CancellationToken cancellationToken)
     {
         ManagerInputValidator.ValidateId(hallId, nameof(hallId));
         var hall = await hallRepository.GetByIdAsync(hallId, cancellationToken);
-        return hall is null ? Result.Failure<HallModel>(ConferenceHallErrors.NotFound) : Result.Success(ToModel(hall));
+        return hall is null
+            ? Result.Failure<HallModel>(ConferenceHallErrors.NotFound)
+            : Result.Success(mapper.Map<HallModel>(hall));
     }
 
     public async Task<Result> UpdateHallAsync(Guid hallId, string name, int capacity, decimal hourlyRate,
@@ -71,13 +73,6 @@ public sealed class ConferenceHallManager(IConferenceHallRepository hallReposito
         var duration = BookingPeriodFactory.Create(date, TimeOnly.ParseExact(startTime, "HH:mm", CultureInfo.InvariantCulture),
             TimeOnly.ParseExact(endTime, "HH:mm", CultureInfo.InvariantCulture));
         var halls = await hallRepository.GetAvailableConferenceHalls(duration, new Capacity(capacity), cancellationToken);
-        return Result.Success(halls.Select(ToModel));
+        return Result.Success(mapper.Map<IEnumerable<HallModel>>(halls));
     }
-
-    private static HallModel ToModel(ConferenceHall hall) => new(hall.Id, hall.Name.Value, hall.Seats.Value,
-        hall.Price.Amount, hall.Price.Currency.Code, hall.Amenities.Select(amenity =>
-        {
-            var price = amenity.GetPrice(hall.Price.Currency);
-            return new AmenityModel(amenity, amenity == Amenity.WiFi ? "Wi-Fi" : amenity.ToString(), price.Amount, price.Currency.Code);
-        }).ToList());
 }

@@ -33,7 +33,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddProblemDetails();
         services.AddEndpointsApiExplorer();
-        services.AddAutoMapper(_ => { }, typeof(AutoMapperConfig), typeof(BookingApp.Dal.SqlRepositories.Mappings.AutoMapperConfig));
+        services.AddAutoMapper(_ => { }, typeof(AutoMapperConfig), typeof(BookingApp.Bll.Mappings.AutoMapperConfig),
+            typeof(BookingApp.Dal.SqlRepositories.Mappings.AutoMapperConfig));
 
         AddBusinessLogic(services);
         AddDataAccess(services, configuration);
