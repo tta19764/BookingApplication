@@ -10,7 +10,7 @@ WORKDIR /src
 COPY ["BookingApp.Services.Web/BookingApp.Services.Web.csproj", "BookingApp.Services.Web/"]
 COPY ["BookingApp.Bll/BookingApp.Bll.csproj", "BookingApp.Bll/"]
 COPY ["BookingApp.Bll.Common/BookingApp.Bll.Common.csproj", "BookingApp.Bll.Common/"]
-COPY ["BookingApp.Dal.SqlRepositories/BookingApp.Dal.SqlRepositories.csproj", "BookingApp.Dal.SqlRepositories/"]
+COPY ["BookingApp.Dal.PostgreSQLRepositories/BookingApp.Dal.PostgreSQLRepositories.csproj", "BookingApp.Dal.PostgreSQLRepositories/"]
 RUN dotnet restore "BookingApp.Services.Web/BookingApp.Services.Web.csproj"
 COPY . .
 WORKDIR "/src/BookingApp.Services.Web"
