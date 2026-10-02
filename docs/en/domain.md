@@ -1,14 +1,13 @@
 # Domain layer
 
-`BookingApp.Bll.Common` contains the business model and rules that must remain independent of ASP.NET Core and EF Core.
+`BookingApp.Bll.Common` contains plain business models and contracts that remain independent of ASP.NET Core and EF Core. Persistence entities belong exclusively to `BookingApp.Dal.SqlRepositories`.
 
 ## Responsibilities
 
-- `ConferenceHall` owns its name, capacity, hourly price, amenities, and booking metadata.
-- `Booking` controls reservation creation and state transitions: Reserved, Rejected, Completed, and Cancelled.
+- `ConferenceHall`, `Booking`, and `User` are anemic business models and do not inherit from a persistence entity base.
+- Public manager, repository, pricing, and unit-of-work interfaces define the boundaries implemented by BLL and DAL projects.
 - Value objects such as `Money`, `Currency`, `Name`, `Capacity`, and `DateRange` keep invalid primitive combinations out of business logic.
 - `IPricingManager` is declared in Common, while the BLL `PricingManager` implements tariff boundaries, modifiers, and amenity pricing.
-- Domain events describe reservation and status changes without coupling entities to side effects.
 - Repository and unit-of-work interfaces define persistence needs without choosing a database.
 - `Result` and domain error catalogs represent expected business failures explicitly.
 

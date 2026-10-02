@@ -1,13 +1,17 @@
 using BookingApp.Bll.Bookings;
 using BookingApp.Bll.Abstractions.Messaging;
 using BookingApp.Bll.Common.Bookings;
+using BookingApp.Bll.Common.ConferenceHalls;
+using BookingApp.Bll.Common.Reports;
+using BookingApp.Bll.ConferenceHalls;
+using BookingApp.Bll.Reports;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BookingApp.Bll;
 
 /// <summary>
-/// Registers business-logic handlers, validation, and domain-event dispatching.
+/// Registers business-logic managers and validation.
 /// </summary>
 public static class DependencyInjection
 {
@@ -20,6 +24,9 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(applicationAssembly);
         services.AddScoped<IManagerDispatcher, ManagerDispatcher>();
+        services.AddScoped<IBookingManager, BookingManager>();
+        services.AddScoped<IConferenceHallManager, ConferenceHallManager>();
+        services.AddScoped<IReportManager, ReportManager>();
 
         RegisterManagers(services, applicationAssembly.DefinedTypes);
 

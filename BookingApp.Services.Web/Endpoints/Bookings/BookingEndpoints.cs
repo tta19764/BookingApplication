@@ -3,9 +3,7 @@ using BookingApp.Services.Web.Dtos;
 using BookingApp.Services.Web.Extensions;
 using BookingApp.Services.Web.Mappings;
 using AutoMapper;
-using BookingApp.Bll.Bookings.AddBooking;
-using BookingApp.Bll.Bookings.GetBookings;
-using BookingApp.Bll.Abstractions.Messaging;
+using BookingApp.Bll.Common.Bookings;
 
 namespace BookingApp.Services.Web.Endpoints.Bookings;
 
@@ -41,13 +39,11 @@ public static class BookingEndpoints
 
     public static async Task<IResult> GetBookings(
         [AsParameters] GetBookingsRequest request,
-        IManagerDispatcher dispatcher,
+        IBookingManager bookingManager,
         IMapper mapper,
         CancellationToken cancellationToken)
     {
-        var result = await dispatcher.Send(
-            new BookingApp.Bll.Bookings.GetBookings.GetBookingsRequest(request.Page, request.PageSize),
-            cancellationToken);
+        var result = await bookingManager.GetBookingsAsync(request.Page, request.PageSize, cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse(mapper.Map<IReadOnlyCollection<BookingDto>>))
@@ -56,19 +52,18 @@ public static class BookingEndpoints
 
     public static async Task<IResult> CreateBooking(
         CreateBookingRequest request,
-        IManagerDispatcher dispatcher,
+        IBookingManager bookingManager,
         IMapper mapper,
         CancellationToken cancellationToken)
     {
-        var command = new AddBookingRequest(
+        var result = await bookingManager.AddBookingAsync(
             request.HallId,
             SeedDataExtensions.SeededUserId,
             request.Date,
             request.StartTime,
             request.EndTime,
-            request.Amenities);
-
-        var result = await dispatcher.Send(command, cancellationToken);
+            request.Amenities,
+            cancellationToken);
 
         if (result.IsSuccess)
         {

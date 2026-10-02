@@ -3,13 +3,7 @@ using BookingApp.Services.Web.Dtos;
 using BookingApp.Services.Web.Extensions;
 using BookingApp.Services.Web.Mappings;
 using AutoMapper;
-using BookingApp.Bll.ConferenceHalls.AddHall;
-using BookingApp.Bll.ConferenceHalls.GetAvailableHalls;
-using BookingApp.Bll.ConferenceHalls.GetHall;
-using BookingApp.Bll.ConferenceHalls.GetHalls;
-using BookingApp.Bll.ConferenceHalls.RemoveHall;
-using BookingApp.Bll.ConferenceHalls.UpdateHall;
-using BookingApp.Bll.Abstractions.Messaging;
+using BookingApp.Bll.Common.ConferenceHalls;
 namespace BookingApp.Services.Web.Endpoints.ConferenceHalls;
 
 /// <summary>
@@ -68,13 +62,11 @@ public static class ConferenceHallEndpoints
 
     public static async Task<IResult> GetConferenceHalls(
         [AsParameters] GetConferenceHallsRequest request,
-        IManagerDispatcher dispatcher,
+        IConferenceHallManager hallManager,
         IMapper mapper,
         CancellationToken cancellationToken)
     {
-        var result = await dispatcher.Send(
-            new GetHallsRequest(request.Page, request.PageSize),
-            cancellationToken);
+        var result = await hallManager.GetHallsAsync(request.Page, request.PageSize, cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse(mapper.Map<IReadOnlyCollection<ConferenceHallDto>>))
@@ -82,11 +74,17 @@ public static class ConferenceHallEndpoints
     }
 
     public static async Task<IResult> CreateConferenceHall(
-        AddHallRequest command,
-        IManagerDispatcher dispatcher,
+        CreateConferenceHallRequest request,
+        IConferenceHallManager hallManager,
         CancellationToken cancellationToken)
     {
-        var result = await dispatcher.Send(command, cancellationToken);
+        var result = await hallManager.AddHallAsync(
+            request.Name,
+            request.Capacity,
+            request.HourlyRate,
+            request.CurrencyCode,
+            request.Amenities,
+            cancellationToken);
 
         return result.IsSuccess
             ? Results.CreatedAtRoute(nameof(GetConferenceHall), new { hallId = result.Value, version = BookingAppApiVersions.V1RouteValue }, result.MapToApiResponse())
@@ -95,11 +93,11 @@ public static class ConferenceHallEndpoints
 
     public static async Task<IResult> GetConferenceHall(
         Guid hallId,
-        IManagerDispatcher dispatcher,
+        IConferenceHallManager hallManager,
         IMapper mapper,
         CancellationToken cancellationToken)
     {
-        var result = await dispatcher.Send(new GetHallRequest(hallId), cancellationToken);
+        var result = await hallManager.GetHallAsync(hallId, cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse(mapper.Map<ConferenceHallDto>))
@@ -109,17 +107,16 @@ public static class ConferenceHallEndpoints
     public static async Task<IResult> UpdateConferenceHall(
         Guid hallId,
         UpdateConferenceHallRequest request,
-        IManagerDispatcher dispatcher,
+        IConferenceHallManager hallManager,
         CancellationToken cancellationToken)
     {
-        var command = new UpdateHallRequest(
+        var result = await hallManager.UpdateHallAsync(
             hallId,
             request.Name,
             request.Capacity,
             request.HourlyRate,
-            request.Amenities);
-
-        var result = await dispatcher.Send(command, cancellationToken);
+            request.Amenities,
+            cancellationToken);
 
         if (result.IsSuccess)
         {
@@ -133,10 +130,10 @@ public static class ConferenceHallEndpoints
 
     public static async Task<IResult> DeleteConferenceHall(
         Guid hallId,
-        IManagerDispatcher dispatcher,
+        IConferenceHallManager hallManager,
         CancellationToken cancellationToken)
     {
-        var result = await dispatcher.Send(new RemoveHallRequest(hallId), cancellationToken);
+        var result = await hallManager.RemoveHallAsync(hallId, cancellationToken);
 
         return result.IsSuccess
             ? Results.NoContent()
@@ -145,17 +142,16 @@ public static class ConferenceHallEndpoints
 
     public static async Task<IResult> GetAvailableConferenceHalls(
         [AsParameters] GetAvailableConferenceHallsRequest request,
-        IManagerDispatcher dispatcher,
+        IConferenceHallManager hallManager,
         IMapper mapper,
         CancellationToken cancellationToken)
     {
-        var query = new GetAvailableHallsRequest(
+        var result = await hallManager.GetAvailableHallsAsync(
             request.Date,
             request.StartTime,
             request.EndTime,
-            request.Capacity);
-
-        var result = await dispatcher.Send(query, cancellationToken);
+            request.Capacity,
+            cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse(mapper.Map<IEnumerable<ConferenceHallDto>>))

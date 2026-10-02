@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using BookingApp.Bll.Common.Abstractions;
 using AutoMapper;
 
 namespace BookingApp.Dal.SqlRepositories.Repositories;
@@ -9,7 +8,6 @@ public abstract class Repository<TEntity, TModel>(
     EntityChangeTracker changeTracker,
     IMapper mapper)
     where TEntity : class
-    where TModel : Entity
 {
     protected readonly DbContext DbContext = dbContext;
     protected readonly DbSet<TEntity> DbSet = dbContext.Set<TEntity>();

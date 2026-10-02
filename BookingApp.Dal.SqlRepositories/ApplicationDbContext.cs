@@ -1,7 +1,6 @@
 using BookingApp.Bll.Common.Abstractions;
 using BookingApp.Dal.SqlRepositories.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace BookingApp.Dal.SqlRepositories;
 
@@ -13,11 +12,6 @@ public sealed class ApplicationDbContext(
     EntityChangeTracker entityChangeTracker)
     : DbContext(options), IUnitOfWork
 {
-    private static readonly JsonSerializerSettings JsonSerializerSettings = new()
-    {
-        TypeNameHandling = TypeNameHandling.All
-    };
-
     /// <summary>
     /// Applies all entity configurations from the infrastructure assembly.
     /// </summary>
@@ -29,7 +23,7 @@ public sealed class ApplicationDbContext(
     }
 
     /// <summary>
-    /// Saves persistence changes and publishes domain events raised by tracked entities.
+    /// Synchronizes tracked business models and saves persistence changes.
     /// </summary>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
