@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
+using BookingApp.Dal.SqlRepositories.Mappings;
 
 namespace BookingApp.Dal.SqlRepositories;
 
@@ -28,6 +29,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
+        services.AddAutoMapper(configuration => { }, typeof(AutoMapperConfig));
 
         AddPersistence(services, configuration);
 

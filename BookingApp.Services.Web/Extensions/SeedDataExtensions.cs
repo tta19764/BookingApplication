@@ -2,6 +2,7 @@ using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Users;
 using BookingApp.Dal.SqlRepositories;
+using BookingApp.Dal.SqlRepositories.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookingApp.Services.Web.Extensions;
@@ -84,22 +85,22 @@ public static class SeedDataExtensions
 
     private static void SeedUser(ApplicationDbContext dbContext)
     {
-        if (dbContext.Set<User>().Any(user => user.Id == SeededUserId))
+        if (dbContext.Set<UserEntity>().Any(user => user.Id == SeededUserId))
         {
             return;
         }
 
         ClearRegisteredRoleNavigationState();
 
-        var user = User.Create(
-            SeededUserId,
-            new FirstName("Seeded"),
-            new LastName("User"),
-            new Email("seeded.user@booking.local"));
+        var user = new UserEntity
+        {
+            Id = SeededUserId,
+            FirstName = new FirstName("Seeded"),
+            LastName = new LastName("User"),
+            Email = new Email("seeded.user@booking.local")
+        };
 
-        ClearUserRoles(user);
-
-        dbContext.Set<User>().Add(user);
+        dbContext.Set<UserEntity>().Add(user);
 
         dbContext.Set<Dictionary<string, object>>("user_roles").Add(new Dictionary<string, object>
         {
@@ -116,41 +117,25 @@ public static class SeedDataExtensions
         Role.Registered.Permissions.Clear();
     }
 
-    private static void ClearUserRoles(User user)
-    {
-        var rolesField = typeof(User).GetField("_roles", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-
-        if (rolesField?.GetValue(user) is List<Role> roles)
-        {
-            roles.Clear();
-        }
-    }
-
     private static void SeedConferenceHalls(ApplicationDbContext dbContext)
     {
-        if (dbContext.Set<ConferenceHall>().Any())
+        if (dbContext.Set<ConferenceHallEntity>().Any())
         {
             return;
         }
 
-        dbContext.Set<ConferenceHall>().AddRange(
-            new ConferenceHall(
-                Guid.NewGuid(),
-                new Name("Hall A"),
-                new Capacity(50),
-                new Money(2000m, Currency.Uah),
-                [Amenity.Projector, Amenity.WiFi, Amenity.SoundSystem]),
-            new ConferenceHall(
-                Guid.NewGuid(),
-                new Name("Hall B"),
-                new Capacity(100),
-                new Money(3500m, Currency.Uah),
-                [Amenity.Projector, Amenity.WiFi, Amenity.SoundSystem]),
-            new ConferenceHall(
-                Guid.NewGuid(),
-                new Name("Hall C"),
-                new Capacity(30),
-                new Money(1500m, Currency.Uah),
-                [Amenity.Projector, Amenity.WiFi, Amenity.SoundSystem]));
+        dbContext.Set<ConferenceHallEntity>().AddRange(
+            CreateHall("Hall A", 50, 2000m),
+            CreateHall("Hall B", 100, 3500m),
+            CreateHall("Hall C", 30, 1500m));
     }
+
+    private static ConferenceHallEntity CreateHall(string name, int capacity, decimal rate) => new()
+    {
+        Id = Guid.NewGuid(),
+        Name = new Name(name),
+        Seats = new Capacity(capacity),
+        Price = new Money(rate, Currency.Uah),
+        Amenities = [Amenity.Projector, Amenity.WiFi, Amenity.SoundSystem]
+    };
 }

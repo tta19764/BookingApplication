@@ -21,11 +21,10 @@ public class UpdateHallManager(
             return Result.Failure(ConferenceHallErrors.NotFound);
         }
 
-        hall.Update(
-            new Name(request.Name.Trim()),
-            new Capacity(request.Capacity),
-            new Money(request.HourlyRate, Currency.Uah),
-            request.Amenities);
+        hall.Name = new Name(request.Name.Trim());
+        hall.Seats = new Capacity(request.Capacity);
+        hall.Price = new Money(request.HourlyRate, Currency.Uah);
+        hall.Amenities = request.Amenities.Distinct().ToList();
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

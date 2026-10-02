@@ -1,3 +1,4 @@
+using BookingApp.Bll.Bookings;
 using BookingApp.Bll.Common.Models;
 using BookingApp.Bll.Reports.GetBookingSummary;
 using BookingApp.Bll.UnitTests.Infrastructure;
@@ -57,13 +58,18 @@ public class GetBookingSummaryManagerTests
             TimeOnly.Parse(startTime),
             TimeOnly.Parse(endTime));
 
-        return Booking.Reserve(
-            hall,
-            [Amenity.Projector],
-            Guid.NewGuid(),
-            duration,
-            new DateTime(2026, 7, 22, 8, 0, 0, DateTimeKind.Utc),
-            new PricingService());
+        var pricing = new PricingService().CalculatePrice(hall, duration, [Amenity.Projector]);
+        return new Booking(Guid.NewGuid())
+        {
+            ConferenceHallId = hall.Id,
+            UserId = Guid.NewGuid(),
+            Duration = duration,
+            PriceForPeriod = pricing.PriceForPeriod,
+            AmenitiesUpCharge = pricing.AmenitiesUpCharge,
+            TotalPrice = pricing.TotalPrice,
+            Status = BookingStatus.Reserved,
+            CreatedOnUtc = new DateTime(2026, 7, 22, 8, 0, 0, DateTimeKind.Utc)
+        };
     }
 
     private static async IAsyncEnumerable<IReadOnlyCollection<Booking>> ToAsyncPages(

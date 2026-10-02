@@ -2,6 +2,7 @@ using BookingApp.Services.Web.Contracts;
 using BookingApp.Services.Web.Dtos;
 using BookingApp.Services.Web.Extensions;
 using BookingApp.Services.Web.Mappings;
+using AutoMapper;
 using BookingApp.Bll.Bookings.AddBooking;
 using BookingApp.Bll.Bookings.GetBookings;
 using BookingApp.Bll.Abstractions.Messaging;
@@ -41,6 +42,7 @@ public static class BookingEndpoints
     public static async Task<IResult> GetBookings(
         [AsParameters] GetBookingsRequest request,
         IManagerDispatcher dispatcher,
+        IMapper mapper,
         CancellationToken cancellationToken)
     {
         var result = await dispatcher.Send(
@@ -48,15 +50,14 @@ public static class BookingEndpoints
             cancellationToken);
 
         return result.IsSuccess
-            ? Results.Ok(result.MapToApiResponse(models =>
-                (IReadOnlyCollection<BookingDto>)models.Select(DtoMapper.ToDto).ToList()))
-            : Results.BadRequest(result.MapToApiResponse(models =>
-                (IReadOnlyCollection<BookingDto>)models.Select(DtoMapper.ToDto).ToList()));
+            ? Results.Ok(result.MapToApiResponse(mapper.Map<IReadOnlyCollection<BookingDto>>))
+            : Results.BadRequest(result.MapToApiResponse(mapper.Map<IReadOnlyCollection<BookingDto>>));
     }
 
     public static async Task<IResult> CreateBooking(
         CreateBookingRequest request,
         IManagerDispatcher dispatcher,
+        IMapper mapper,
         CancellationToken cancellationToken)
     {
         var command = new AddBookingRequest(
@@ -71,11 +72,11 @@ public static class BookingEndpoints
 
         if (result.IsSuccess)
         {
-            return Results.Created($"/api/v{BookingAppApiVersions.V1RouteValue}/bookings/{result.Value.BookingId}", result.MapToApiResponse(DtoMapper.ToDto));
+            return Results.Created($"/api/v{BookingAppApiVersions.V1RouteValue}/bookings/{result.Value.BookingId}", result.MapToApiResponse(mapper.Map<BookingConfirmationDto>));
         }
 
         return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
-            ? Results.NotFound(result.MapToApiResponse(DtoMapper.ToDto))
-            : Results.BadRequest(result.MapToApiResponse(DtoMapper.ToDto));
+            ? Results.NotFound(result.MapToApiResponse(mapper.Map<BookingConfirmationDto>))
+            : Results.BadRequest(result.MapToApiResponse(mapper.Map<BookingConfirmationDto>));
     }
 }

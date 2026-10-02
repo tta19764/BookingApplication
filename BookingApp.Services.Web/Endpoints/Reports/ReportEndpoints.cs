@@ -2,6 +2,7 @@ using BookingApp.Services.Web.Contracts;
 using BookingApp.Services.Web.Dtos;
 using BookingApp.Services.Web.Extensions;
 using BookingApp.Services.Web.Mappings;
+using AutoMapper;
 using BookingApp.Bll.Reports.GetBookingSummary;
 using BookingApp.Bll.Abstractions.Messaging;
 
@@ -31,10 +32,11 @@ public static class ReportEndpoints
 
     public static async Task<IResult> GetBookingSummary(
         IManagerDispatcher dispatcher,
+        IMapper mapper,
         CancellationToken cancellationToken)
     {
         var result = await dispatcher.Send(new GetBookingSummaryRequest(), cancellationToken);
 
-        return Results.Ok(result.MapToApiResponse(DtoMapper.ToDto));
+        return Results.Ok(result.MapToApiResponse(mapper.Map<BookingSummaryDto>));
     }
 }

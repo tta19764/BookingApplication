@@ -6,7 +6,7 @@ namespace BookingApp.Bll.Common.ConferenceHalls;
 
 public class ConferenceHall : Entity
 {
-    protected ConferenceHall()
+    public ConferenceHall()
     {
     }
 
@@ -18,39 +18,10 @@ public class ConferenceHall : Entity
         Amenities = amenities;
     }
 
-    public Name Name { get; private set; } = null!;
-    public Capacity Seats { get; private set; } = null!;
-    public Money Price { get; private set; } = null!;
-    public DateTime? LastBookedOnUtc { get; protected internal set; }
-
-    public List<Amenity> Amenities { get; private set; } = [];
-
-    public ICollection<Booking> Bookings { get; private set; } = new List<Booking>();
-
-    public void Update(Name name, Capacity seats, Money price, IEnumerable<Amenity> amenities)
-    {
-        Name = name;
-        Seats = seats;
-        Price = price;
-        Amenities = amenities.Distinct().ToList();
-    }
-
-    public bool SupportsAmenity(Amenity amenity)
-    {
-        return Amenities.Contains(amenity);
-    }
-
-    public static ConferenceHall Restore(
-        Guid id,
-        Name name,
-        Capacity seats,
-        Money price,
-        IEnumerable<Amenity> amenities,
-        DateTime? lastBookedOnUtc)
-    {
-        return new ConferenceHall(id, name, seats, price, amenities.ToList())
-        {
-            LastBookedOnUtc = lastBookedOnUtc
-        };
-    }
+    public Name Name { get; set; } = null!;
+    public Capacity Seats { get; set; } = null!;
+    public Money Price { get; set; } = null!;
+    public DateTime? LastBookedOnUtc { get; set; }
+    public List<Amenity> Amenities { get; set; } = [];
+    public ICollection<Booking> Bookings { get; set; } = [];
 }

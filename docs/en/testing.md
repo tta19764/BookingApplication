@@ -10,7 +10,7 @@ Docker Desktop or another compatible Docker engine is required for integration t
 
 ## BookingApp.Bll.Common.UnitTests
 
-Fast tests for booking state transitions, domain events, supported hours, partial-hour calculations, tariff-boundary splitting, discounts, peak surcharges, amenity prices, and invalid periods. They do not use mocks, HTTP, or a database.
+Fast tests for booking manager-driven state transitions, supported hours, partial-hour calculations, tariff-boundary splitting, discounts, peak surcharges, amenity prices, and invalid periods. They do not use mocks, HTTP, or a database.
 
 ## BookingApp.Bll.UnitTests
 

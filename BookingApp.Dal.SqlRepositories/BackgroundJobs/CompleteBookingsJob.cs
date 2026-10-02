@@ -39,13 +39,13 @@ internal sealed class CompleteBookingsJob(
 
             foreach (var booking in bookings)
             {
-                // The aggregate owns the status transition and domain event creation.
-                var result = booking.Complete(utcNow);
-
-                if (result.IsFailure)
+                if (booking.Status != BookingStatus.Reserved)
                 {
                     continue;
                 }
+
+                booking.Status = BookingStatus.Completed;
+                booking.CompletedOnUtc = utcNow;
 
                 await unitOfWork.SaveChangesAsync(context.CancellationToken);
 

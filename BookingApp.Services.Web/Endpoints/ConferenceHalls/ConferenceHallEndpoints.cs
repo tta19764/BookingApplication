@@ -2,6 +2,7 @@ using BookingApp.Services.Web.Contracts;
 using BookingApp.Services.Web.Dtos;
 using BookingApp.Services.Web.Extensions;
 using BookingApp.Services.Web.Mappings;
+using AutoMapper;
 using BookingApp.Bll.ConferenceHalls.AddHall;
 using BookingApp.Bll.ConferenceHalls.GetAvailableHalls;
 using BookingApp.Bll.ConferenceHalls.GetHall;
@@ -68,6 +69,7 @@ public static class ConferenceHallEndpoints
     public static async Task<IResult> GetConferenceHalls(
         [AsParameters] GetConferenceHallsRequest request,
         IManagerDispatcher dispatcher,
+        IMapper mapper,
         CancellationToken cancellationToken)
     {
         var result = await dispatcher.Send(
@@ -75,10 +77,8 @@ public static class ConferenceHallEndpoints
             cancellationToken);
 
         return result.IsSuccess
-            ? Results.Ok(result.MapToApiResponse(models =>
-                (IReadOnlyCollection<ConferenceHallDto>)models.Select(DtoMapper.ToDto).ToList()))
-            : Results.BadRequest(result.MapToApiResponse(models =>
-                (IReadOnlyCollection<ConferenceHallDto>)models.Select(DtoMapper.ToDto).ToList()));
+            ? Results.Ok(result.MapToApiResponse(mapper.Map<IReadOnlyCollection<ConferenceHallDto>>))
+            : Results.BadRequest(result.MapToApiResponse(mapper.Map<IReadOnlyCollection<ConferenceHallDto>>));
     }
 
     public static async Task<IResult> CreateConferenceHall(
@@ -96,13 +96,14 @@ public static class ConferenceHallEndpoints
     public static async Task<IResult> GetConferenceHall(
         Guid hallId,
         IManagerDispatcher dispatcher,
+        IMapper mapper,
         CancellationToken cancellationToken)
     {
         var result = await dispatcher.Send(new GetHallRequest(hallId), cancellationToken);
 
         return result.IsSuccess
-            ? Results.Ok(result.MapToApiResponse(DtoMapper.ToDto))
-            : Results.NotFound(result.MapToApiResponse(DtoMapper.ToDto));
+            ? Results.Ok(result.MapToApiResponse(mapper.Map<ConferenceHallDto>))
+            : Results.NotFound(result.MapToApiResponse(mapper.Map<ConferenceHallDto>));
     }
 
     public static async Task<IResult> UpdateConferenceHall(
@@ -145,6 +146,7 @@ public static class ConferenceHallEndpoints
     public static async Task<IResult> GetAvailableConferenceHalls(
         [AsParameters] GetAvailableConferenceHallsRequest request,
         IManagerDispatcher dispatcher,
+        IMapper mapper,
         CancellationToken cancellationToken)
     {
         var query = new GetAvailableHallsRequest(
@@ -156,7 +158,7 @@ public static class ConferenceHallEndpoints
         var result = await dispatcher.Send(query, cancellationToken);
 
         return result.IsSuccess
-            ? Results.Ok(result.MapToApiResponse(models => models.Select(DtoMapper.ToDto)))
-            : Results.BadRequest(result.MapToApiResponse(models => models.Select(DtoMapper.ToDto)));
+            ? Results.Ok(result.MapToApiResponse(mapper.Map<IEnumerable<ConferenceHallDto>>))
+            : Results.BadRequest(result.MapToApiResponse(mapper.Map<IEnumerable<ConferenceHallDto>>));
     }
 }

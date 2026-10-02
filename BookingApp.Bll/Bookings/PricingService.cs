@@ -1,7 +1,8 @@
+using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.Shared;
 
-namespace BookingApp.Bll.Common.Bookings;
+namespace BookingApp.Bll.Bookings;
 
 /// <summary>
 /// Calculates booking prices from hall hourly rate, time-based modifiers, and selected amenities.
@@ -21,7 +22,7 @@ public sealed class PricingService
         // Pricing is allowed only for amenities that belong to the selected hall.
         foreach (var amenity in amenities ?? [])
         {
-            if (!hall.SupportsAmenity(amenity))
+            if (!hall.Amenities.Contains(amenity))
             {
                 throw new ArgumentException(
                     $"Hall '{hall.Name}' does not support '{amenity}'.");
