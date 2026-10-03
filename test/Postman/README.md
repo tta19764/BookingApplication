@@ -1,7 +1,7 @@
 # Postman API checks
 
 1. Start the stack with `docker compose up --build`.
-2. Import `BookingApp.Services.Web.postman_collection.json` and `BookingApp.Local.postman_environment.json`.
+2. Import `BookingApp.Api.postman_collection.json` and `BookingApp.Local.postman_environment.json`.
 3. Select the **BookingApp Local** environment.
 4. Run the complete collection in its defined order.
 
