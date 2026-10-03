@@ -1,0 +1,189 @@
+{
+  "info": {
+    "_postman_id": "baf09589-0109-4d9f-96ee-f5b02d79f2f5",
+    "name": "BookingApp Required API Methods",
+    "description": "Run the collection in order. It creates unique data and a future booking date automatically, then verifies all five required API operations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Add conference hall",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const suffix = Date.now().toString() + '-' + Math.floor(Math.random() * 1000000);",
+              "const bookingDate = new Date();",
+              "bookingDate.setUTCDate(bookingDate.getUTCDate() + 7);",
+              "pm.environment.set('runId', suffix);",
+              "pm.environment.set('bookingDate', bookingDate.toISOString().slice(0, 10));",
+              "pm.environment.unset('conferenceHallId');",
+              "pm.environment.unset('deletableHallId');",
+              "pm.environment.unset('bookingId');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Hall is created with HTTP 201', () => pm.response.to.have.status(201));",
+              "const response = pm.response.json();",
+              "pm.test('Unique hall ID is returned', function () {",
+              "  pm.expect(response.data).to.be.a('string').and.not.empty;",
+              "});",
+              "pm.environment.set('conferenceHallId', response.data);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Booking Hall {{runId}}\",\n  \"capacity\": 80,\n  \"hourlyRate\": 2000,\n  \"currencyCode\": \"UAH\",\n  \"amenities\": [1, 2]\n}"
+        },
+        "url": "{{baseUrl}}/api/{{apiVersion}}/conference-halls"
+      }
+    },
+    {
+      "name": "2. Update conference hall",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": ["pm.test('Hall is updated with HTTP 204', () => pm.response.to.have.status(204));"]
+        }
+      }],
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Booking Hall Updated {{runId}}\",\n  \"capacity\": 90,\n  \"hourlyRate\": 2500,\n  \"amenities\": [1, 2, 3]\n}"
+        },
+        "url": "{{baseUrl}}/api/{{apiVersion}}/conference-halls/{{conferenceHallId}}"
+      }
+    },
+    {
+      "name": "2a. Verify updated conference hall",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Updated hall is returned', () => pm.response.to.have.status(200));",
+            "const hall = pm.response.json().data;",
+            "pm.test('Updated values were persisted', function () {",
+            "  pm.expect(hall.id).to.eql(pm.environment.get('conferenceHallId'));",
+            "  pm.expect(hall.capacity).to.eql(90);",
+            "  pm.expect(hall.hourlyRate).to.eql(2500);",
+            "  pm.expect(hall.amenities).to.have.lengthOf(3);",
+            "});"
+          ]
+        }
+      }],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/{{apiVersion}}/conference-halls/{{conferenceHallId}}"
+      }
+    },
+    {
+      "name": "3a. Create disposable conference hall",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Disposable hall is created', () => pm.response.to.have.status(201));",
+            "const hallId = pm.response.json().data;",
+            "pm.expect(hallId).to.be.a('string').and.not.empty;",
+            "pm.environment.set('deletableHallId', hallId);"
+          ]
+        }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Disposable Hall {{runId}}\",\n  \"capacity\": 20,\n  \"hourlyRate\": 1500,\n  \"currencyCode\": \"UAH\",\n  \"amenities\": [1]\n}"
+        },
+        "url": "{{baseUrl}}/api/{{apiVersion}}/conference-halls"
+      }
+    },
+    {
+      "name": "3. Delete conference hall",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": ["pm.test('Hall is deleted with HTTP 204', () => pm.response.to.have.status(204));"]
+        }
+      }],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/{{apiVersion}}/conference-halls/{{deletableHallId}}"
+      }
+    },
+    {
+      "name": "4. Find available conference halls",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Availability search succeeds', () => pm.response.to.have.status(200));",
+            "const halls = pm.response.json().data;",
+            "pm.test('Created hall is available and meets capacity', function () {",
+            "  pm.expect(halls).to.be.an('array');",
+            "  pm.expect(halls.some(h => h.id === pm.environment.get('conferenceHallId') && h.capacity >= 80)).to.eql(true);",
+            "});"
+          ]
+        }
+      }],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/{{apiVersion}}/conference-halls/available?date={{bookingDate}}&startTime=12%3A00&endTime=14%3A00&capacity=80"
+      }
+    },
+    {
+      "name": "5. Book conference hall and calculate price",
+      "event": [{
+        "listen": "test",
+        "script": {
+          "type": "text/javascript",
+          "exec": [
+            "pm.test('Booking is created with HTTP 201', () => pm.response.to.have.status(201));",
+            "const confirmation = pm.response.json().data;",
+            "pm.test('Confirmation contains ID and exact price breakdown', function () {",
+            "  pm.expect(confirmation.bookingId).to.be.a('string').and.not.empty;",
+            "  pm.expect(confirmation.hallId).to.eql(pm.environment.get('conferenceHallId'));",
+            "  pm.expect(confirmation.priceForPeriod).to.eql(5750);",
+            "  pm.expect(confirmation.amenitiesUpCharge).to.eql(1500);",
+            "  pm.expect(confirmation.totalPrice).to.eql(7250);",
+            "  pm.expect(confirmation.currency).to.eql('UAH');",
+            "});",
+            "pm.environment.set('bookingId', confirmation.bookingId);"
+          ]
+        }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hallId\": \"{{conferenceHallId}}\",\n  \"date\": \"{{bookingDate}}\",\n  \"startTime\": \"12:00\",\n  \"endTime\": \"14:00\",\n  \"amenities\": [1, 2, 3]\n}"
+        },
+        "url": "{{baseUrl}}/api/{{apiVersion}}/bookings"
+      }
+    }
+  ]
+}
