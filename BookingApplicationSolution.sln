@@ -2,23 +2,23 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3B250370-6DC3-42AA-A87B-C0A6866A6836}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Services.Web", "BookingApp.Services.Web\BookingApp.Services.Web.csproj", "{C6C65C5F-45F2-4CC4-A369-BE3624157631}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Api", "BookingApp.Api\BookingApp.Api.csproj", "{C6C65C5F-45F2-4CC4-A369-BE3624157631}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Bll.Common", "BookingApp.Bll.Common\BookingApp.Bll.Common.csproj", "{3B159A76-6FE1-4BD7-8C8B-2CDB5E11838B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Domain", "BookingApp.Domain\BookingApp.Domain.csproj", "{3B159A76-6FE1-4BD7-8C8B-2CDB5E11838B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Bll", "BookingApp.Bll\BookingApp.Bll.csproj", "{FA684667-050D-46A3-ADB9-49E4D60D7FDC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Application", "BookingApp.Application\BookingApp.Application.csproj", "{FA684667-050D-46A3-ADB9-49E4D60D7FDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Dal.PostgreSQLRepositories", "BookingApp.Dal.PostgreSQLRepositories\BookingApp.Dal.PostgreSQLRepositories.csproj", "{20E62405-068D-45A9-8049-4F77A03DB569}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Infrastructure", "BookingApp.Infrastructure\BookingApp.Infrastructure.csproj", "{20E62405-068D-45A9-8049-4F77A03DB569}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Bll.Common.UnitTests", "test\BookingApp.Bll.Common.UnitTests\BookingApp.Bll.Common.UnitTests.csproj", "{31A04122-71B8-4022-B0B4-00E73D529814}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Domain.UnitTests", "BookingApp.Domain.UnitTests\BookingApp.Domain.UnitTests.csproj", "{31A04122-71B8-4022-B0B4-00E73D529814}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{0C88DD14-F956-CE84-757C-A364CCF449FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Bll.UnitTests", "test\BookingApp.Bll.UnitTests\BookingApp.Bll.UnitTests.csproj", "{A39FF2F1-207E-4E3D-8324-FE3F6A1806B0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Application.UnitTests", "test\BookingApp.Application.UnitTests\BookingApp.Application.UnitTests.csproj", "{A39FF2F1-207E-4E3D-8324-FE3F6A1806B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Services.Web.IntegrationTests", "test\BookingApp.Services.Web.IntegrationTests\BookingApp.Services.Web.IntegrationTests.csproj", "{ADDE2C78-CBA4-4885-B66C-F19EE8E1862B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Api.IntegrationTests", "test\BookingApp.Api.IntegrationTests\BookingApp.Api.IntegrationTests.csproj", "{ADDE2C78-CBA4-4885-B66C-F19EE8E1862B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Bll.IntegrationTests", "test\BookingApp.Bll.IntegrationTests\BookingApp.Bll.IntegrationTests.csproj", "{6301231C-F3E3-436B-97D7-B51B3A6ABDB9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Application.IntegrationTests", "test\BookingApp.Application.IntegrationTests\BookingApp.Application.IntegrationTests.csproj", "{6301231C-F3E3-436B-97D7-B51B3A6ABDB9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
