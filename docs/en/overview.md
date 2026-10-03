@@ -45,10 +45,11 @@ This exposes the API on `http://localhost:8080`, Swagger on `/swagger`, PostgreS
 For local execution, provide PostgreSQL at `localhost:5432` and run:
 
 ```powershell
-dotnet run --project BookingApp.Api
+dotnet run --project BookingApp.Services.Web
 ```
 
 ## Architecture
 
-Dependencies point inward: API and Infrastructure depend on Application and Domain, while Domain contains no transport or persistence concerns. Continue with the [Domain](domain.md), [Application](application.md), [Infrastructure](infrastructure.md), [API](api.md), and [Testing](testing.md) documents.
+The layer boundaries use separate representations: feature `Models` folders in `Bll.Common` contain business and read models, `Dal.PostgreSQLRepositories/Entities` contains EF Core persistence entities, and `Services.Web/Dtos` contains HTTP contracts. Explicit repository and DTO mappers prevent database and transport concerns from leaking into the business layer.
 
+`Services.Web` is the composition root and references every layer explicitly so all dependency injection registrations remain at the application boundary. Continue with the [Common](domain.md), [BLL](application.md), [DAL](infrastructure.md), [API](api.md), [Testing](testing.md), and [Refactoring](refactoring.md) documents.

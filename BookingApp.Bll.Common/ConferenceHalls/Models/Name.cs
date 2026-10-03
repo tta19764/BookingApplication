@@ -1,0 +1,6 @@
+namespace BookingApp.Bll.Common.ConferenceHalls.Models;
+
+/// <summary>
+/// Value object that stores the display name of a conference hall.
+/// </summary>
+public record Name(string Value);

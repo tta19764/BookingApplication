@@ -2,32 +2,32 @@
 
 Booking Application is a versioned REST API for managing conference halls and reservations. Clients can maintain a hall catalog, search availability, book halls with optional services, receive time-based price calculations, and read revenue analytics.
 
-The solution uses Clean Architecture with separate Domain, Application, Infrastructure, and API layers. It is built with .NET 10, ASP.NET Core Minimal APIs, EF Core, PostgreSQL, MediatR, FluentValidation, Quartz, Swagger, Serilog, xUnit, and Testcontainers.
+The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and Dal.PostgreSQLRepositories projects. It is built with .NET 10, ASP.NET Core MVC controllers, EF Core, PostgreSQL, Quartz, Swagger, Serilog, xUnit, and Testcontainers.
 
-Українська: Booking Application — це REST API для керування конференц-залами та бронюваннями. Система підтримує каталог залів, пошук доступності, додаткові послуги, розрахунок вартості за часовими тарифами й аналітику доходу. Рішення побудоване за принципами Clean Architecture.
+Українська: Booking Application — це REST API для керування конференц-залами та бронюваннями. Система підтримує каталог залів, пошук доступності, додаткові послуги, розрахунок вартості за часовими тарифами й аналітику доходу. Рішення побудоване за принципами layered architecture.
 
 ## Documentation / Документація
 
 | Subject | English | Українська |
 | --- | --- | --- |
 | Project overview, business rules, setup, and API | [Overview](docs/en/overview.md) | [Огляд](docs/ua/overview.md) |
-| Domain layer | [Domain](docs/en/domain.md) | [Доменний рівень](docs/ua/domain.md) |
-| Application layer | [Application](docs/en/application.md) | [Прикладний рівень](docs/ua/application.md) |
-| Infrastructure layer | [Infrastructure](docs/en/infrastructure.md) | [Інфраструктурний рівень](docs/ua/infrastructure.md) |
+| Common layer | [Common](docs/en/domain.md) | [Рівень Common](docs/ua/domain.md) |
+| BLL layer | [BLL](docs/en/application.md) | [Рівень BLL](docs/ua/application.md) |
+| DAL layer | [DAL](docs/en/infrastructure.md) | [Рівень DAL](docs/ua/infrastructure.md) |
 | API layer | [API](docs/en/api.md) | [Рівень API](docs/ua/api.md) |
 | Test projects and strategy | [Testing](docs/en/testing.md) | [Тестування](docs/ua/testing.md) |
 | Features added beyond the assignment | [Extended features](docs/en/extended-features.md) | [Розширені можливості](docs/ua/extended-features.md) |
+| Layered architecture refactoring | [Refactoring](docs/en/refactoring.md) | [Рефакторинг](docs/ua/refactoring.md) |
 
 ## Technologies and tools / Технології та інструменти
 
 | Area | Technologies and purpose |
 | --- | --- |
 | Runtime and language | **.NET 10** and **C#** for the application and test projects. |
-| Web API | **ASP.NET Core Minimal APIs** for HTTP endpoints and **ASP.NET API Versioning** for `/api/v1`. |
+| Web API | **ASP.NET Core MVC controllers** for HTTP endpoints and **ASP.NET API Versioning** for `/api/v1`. |
 | API documentation | **Swagger/OpenAPI** through Swashbuckle for interactive endpoint documentation. |
-| Application flow | **MediatR** for commands, queries, handlers, pipeline behaviors, and domain-event dispatch. |
-| Validation | **FluentValidation** for centralized request and command validation. |
-| Domain design | Clean Architecture, entities, value objects, domain events, repository abstractions, and Result-based errors. |
+| Application flow | Feature-oriented **BLL managers** that expose service-style business operations. |
+| Domain design | Layered architecture, anemic Common models, DAL entities, AutoMapper profiles, repository abstractions, FluentValidation, and Result-based errors. |
 | Persistence | **Entity Framework Core**, **Npgsql**, **PostgreSQL**, and EF Core migrations. |
 | Background work | **Quartz.NET** for automatically completing expired bookings. |
 | Logging | **Serilog** for structured logging and **Seq** for local log collection and inspection. |
