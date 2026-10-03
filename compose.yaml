@@ -4,7 +4,7 @@ services:
     image: bookingapp.api
     build:
       context: .
-      dockerfile: BookingApp.Api/Dockerfile
+      dockerfile: BookingApp.Services.Web/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
