@@ -11,10 +11,10 @@ The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and
 | Subject | English | Українська |
 | --- | --- | --- |
 | Project overview, business rules, setup, and API | [Overview](docs/en/overview.md) | [Огляд](docs/ua/overview.md) |
-| Common layer | [Common](docs/en/domain.md) | [Рівень Common](docs/ua/domain.md) |
-| BLL layer | [BLL](docs/en/application.md) | [Рівень BLL](docs/ua/application.md) |
-| DAL layer | [DAL](docs/en/infrastructure.md) | [Рівень DAL](docs/ua/infrastructure.md) |
-| API layer | [API](docs/en/api.md) | [Рівень API](docs/ua/api.md) |
+| Common layer | [Common](docs/en/bll.common.md) | [Рівень Common](docs/ua/bll.common.md) |
+| BLL layer | [BLL](docs/en/bll.md) | [Рівень BLL](docs/ua/bll.md) |
+| DAL layer | [DAL](docs/en/dal.postgresqlrepositories.md) | [Рівень DAL](docs/ua/dal.postgresqlrepositories.md) |
+| Service layer | [Service](docs/en/services.web.md) | [Рівень Service](docs/ua/services.web.md) |
 | Test projects and strategy | [Testing](docs/en/testing.md) | [Тестування](docs/ua/testing.md) |
 | Features added beyond the assignment | [Extended features](docs/en/extended-features.md) | [Розширені можливості](docs/ua/extended-features.md) |
 | Layered architecture refactoring | [Refactoring](docs/en/refactoring.md) | [Рефакторинг](docs/ua/refactoring.md) |
