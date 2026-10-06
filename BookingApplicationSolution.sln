@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Bll.Common", "Bo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Bll", "BookingApp.Bll\BookingApp.Bll.csproj", "{FA684667-050D-46A3-ADB9-49E4D60D7FDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Dal.PostgreSQLRepositories", "BookingApp.Dal.PostgreSQLRepositories\BookingApp.Dal.PostgreSQLRepositories.csproj", "{20E62405-068D-45A9-8049-4F77A03DB569}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Dal.SqlServerRepositories", "BookingApp.Dal.SqlServerRepositories\BookingApp.Dal.SqlServerRepositories.csproj", "{20E62405-068D-45A9-8049-4F77A03DB569}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookingApp.Bll.Common.UnitTests", "test\BookingApp.Bll.Common.UnitTests\BookingApp.Bll.Common.UnitTests.csproj", "{31A04122-71B8-4022-B0B4-00E73D529814}"
 EndProject
