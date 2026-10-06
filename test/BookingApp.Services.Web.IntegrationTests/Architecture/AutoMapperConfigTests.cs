@@ -14,7 +14,7 @@ public sealed class AutoMapperConfigTests
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ConnectionStrings:Database"] = "Host=localhost;Database=test;Username=test;Password=test"
+                ["ConnectionStrings:Database"] = "Server=localhost;Database=test;Integrated Security=True;Encrypt=True"
             })
             .Build();
         var services = new ServiceCollection();
