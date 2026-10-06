@@ -17,8 +17,7 @@ public class ConferenceHallManagerTests
     {
         // Arrange
         var repository = Substitute.For<IConferenceHallRepository>();
-        var unitOfWork = Substitute.For<IUnitOfWork>();
-        var manager = new ConferenceHallManager(repository, unitOfWork, Substitute.For<IMapper>(),
+        var manager = new ConferenceHallManager(repository, Substitute.For<IMapper>(),
             new CreateHallModelValidator(), new UpdateHallModelValidator(), new HallReferenceModelValidator(),
             new FindAvailableHallsModelValidator(), new PaginationModelValidator());
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -29,7 +28,6 @@ public class ConferenceHallManagerTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        repository.Received(1).Add(Arg.Is<ConferenceHall>(hall => hall.Id == result.Value));
-        await unitOfWork.Received(1).SaveChangesAsync(cancellationToken);
+        await repository.Received(1).AddAsync(Arg.Is<ConferenceHall>(hall => hall.Id == result.Value), cancellationToken);
     }
 }

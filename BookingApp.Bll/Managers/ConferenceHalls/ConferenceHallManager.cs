@@ -15,7 +15,6 @@ namespace BookingApp.Bll.Managers.ConferenceHalls;
 
 public sealed class ConferenceHallManager(
     IConferenceHallRepository hallRepository,
-    IUnitOfWork unitOfWork,
     IMapper mapper,
     IValidator<CreateHallModel> createHallValidator,
     IValidator<UpdateHallModel> updateHallValidator,
@@ -30,8 +29,7 @@ public sealed class ConferenceHallManager(
         var hall = new ConferenceHall(Guid.NewGuid(), new Name(model.Name.Trim()), new Capacity(model.Capacity),
             new Money(model.HourlyRate, Currency.FromCode(model.CurrencyCode.Trim().ToUpperInvariant())),
             model.Amenities.Distinct().ToList());
-        hallRepository.Add(hall);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await hallRepository.AddAsync(hall, cancellationToken);
         return Result.Success(hall.Id);
     }
 
@@ -61,9 +59,9 @@ public sealed class ConferenceHallManager(
         hall.Seats = new Capacity(model.Capacity);
         hall.Price = new Money(model.HourlyRate, Currency.Uah);
         hall.Amenities = model.Amenities.Distinct().ToList();
-        hallRepository.Update(hall);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        return await hallRepository.UpdateAsync(hall, cancellationToken)
+            ? Result.Success()
+            : Result.Failure(ConferenceHallErrors.NotFound);
     }
 
     public async Task<Result> RemoveHallAsync(HallReferenceModel model, CancellationToken cancellationToken)
@@ -71,9 +69,13 @@ public sealed class ConferenceHallManager(
         await hallReferenceValidator.ValidateForApplicationAsync(model, cancellationToken);
         var hall = await hallRepository.GetByIdAsync(model.HallId, cancellationToken);
         if (hall is null) return Result.Failure(ConferenceHallErrors.NotFound);
-        hallRepository.Remove(hall);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        return await hallRepository.RemoveAsync(hall.Id, cancellationToken) switch
+        {
+            HallRemovalOutcome.Removed => Result.Success(),
+            HallRemovalOutcome.NotFound => Result.Failure(ConferenceHallErrors.NotFound),
+            HallRemovalOutcome.HasBookings => Result.Failure(ConferenceHallErrors.HasBookings),
+            _ => throw new InvalidOperationException("Unexpected hall removal outcome")
+        };
     }
 
     public async Task<Result<IEnumerable<HallModel>>> GetAvailableHallsAsync(FindAvailableHallsModel model,

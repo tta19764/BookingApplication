@@ -5,6 +5,7 @@ using FluentAssertions;
 
 namespace BookingApp.Bll.IntegrationTests.ConferenceHalls;
 
+[Collection("SqlServer")]
 public class GetAvailableHallsTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
     [Fact]
