@@ -30,19 +30,19 @@ Amenities are charged once per booking: Projector `500 UAH`, Wi-Fi `300 UAH`, an
 
 ## Seed data
 
-Development startup creates Hall A (50 seats, 2000 UAH/hour), Hall B (100, 3500), Hall C (30, 1500), and the seeded user `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa`. Authentication is outside the current scope, so booking endpoints use this user.
+Reference SQL installs the user `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` while authentication is outside scope. Optional `004_demo_seed.sql` creates Hall A (50 seats, 2000 UAH/hour), Hall B (100, 3500), and Hall C (30, 1500). Web startup does not seed data.
 
 ## Running
 
-With Docker Desktop running:
+Deploy the [SQL Server scripts](../../BookingApp.Dal.SqlServerRepositories/Database/README.md) to an approved remote database and set `ConnectionStrings__Database` with runtime credentials. For optional API/Seq hosting with Docker:
 
 ```powershell
 docker compose up --build
 ```
 
-This exposes the API on `http://localhost:8080`, Swagger on `/swagger`, PostgreSQL on `localhost:5432`, and Seq on `http://localhost:8081`.
+This exposes API on `http://localhost:8080`, Swagger on `/swagger`, and Seq on `http://localhost:8081`. The database remains remote SQL Server.
 
-For local execution, provide PostgreSQL at `localhost:5432` and run:
+For local execution with the remote connection configured, run:
 
 ```powershell
 dotnet run --project BookingApp.Services.Web
@@ -50,6 +50,6 @@ dotnet run --project BookingApp.Services.Web
 
 ## Architecture
 
-The layer boundaries use separate representations: feature `Models` folders in `Bll.Common` contain business and read models, `Dal.PostgreSQLRepositories/Entities` contains EF Core persistence entities, and `Services.Web/Dtos` contains HTTP contracts. Explicit repository and DTO mappers prevent database and transport concerns from leaking into the business layer.
+Common contains business/read models, DAL readers hydrate persistence entities and AutoMapper converts them to business models, and Services owns HTTP DTOs. Only DAL knows the provider. Async writes call stored procedures directly; atomic reservation operations replace EF tracking and IUnitOfWork.
 
-`Services.Web` is the composition root and references every layer explicitly so all dependency injection registrations remain at the application boundary. Continue with the [Common](bll.common.md), [BLL](bll.md), [DAL](dal.postgresqlrepositories.md), [Service](services.web.md), [Testing](testing.md), and [Refactoring](refactoring.md) documents.
+`Services.Web` is the composition root and references every layer explicitly so all dependency injection registrations remain at the application boundary. Continue with the [Common](bll.common.md), [BLL](bll.md), [DAL](dal.sqlserverrepositories.md), [Service](services.web.md), [Testing](testing.md), and [Refactoring](refactoring.md) documents.

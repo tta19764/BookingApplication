@@ -2,7 +2,7 @@
 
 Booking Application is a versioned REST API for managing conference halls and reservations. Clients can maintain a hall catalog, search availability, book halls with optional services, receive time-based price calculations, and read revenue analytics.
 
-The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and Dal.PostgreSQLRepositories projects. It is built with .NET 10, ASP.NET Core MVC controllers, EF Core, PostgreSQL, Quartz, Swagger, Serilog, xUnit, and Testcontainers.
+The solution uses Services.Web, Bll, Bll.Common, and Dal.SqlServerRepositories layers. It is built with .NET 10, ASP.NET Core MVC, ADO.NET (Microsoft.Data.SqlClient), remote SQL Server stored procedures, Quartz, Swagger, Serilog, xUnit, and test-only SQL Server Testcontainers.
 
 Українська: Booking Application — це REST API для керування конференц-залами та бронюваннями. Система підтримує каталог залів, пошук доступності, додаткові послуги, розрахунок вартості за часовими тарифами й аналітику доходу. Рішення побудоване за принципами layered architecture.
 
@@ -13,7 +13,8 @@ The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and
 | Project overview, business rules, setup, and API | [Overview](docs/en/overview.md) | [Огляд](docs/ua/overview.md) |
 | Common layer | [Common](docs/en/bll.common.md) | [Рівень Common](docs/ua/bll.common.md) |
 | BLL layer | [BLL](docs/en/bll.md) | [Рівень BLL](docs/ua/bll.md) |
-| DAL layer | [DAL](docs/en/dal.postgresqlrepositories.md) | [Рівень DAL](docs/ua/dal.postgresqlrepositories.md) |
+| DAL layer | [DAL](docs/en/dal.sqlserverrepositories.md) | [Рівень DAL](docs/ua/dal.sqlserverrepositories.md) |
+| Database deployment and scripts | [SQL Server setup](BookingApp.Dal.SqlServerRepositories/Database/README.md) | [План міграції](docs/en/ef-to-ado-net-migration-plan.md) |
 | Service layer | [Service](docs/en/services.web.md) | [Рівень Service](docs/ua/services.web.md) |
 | Test projects and strategy | [Testing](docs/en/testing.md) | [Тестування](docs/ua/testing.md) |
 | Features added beyond the assignment | [Extended features](docs/en/extended-features.md) | [Розширені можливості](docs/ua/extended-features.md) |
@@ -27,18 +28,26 @@ The solution uses a layered architecture with Services.Web, Bll, Bll.Common, and
 | Web API | **ASP.NET Core MVC controllers** for HTTP endpoints and **ASP.NET API Versioning** for `/api/v1`. |
 | API documentation | **Swagger/OpenAPI** through Swashbuckle for interactive endpoint documentation. |
 | Application flow | Feature-oriented **BLL managers** that expose service-style business operations. |
-| Domain design | Layered architecture, anemic Common models, DAL entities, AutoMapper profiles, repository abstractions, FluentValidation, and Result-based errors. |
-| Persistence | **Entity Framework Core**, **Npgsql**, **PostgreSQL**, and EF Core migrations. |
+| Domain design | Common models, DAL persistence entities and DAL/BLL/HTTP AutoMapper profiles, async repositories, FluentValidation and Result-based errors. |
+| Persistence | **ADO.NET**, **Microsoft.Data.SqlClient**, remote **SQL Server**, stored procedures and versioned T-SQL scripts. |
 | Background work | **Quartz.NET** for automatically completing expired bookings. |
 | Logging | **Serilog** for structured logging and **Seq** for local log collection and inspection. |
-| Containers | **Docker** and **Docker Compose** for the API, PostgreSQL, and Seq development stack. |
+| Containers | Optional API/Seq Compose stack; SQL Server containers only for integration tests. |
 | Automated testing | **xUnit**, **FluentAssertions**, **NSubstitute**, `WebApplicationFactory`, and **Testcontainers**. |
-| Manual/API testing | **Postman** collection and environment under [`test/Postman`](test/Postman), ready to run without editing data. |
+| Manual/API testing | **Postman** collection and environment under [`test/Postman`](test/Postman), ready to run once the database and required reference user are configured. |
 | Dependency security | NuGet vulnerability auditing and a patched direct SSH.NET dependency used by Testcontainers. |
 
 ## Quick start / Швидкий старт
 
-Prerequisite / Передумова: Docker Desktop.
+Prerequisites: .NET 10 and an approved remote SQL Server database. Docker is needed only for integration tests or optional API/Seq hosting.
+
+Create the initial SQL Server database using your code-first setup, then generate the reusable initial setup script from that database. Ensure its schema matches the [DAL schema contract and stored procedures](BookingApp.Dal.SqlServerRepositories/Database/README.md). Configure a separate EXECUTE-only application user through `ConnectionStrings__Database` or user secrets. No deployment-tool project is included.
+
+```powershell
+dotnet run --project BookingApp.Services.Web
+```
+
+For optional API/Seq containers, set `ConnectionStrings__Database` to the remote runtime connection string before running:
 
 ```powershell
 docker compose up --build
@@ -46,7 +55,6 @@ docker compose up --build
 
 - API and Swagger: `http://localhost:8080` and `http://localhost:8080/swagger`
 - Seq: `http://localhost:8081`
-- PostgreSQL: `localhost:5432`
 
 Run all tests / Запуск усіх тестів:
 
@@ -54,6 +62,6 @@ Run all tests / Запуск усіх тестів:
 dotnet test BookingApplicationSolution.sln
 ```
 
-The integration test projects start temporary PostgreSQL containers and therefore require a working Docker engine.
+Integration tests start ephemeral SQL Server containers with the real scripts and restricted runtime credentials. They require Docker and do not connect to the remote application database. The app never applies migrations or seeds automatically at startup. Existing PostgreSQL data requires a deliberate export/import; deployment does not transfer it.
 
-For an out-of-the-box manual verification of the five required API methods, import the files from [`test/Postman`](test/Postman) and run the collection in order.
+After initial database setup, for manual verification of the five required API methods, import the files from [`test/Postman`](test/Postman) and run the collection in order.

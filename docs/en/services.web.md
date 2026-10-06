@@ -26,7 +26,7 @@ GET    /api/v1/reports/bookings-summary
 - Central exception handling prevents internal exception details from leaking to clients.
 - Request-context logging through Serilog and Seq.
 - HTTPS redirection in the middleware pipeline.
-- Development migrations and idempotent seed-data initialization.
+- Initial schema setup uses code first and a generated SQL script; web startup does not create or seed databases.
 
 The current API uses a seeded user. Production deployment should add authentication, authorization policies, secret management, rate limiting, and environment-specific trust/proxy configuration.
 

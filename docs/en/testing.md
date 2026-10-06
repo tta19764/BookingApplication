@@ -1,6 +1,6 @@
 # Testing
 
-All test methods use explicit `Arrange`, `Act`, and `Assert` sections. Run the entire suite with:
+Run the entire suite with:
 
 ```powershell
 dotnet test BookingApplicationSolution.sln
@@ -14,17 +14,21 @@ Fast tests for value objects and business-model behavior without mocks, HTTP, or
 
 ## BookingApp.Bll.UnitTests
 
-Manager and validator tests using NSubstitute and FluentAssertions. They verify hall creation, booking success and missing-hall behavior, pricing rules, input validation, repository and unit-of-work calls, event dispatch, and paginated report aggregation.
+Manager and validator tests use NSubstitute and FluentAssertions. They verify asynchronous writes, atomic reservation outcomes, event dispatch only after success, persistence failures, pricing, validation and paginated reporting.
 
 ## BookingApp.Bll.IntegrationTests
 
-BLL-level tests resolve managers and EF Core from the real host, call manager methods without HTTP, and verify PostgreSQL persistence, mappings, seeded data, UTC timestamps, availability, and price breakdowns.
+BLL tests call managers and the production SqlClient repositories against SQL Server Testcontainers. They cover mapping/Unicode/UTC/money, status-aware occupancy, concurrent reservations, rollback of hall changes, role/permission hydration, guarded completion, migration reruns/checksums and EXECUTE-only permissions. A shared nonparallel test collection owns one container; tests use distinct data IDs.
 
 ## BookingApp.Services.Web.IntegrationTests
 
-End-to-end tests call the in-memory ASP.NET Core host through `HttpClient` while using a real temporary PostgreSQL database. They cover the five required operations: create, update, delete, availability search, and booking. Assertions include HTTP status codes, routing/model binding, JSON contracts, persistence, overlap exclusion, and exact peak-hour/amenity totals.
+HTTP tests use HttpClient and a SQL Server container. They cover hall create/update/delete, availability and booking, HTTP statuses, JSON contracts and price totals.
 
-Architecture tests in this project also validate all AutoMapper profiles, DAL entity inheritance, controller-to-manager boundaries, `TimeOnly` request serialization, and domain-event dispatch behavior.
+Architecture tests verify provider-free BLL dependencies, AutoMapper profiles, controller boundaries, TimeOnly serialization, domain-event dispatch and the bounded completion job.
 
-Each integration test project owns its `WebApplicationFactory` and PostgreSQL container so API and application test concerns remain separate.
+Both test projects link `test/Shared/SqlServerWebAppFactory.cs`. The fixture starts an ephemeral SQL Server, applies the production embedded scripts, creates a restricted runtime identity and disposes the host/container after tests. Scheduled completion is disabled in API fixtures. No remote application credentials are used.
 
+The SQL Server 2022 image is pinned by digest. Override `BOOKINGAPP_TEST_SQL_IMAGE` to match the remote engine major version and align compatibility level/collation/isolation where needed. Allow time/resources for the first image pull; CI failures to start SQL Server are reported as test failures. Optional remote staging smoke tests separately validate TLS, authentication and network access. See [database deployment](../../BookingApp.Dal.SqlServerRepositories/Database/README.md).
+
+
+The current suite has 64 tests: Common 1, BLL unit 27, BLL integration 22 and Web integration 14. Entity architecture checks cover Guid identity inheritance and prevent business/provider types in DAL entity properties. Database-folder artifacts are deliberately kept outside the migration commits; restore/provision those local artifacts before building the integration test bootstrap from such a checkout.
