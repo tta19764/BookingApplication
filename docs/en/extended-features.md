@@ -4,7 +4,7 @@ The assignment requires hall creation, editing, deletion, availability search, b
 
 ## Users, roles, and permissions
 
-Common contains `User`, `Role`, `Permission`, and `RolePermission` business models and repository contracts. DAL contains their EF Core mappings and persistence representation. Development seeding creates a stable system user and associates it with the Registered role and hall/booking read/write permissions.
+Common contains `User`, `Role`, `Permission`, and `RolePermission` business models and repository contracts. DAL contains persistence entities, reader hydration and AutoMapper profiles. Reference SQL explicitly creates a stable system user and associates it with the Registered role and hall/booking read/write permissions.
 
 The booking controller currently assigns reservations to this seeded user because registration and authentication were not part of the requested API methods. These models prepare the solution for later identity integration, but they do **not** currently enforce controller authorization. Production work should add authentication and permission policies before treating the API as multi-user secure.
 
@@ -18,7 +18,7 @@ In addition to the five required mutations/search operations, the API exposes ha
 
 ## Booking lifecycle automation
 
-Bookings have explicit Reserved, Rejected, Completed, and Cancelled states. A Quartz background job finds expired reserved bookings in bounded batches and completes them automatically.
+Bookings have explicit Reserved, Rejected, Completed, and Cancelled states. A Quartz background job atomically completes expired reservations in bounded batches and logs the actual transitioned count. Each run uses one UTC cutoff. Set `BackgroundJobs:CompleteBookings:Enabled` to false to disable scheduling; test fixtures do this automatically.
 
 ## Versioning and API documentation
 
@@ -32,14 +32,14 @@ Operation-specific FluentValidation validators enforce context-free input constr
 
 Serilog adds structured request and application logs. Docker Compose includes Seq so developers can search and inspect logs without additional setup. A Services domain-event handler logs booking creation events.
 
-## Seed data and repeatable startup
+## Explicit initial database setup
 
-Development startup applies migrations and idempotently creates roles, permissions, the seeded user, and the three required halls. Stable user identity and generated hall IDs make local scenarios predictable without hard-coding database rows in clients.
+Web startup performs no schema changes or seeding. Create the initial schema using the external code-first setup, install the stored procedures and required reference data, then generate a reusable setup script from that database. The repository contains no code-first context or deployment-tool project. Optional demo SQL creates Hall A, Hall B and Hall C with stable IDs.
 
 ## Expanded verification
 
-The solution separates Common unit, BLL unit, BLL integration, and Services Web integration tests. PostgreSQL Testcontainers validate real mappings and queries. The collection in `test/Postman/` dynamically generates future dates and unique names, chains IDs, and asserts all five required API operations repeatedly without manual data changes.
+The solution separates Common unit, BLL unit, BLL integration, and Services Web integration tests. SQL Server Testcontainers validate real mappings and queries. The collection in `test/Postman/` dynamically generates future dates and unique names, chains IDs, and asserts all five required API operations repeatedly without manual data changes.
 
 ## Operational foundation
 
-Docker Compose supplies the API, PostgreSQL, and Seq. Configuration is split by environment, timestamps are stored in UTC, and .NET `TimeProvider` keeps time-dependent behavior testable.
+Docker Compose supplies the API and Seq; the database is remote SQL Server. Configuration is split by environment, timestamps are stored in UTC, and .NET `TimeProvider` keeps time-dependent behavior testable.

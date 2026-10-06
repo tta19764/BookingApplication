@@ -1,63 +1,24 @@
-# Layered architecture refactoring
+# Layered architecture and ADO.NET migration
 
-The project was migrated from its earlier Clean Architecture/CQRS-oriented structure to an explicit layered architecture. The current solution contains four production projects and four test projects; obsolete `Api`, `Application`, `Domain`, and `Infrastructure` project directories are no longer part of the repository.
+The earlier layered refactor replaced mediator handlers with managers and versioned MVC controllers. This migration replaces its EF/PostgreSQL persistence with ADO.NET and remote SQL Server stored procedures.
 
-## Current project mapping
-
-| Project | Layer | Responsibility |
-| --- | --- | --- |
-| `BookingApp.Services.Web` | Service | MVC controllers, HTTP DTOs, middleware, configuration, dependency injection, Swagger, background jobs, seed data, and domain-event handlers. |
-| `BookingApp.Bll.Common` | Common | Business models, value objects, manager interfaces, repository interfaces, errors, results, and domain-event contracts. It has no dependency on ASP.NET Core or EF Core. |
-| `BookingApp.Bll` | BLL | Service-style managers, pricing, booking-period construction, FluentValidation validators, and mappings from business models to BLL read models. |
-| `BookingApp.Dal.PostgreSQLRepositories` | DAL | EF Core context, PostgreSQL repositories, persistence entities, entity configurations, AutoMapper mappings, and migrations. |
-
-The compile-time dependency direction is:
+| Project | Responsibility |
+| --- | --- |
+| BookingApp.Services.Web | HTTP DTOs/controllers, middleware, composition, Swagger, events and Quartz jobs. |
+| BookingApp.Bll.Common | Provider-independent business models, value objects, repository/manager contracts, results and events. |
+| BookingApp.Bll | Validation, pricing, booking workflow and application read models. |
+| BookingApp.Dal.SqlServerRepositories | SqlClient connections/commands, persistence entities, reader hydration, AutoMapper profiles and stored procedure scripts. |
 
 ```text
-Services.Web ──> Bll ──> Bll.Common
-      │                     ▲
-      └──> Dal.PostgreSQLRepositories ──┘
+Services.Web -> Bll -> Bll.Common
+     |                    ^
+     +-> SqlServer DAL ---+
 ```
 
-`Services.Web` is the composition root and is the only project that registers concrete implementations.
+Controllers depend on managers; BLL depends on Common repository interfaces. The DAL registration extension creates concrete repositories. Provider types and SQL stay in DAL. DAL persistence entities and AutoMapper profiles isolate storage representations from Common business models. BLL/Services retain their AutoMapper profiles; generic tracked repositories and EF tracking are removed.
 
-## Main changes
+Async writes persist immediately. IUnitOfWork is removed. One reservation operation atomically inserts the booking and updates hall booking time; SQL Server hall locks serialize occupancy checks. Only Reserved bookings block a hall. Hall edits never overwrite last-booked time, and referenced hall deletion returns HTTP 409. Completion uses bounded guarded updates and actual committed counts. BLL retains validation/pricing, and event dispatch occurs after commit.
 
-### Managers instead of request handlers
+Web startup does not migrate or seed the remote database. Initial setup uses your code-first database followed by a generated SQL setup script; no deployment-tool project is included. Stored procedures and required reference data are included before generating that script. PostgreSQL migrations cannot be replayed on SQL Server; existing data requires a validated export/import. See the [setup guide](../../BookingApp.Dal.SqlServerRepositories/Database/README.md) and [migration plan](ef-to-ado-net-migration-plan.md).
 
-MediatR, Commands, Queries, and request handlers were removed. Controllers call `IBookingManager`, `IConferenceHallManager`, and `IReportManager`. Managers expose cohesive business operations and use repository abstractions and other business services through dependency injection.
-
-### Separate representations at each boundary
-
-- Common contains anemic business models and operation input models.
-- DAL contains EF Core entities that inherit the persistence-only `Entity` base class.
-- Services contains HTTP request and response DTOs.
-- AutoMapper profiles are owned by the layer performing each conversion: Services maps HTTP DTOs, BLL builds read models, and DAL maps business models to persistence entities.
-
-### MVC controllers
-
-Minimal API endpoint groups were replaced with versioned ASP.NET Core MVC controllers. Controllers depend on manager interfaces and `IMapper`; they do not access repositories or EF Core directly. Existing `/api/v1` routes and response envelopes were preserved.
-
-### Validation
-
-The static `ManagerInputValidator` was replaced with operation-specific FluentValidation validators in BLL. Common input models use `DateOnly` and `TimeOnly` instead of passing time strings into managers. Services discovers all public BLL validators by assembly. Managers retain rules that require application state, such as hall existence, booking overlap, supported amenities, and past-time checks.
-
-### Explicit persistence
-
-The former save-time `EntityChangeTracker` copied changed Common models back into tracked EF entities implicitly. It was removed. Repositories now expose explicit `Update` operations, map changes into entities found by EF Core, and persist them through `IUnitOfWork`. The generic repository orders pages directly by the shared DAL entity ID and has no redundant ordering or model-ID hooks.
-
-### Mappings and dependency injection
-
-Manual `ToModel` projections in managers were replaced with the BLL AutoMapper profile. Services performs the single AutoMapper registration for the Services, BLL, and DAL profiles. FluentValidation uses assembly discovery, while managers, repositories, event dispatchers, and jobs remain explicitly registered at the composition root.
-
-### Tests and repository layout
-
-All test projects and the Postman assets are under `test/`. The maintained suites are `BookingApp.Bll.Common.UnitTests`, `BookingApp.Bll.UnitTests`, `BookingApp.Bll.IntegrationTests`, and `BookingApp.Services.Web.IntegrationTests`. Architecture tests verify AutoMapper configuration, DAL entity rules, controller dependencies, request serialization, and event dispatch. Obsolete build directories from the former projects were removed.
-
-### Database migration impact
-
-The migration history was consolidated into the current initial migration. Existing local databases created by the old migration chain are not compatible with that new history. Disposable development databases must be recreated; production data would require a deliberate incremental migration or migration-history reconciliation instead of deleting the database.
-
-## Result
-
-The refactored solution has explicit layer boundaries, controller-to-manager flow, visible persistence operations, centralized composition, independently testable business logic, and no dependency on a mediator pipeline. The API behavior and required business capabilities remain intact.
+All four maintained test suites and Postman assets remain under test/. SQL Server Testcontainers run production scripts with restricted runtime credentials. Architecture tests verify provider isolation, mappings, controller boundaries, serialization and events; persistence tests cover concurrency, rollback, completion and permissions. Application deployment uses remote SQL Server; database containers are test-only.

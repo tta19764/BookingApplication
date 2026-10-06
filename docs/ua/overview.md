@@ -30,19 +30,19 @@ Booking Application керує орендою конференц-залів. К�
 
 ## Початкові дані
 
-У середовищі розробки створюються `Hall A` (50 місць, 2000 UAH/год), `Hall B` (100, 3500), `Hall C` (30, 1500) і користувач `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa`. Автентифікація не входить до поточного обсягу, тому контролер бронювання використовує цього користувача.
+Reference SQL створює користувача `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa`, якого використовує API до впровадження автентифікації. Необов'язковий 004_demo_seed.sql створює Hall A, Hall B і Hall C. Startup не заповнює базу.
 
 ## Запуск
 
-Коли Docker Desktop запущено:
+Застосуйте [SQL-скрипти](../../BookingApp.Dal.SqlServerRepositories/Database/README.md) до віддаленої бази та налаштуйте `ConnectionStrings__Database` для runtime-користувача. Для необов'язкового запуску API/Seq у Docker:
 
 ```powershell
 docker compose up --build
 ```
 
-API буде доступне на `http://localhost:8080`, Swagger — на `/swagger`, PostgreSQL — на `localhost:5432`, Seq — на `http://localhost:8081`.
+API доступне на `http://localhost:8080`, Swagger — на `/swagger`, Seq — на `http://localhost:8081`. База даних — віддалений SQL Server.
 
-Для локального запуску надайте PostgreSQL на `localhost:5432` та виконайте:
+Для локального запуску з налаштованим віддаленим з'єднанням виконайте:
 
 ```powershell
 dotnet run --project BookingApp.Services.Web
@@ -50,6 +50,6 @@ dotnet run --project BookingApp.Services.Web
 
 ## Архітектура
 
-Межі рівнів використовують окремі представлення: функціональні папки `Models` у `Bll.Common` містять бізнес-моделі та моделі читання, `Dal.PostgreSQLRepositories/Entities` містить сутності EF Core, а `Services.Web/Dtos` — контракти HTTP. Явне зіставлення в репозиторіях і на рівні Services не дозволяє деталям бази даних та передачі даних проникати до бізнес-логіки.
+Common містить бізнес-моделі, DAL readers заповнюють persistence entities, а AutoMapper перетворює їх на бізнес-моделі, Services має HTTP DTOs. Асинхронні процедури записують дані без EF tracking та IUnitOfWork. Типи провайдера залишаються лише в DAL.
 
-`Services.Web` є коренем композиції та має явні посилання на всі рівні, тому вся реєстрація dependency injection залишається на межі застосунку. Докладніше: [Common](bll.common.md), [BLL](bll.md), [DAL](dal.postgresqlrepositories.md), [Service](services.web.md), [Тестування](testing.md), [Рефакторинг](refactoring.md).
+`Services.Web` є коренем композиції та має явні посилання на всі рівні, тому вся реєстрація dependency injection залишається на межі застосунку. Докладніше: [Common](bll.common.md), [BLL](bll.md), [DAL](dal.sqlserverrepositories.md), [Service](services.web.md), [Тестування](testing.md), [Рефакторинг](refactoring.md).
