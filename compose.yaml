@@ -8,33 +8,13 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__Database: Host=bookingapp.database;Port=5432;Database=booking_app;Username=postgres;Password=postgres
+      ConnectionStrings__Database: ${ConnectionStrings__Database:?Set the remote SQL Server connection string}
       Serilog__WriteTo__1__Args__serverUrl: http://bookingapp.seq:5341
     ports:
       - "8080:8080"
     depends_on:
-      bookingapp.database:
-        condition: service_healthy
       bookingapp.seq:
         condition: service_started
-
-  bookingapp.database:
-    container_name: bookingapp.database
-    image: postgres:18
-    environment:
-      POSTGRES_DB: booking_app
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - bookingapp-postgres18-data:/var/lib/postgresql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d booking_app"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   bookingapp.seq:
     container_name: bookingapp.seq
     image: datalust/seq:latest
@@ -48,5 +28,4 @@ services:
       - bookingapp-seq-dev-data:/data
 
 volumes:
-  bookingapp-postgres18-data:
   bookingapp-seq-dev-data:

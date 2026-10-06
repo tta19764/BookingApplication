@@ -18,11 +18,9 @@ using BookingApp.Bll.Managers.Shared.Validation;
 using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared.Models;
-using BookingApp.Dal.SqlRepositories;
-using BookingApp.Dal.SqlRepositories.Repositories;
+using BookingApp.Dal.SqlServerRepositories;
 using BookingApp.Services.Web.Services.BackgroundJobs;
 using BookingApp.Services.Web.Services.DomainEvents;
-using Microsoft.EntityFrameworkCore;
 using Quartz;
 using FluentValidation;
 
@@ -46,7 +44,7 @@ public static class ServiceCollectionExtensions
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
         services.AddAutoMapper(_ => { }, typeof(AutoMapperConfig), typeof(BookingApp.Bll.Mappings.AutoMapperConfig),
-            typeof(BookingApp.Dal.SqlRepositories.Mappings.AutoMapperConfig));
+            typeof(BookingApp.Dal.SqlServerRepositories.Mappings.AutoMapperConfig));
 
         AddBusinessLogic(services);
         AddDataAccess(services, configuration);
@@ -95,16 +93,15 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("Database")
             ?? throw new InvalidOperationException("The Database connection string is not configured.");
 
-        services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IConferenceHallRepository, ConferenceHallRepository>();
-        services.AddScoped<IBookingRepository, BookingRepository>();
-        services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
+        services.AddSqlServerDataAccess(connectionString, configuration.GetValue("Database:CommandTimeoutSeconds", 30));
 
         services.Configure<CompleteBookingsOptions>(
             configuration.GetSection(CompleteBookingsOptions.SectionName));
-        services.AddQuartz();
-        services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
-        services.ConfigureOptions<CompleteBookingsJobSettings>();
+        if (configuration.GetValue("BackgroundJobs:CompleteBookings:Enabled", true))
+        {
+            services.AddQuartz();
+            services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+            services.ConfigureOptions<CompleteBookingsJobSettings>();
+        }
     }
 }

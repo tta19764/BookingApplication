@@ -1,5 +1,4 @@
 using BookingApp.Services.Web.DI;
-using BookingApp.Services.Web.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,10 +14,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwaggerDocumentation();
     app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
-
-    app.ApplyMigrations();
-
-    app.SeedData();
 }
 
 app.UseHttpsRedirection();
