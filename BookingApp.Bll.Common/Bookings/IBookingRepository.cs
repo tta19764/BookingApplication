@@ -2,56 +2,15 @@ using BookingApp.Bll.Common.Bookings.Models;
 
 namespace BookingApp.Bll.Common.Bookings;
 
-/// <summary>
-/// Provides persistence operations for bookings.
-/// </summary>
 public interface IBookingRepository
 {
-    /// <summary>
-    /// Finds a booking by its identifier.
-    /// </summary>
     Task<Booking?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Checks whether the hall already has a booking that overlaps the requested period.
-    /// </summary>
     Task<bool> HasOverlapAsync(Guid conferenceHallId, DateRange duration, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Lists bookings in pages for reporting and read-side projections.
-    /// </summary>
-    IAsyncEnumerable<IReadOnlyCollection<Booking>> ListAsync(
-        int pageSize,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Returns one page of bookings ordered by identifier.
-    /// </summary>
-    Task<IReadOnlyCollection<Booking>> GetListPaginatedAsync(
-        int page,
-        int pageSize,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Returns reserved bookings whose booking period has ended and should be completed.
-    /// </summary>
-    Task<IReadOnlyCollection<Booking>> GetReservedBookingsDueForCompletionAsync(
-        DateTime utcNow,
-        int pageSize,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Adds a new booking to the persistence context.
-    /// </summary>
-    void Add(Booking booking);
-
-    /// <summary>
-    /// Applies changes from a previously loaded booking to its tracked persistence entity.
-    /// </summary>
-    void Update(Booking booking);
-
-    /// <summary>
-    /// Removes a booking from the persistence context.
-    /// </summary>
-    void Remove(Booking booking);
+    IAsyncEnumerable<IReadOnlyCollection<Booking>> ListAsync(int pageSize, CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<Booking>> GetListPaginatedAsync(int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<Booking>> GetReservedBookingsDueForCompletionAsync(DateTime utcNow, int pageSize, CancellationToken cancellationToken = default);
+    /// <summary>Atomically reserves the hall and updates its timestamp. Only Reserved bookings block occupancy.</summary>
+    Task<ReservationOutcome> CreateReservationAsync(Booking booking, CancellationToken cancellationToken = default);
+    /// <summary>Atomically completes at most pageSize due reservations and returns the actual count.</summary>
+    Task<int> CompleteDueAsync(DateTime utcNow, int pageSize, CancellationToken cancellationToken = default);
 }
