@@ -5,17 +5,16 @@ using BookingApp.Bll.Common.Bookings.Errors;
 using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.ConferenceHalls.Errors;
-using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared.Events;
 using BookingApp.Bll.Common.Shared.Models;
-using BookingApp.Bll.Managers.Bookings.Validation;
 using BookingApp.Bll.Managers.Shared.Validation;
 using FluentValidation;
+using BookingApp.Bll.Common.Users.Errors;
 
 namespace BookingApp.Bll.Managers.Bookings;
 
 public sealed class BookingManager(IConferenceHallRepository hallRepository, IBookingRepository bookingRepository,
-    IPricingManager pricingManager, TimeProvider timeProvider, IUnitOfWork unitOfWork,
+    IPricingManager pricingManager, TimeProvider timeProvider,
     IDomainEventDispatcher domainEventDispatcher, IMapper mapper,
     IValidator<PaginationModel> paginationValidator,
     IValidator<CreateBookingModel> createBookingValidator) : IBookingManager
@@ -42,38 +41,10 @@ public sealed class BookingManager(IConferenceHallRepository hallRepository, IBo
         if (await bookingRepository.HasOverlapAsync(hall.Id, duration, cancellationToken))
             return Result.Failure<BookingConfirmationModel>(BookingErrors.Overlap);
 
+        PricingDetails pricing;
         try
         {
-            var pricing = pricingManager.CalculatePrice(hall, duration, model.Amenities.Distinct());
-            var booking = new Booking(Guid.NewGuid())
-            {
-                ConferenceHallId = hall.Id,
-                UserId = model.UserId,
-                Duration = duration,
-                PriceForPeriod = pricing.PriceForPeriod,
-                AmenitiesUpCharge = pricing.AmenitiesUpCharge,
-                TotalPrice = pricing.TotalPrice,
-                Status = BookingStatus.Reserved,
-                CreatedOnUtc = utcNow
-            };
-            hall.LastBookedOnUtc = utcNow;
-            hallRepository.Update(hall);
-            bookingRepository.Add(booking);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-
-            await domainEventDispatcher.DispatchAsync(
-                new BookingCreatedDomainEvent(
-                    booking.Id,
-                    booking.ConferenceHallId,
-                    booking.UserId,
-                    booking.TotalPrice.Amount,
-                    booking.TotalPrice.Currency.Code,
-                    utcNow),
-                cancellationToken);
-
-            return Result.Success(new BookingConfirmationModel(booking.Id, booking.ConferenceHallId,
-                booking.Duration.Start, booking.Duration.End, booking.PriceForPeriod.Amount,
-                booking.AmenitiesUpCharge.Amount, booking.TotalPrice.Amount, booking.TotalPrice.Currency.Code));
+            pricing = pricingManager.CalculatePrice(hall, duration, model.Amenities.Distinct());
         }
         catch (ArgumentException)
         {
@@ -84,5 +55,43 @@ public sealed class BookingManager(IConferenceHallRepository hallRepository, IBo
         {
             return Result.Failure<BookingConfirmationModel>(new Error("Booking.InvalidPeriod", exception.Message));
         }
+
+        var booking = new Booking(Guid.NewGuid())
+        {
+            ConferenceHallId = hall.Id,
+            UserId = model.UserId,
+            Duration = duration,
+            PriceForPeriod = pricing.PriceForPeriod,
+            AmenitiesUpCharge = pricing.AmenitiesUpCharge,
+            TotalPrice = pricing.TotalPrice,
+            Status = BookingStatus.Reserved,
+            CreatedOnUtc = utcNow
+        };
+        var outcome = await bookingRepository.CreateReservationAsync(booking, cancellationToken);
+        if (outcome != ReservationOutcome.Created)
+        {
+            var error = outcome switch
+            {
+                ReservationOutcome.Overlap => BookingErrors.Overlap,
+                ReservationOutcome.HallNotFound => ConferenceHallErrors.NotFound,
+                ReservationOutcome.UserNotFound => UserErrors.NotFound,
+                _ => throw new InvalidOperationException("Unexpected reservation outcome")
+            };
+            return Result.Failure<BookingConfirmationModel>(error);
+        }
+
+        await domainEventDispatcher.DispatchAsync(
+            new BookingCreatedDomainEvent(
+                booking.Id,
+                booking.ConferenceHallId,
+                booking.UserId,
+                booking.TotalPrice.Amount,
+                booking.TotalPrice.Currency.Code,
+                utcNow),
+            cancellationToken);
+
+        return Result.Success(new BookingConfirmationModel(booking.Id, booking.ConferenceHallId,
+            booking.Duration.Start, booking.Duration.End, booking.PriceForPeriod.Amount,
+            booking.AmenitiesUpCharge.Amount, booking.TotalPrice.Amount, booking.TotalPrice.Currency.Code));
     }
 }
