@@ -30,11 +30,11 @@ Amenities are charged once per booking: Projector `500 UAH`, Wi-Fi `300 UAH`, an
 
 ## Seed data
 
-Reference SQL installs the user `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` while authentication is outside scope. Optional `004_demo_seed.sql` creates Hall A (50 seats, 2000 UAH/hour), Hall B (100, 3500), and Hall C (30, 1500). Web startup does not seed data.
+The explicit reference seeder installs the user `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` while authentication is outside scope. Optional `SeedDemoDataAsync` creates Hall A (50 seats, 2000 UAH/hour), Hall B (100, 3500), and Hall C (30, 1500). Startup data seeding defaults to disabled and can be enabled through configuration.
 
 ## Running
 
-Deploy the [SQL Server scripts](../../BookingApp.Dal.SqlServerRepositories/Database/README.md) to an approved remote database and set `ConnectionStrings__Database` with runtime credentials. For optional API/Seq hosting with Docker:
+Deploy the [SQL Server scripts](database-initialization.md) to an approved remote database and set `ConnectionStrings__Database` with runtime credentials. For optional API/Seq hosting with Docker:
 
 ```powershell
 docker compose up --build

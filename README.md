@@ -14,7 +14,7 @@ The solution uses Services.Web, Bll, Bll.Common, and Dal.SqlServerRepositories l
 | Common layer | [Common](docs/en/bll.common.md) | [Рівень Common](docs/ua/bll.common.md) |
 | BLL layer | [BLL](docs/en/bll.md) | [Рівень BLL](docs/ua/bll.md) |
 | DAL layer | [DAL](docs/en/dal.sqlserverrepositories.md) | [Рівень DAL](docs/ua/dal.sqlserverrepositories.md) |
-| Database deployment and scripts | [SQL Server setup](BookingApp.Dal.SqlServerRepositories/Database/README.md) | [План міграції](docs/en/ef-to-ado-net-migration-plan.md) |
+| Database initialization and seeding | [SQL Server setup](docs/en/database-initialization.md) | [Ініціалізація та дані](docs/ua/database-initialization.md) |
 | Service layer | [Service](docs/en/services.web.md) | [Рівень Service](docs/ua/services.web.md) |
 | Test projects and strategy | [Testing](docs/en/testing.md) | [Тестування](docs/ua/testing.md) |
 | Features added beyond the assignment | [Extended features](docs/en/extended-features.md) | [Розширені можливості](docs/ua/extended-features.md) |
@@ -41,7 +41,7 @@ The solution uses Services.Web, Bll, Bll.Common, and Dal.SqlServerRepositories l
 
 Prerequisites: .NET 10 and an approved remote SQL Server database. Docker is needed only for integration tests or optional API/Seq hosting.
 
-Create the initial SQL Server database using your code-first setup, then generate the reusable initial setup script from that database. Ensure its schema matches the [DAL schema contract and stored procedures](BookingApp.Dal.SqlServerRepositories/Database/README.md). Configure a separate EXECUTE-only application user through `ConnectionStrings__Database` or user secrets. No deployment-tool project is included.
+Create an empty SQL Server application database, configure its connection string, and enable initialization to apply embedded schema/procedure/permission scripts before seeding data. The runner does not create the database itself. For an existing external code-first schema, establish a reviewed baseline first; the runner rejects unjournaled application tables. See [database initialization](docs/en/database-initialization.md). A separate EXECUTE-only runtime identity can be used after setup. No deployment-tool project is included. The DAL `DatabaseSeeder`, registered as `IDatabaseSeeder`, can inspect existing row counts and seed reference or demo data explicitly or at opt-in startup; see the [DAL guide](docs/en/dal.sqlserverrepositories.md#explicit-database-seeding).
 
 ```powershell
 dotnet run --project BookingApp.Services.Web
@@ -62,6 +62,8 @@ Run all tests / Запуск усіх тестів:
 dotnet test BookingApplicationSolution.sln
 ```
 
-Integration tests start ephemeral SQL Server containers with the real scripts and restricted runtime credentials. They require Docker and do not connect to the remote application database. The app never applies migrations or seeds automatically at startup. Existing PostgreSQL data requires a deliberate export/import; deployment does not transfer it.
+Integration tests start ephemeral SQL Server containers with the real scripts and restricted runtime credentials. They require Docker and do not connect to the remote application database. Startup initialization is opt-in through `DatabaseSeeding:Enabled` and defaults to false. When enabled, required scripts run before reference and optional demo data. Existing PostgreSQL data requires a deliberate export/import; deployment does not transfer it.
 
 After initial database setup, for manual verification of the five required API methods, import the files from [`test/Postman`](test/Postman) and run the collection in order.
+
+Opt-in startup data seeding is registered through Common `IDatabaseSeeder`. Set `DatabaseSeeding__Enabled=true` and optionally provide `ConnectionStrings__Seeding` for a separate identity. Missing or blank Seeding falls back to Database; the selected identity needs SELECT/INSERT access for data plus setup rights for unapplied scripts. `DatabaseSeeding__IncludeDemoData=true` optionally adds demo halls. Both flags default to false; failures prevent startup. The Compose API service forwards these settings. Enabled startup applies required schema/procedure/permission scripts first; unchanged journaled scripts are skipped.

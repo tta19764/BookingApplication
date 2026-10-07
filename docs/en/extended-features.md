@@ -4,7 +4,7 @@ The assignment requires hall creation, editing, deletion, availability search, b
 
 ## Users, roles, and permissions
 
-Common contains `User`, `Role`, `Permission`, and `RolePermission` business models and repository contracts. DAL contains persistence entities, reader hydration and AutoMapper profiles. Reference SQL explicitly creates a stable system user and associates it with the Registered role and hall/booking read/write permissions.
+Common contains `User`, `Role`, `Permission`, and `RolePermission` business models and repository contracts. DAL contains persistence entities, reader hydration and AutoMapper profiles. The explicit DAL reference seeder creates a stable system user and associates it with the Registered role and hall/booking read/write permissions.
 
 The booking controller currently assigns reservations to this seeded user because registration and authentication were not part of the requested API methods. These models prepare the solution for later identity integration, but they do **not** currently enforce controller authorization. Production work should add authentication and permission policies before treating the API as multi-user secure.
 
@@ -34,7 +34,7 @@ Serilog adds structured request and application logs. Docker Compose includes Se
 
 ## Explicit initial database setup
 
-Web startup performs no schema changes or seeding. Create the initial schema using the external code-first setup, install the stored procedures and required reference data, then generate a reusable setup script from that database. The repository contains no code-first context or deployment-tool project. Optional demo SQL creates Hall A, Hall B and Hall C with stable IDs.
+Opt-in startup initialization applies required scripts before data seeding when `DatabaseSeeding:Enabled=true`. Create the initial schema using the external code-first setup, install the stored procedures and required reference data, then generate a reusable setup script from that database. The repository contains no code-first context or deployment-tool project. The optional demo seeder creates Hall A, Hall B and Hall C with stable IDs.
 
 ## Expanded verification
 

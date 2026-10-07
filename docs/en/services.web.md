@@ -26,8 +26,10 @@ GET    /api/v1/reports/bookings-summary
 - Central exception handling prevents internal exception details from leaking to clients.
 - Request-context logging through Serilog and Seq.
 - HTTPS redirection in the middleware pipeline.
-- Initial schema setup uses code first and a generated SQL script; web startup does not create or seed databases.
+- Initial schema setup may use code first and a generated SQL script; enabled startup applies the embedded initialization scripts to an empty database; startup initialization applies required scripts before data seeding when enabled; it does not create the database itself.
 
 The current API uses a seeded user. Production deployment should add authentication, authorization policies, secret management, rate limiting, and environment-specific trust/proxy configuration.
 
 The reusable Postman collection under `test/Postman/` provides an additional manual workflow. Automated HTTP behavior is covered by `BookingApp.Services.Web.IntegrationTests`.
+
+Services registers Common `IDatabaseSeeder` as scoped and awaits `StartupDataSeeder` before HTTP/scheduler startup when `DatabaseSeeding:Enabled=true`. `IncludeDemoData` controls optional halls. An optional `ConnectionStrings:Seeding` overrides the main database connection; absent/blank values reuse Database. Seeding requires SELECT/INSERT permissions; failures prevent startup. Enabled startup applies required schema/procedure/permission scripts first; unchanged journaled scripts are skipped.
