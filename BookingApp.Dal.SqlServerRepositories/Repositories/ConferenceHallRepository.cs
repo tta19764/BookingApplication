@@ -22,11 +22,19 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
     /// <remarks>Related bookings are not loaded.</remarks>
     public async Task<ConferenceHall?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        await using var connection = await connections.OpenAsync(cancellationToken);
-        await using var command = SqlProcedure.Create(connection, "booking_api.hall_get", connections.CommandTimeoutSeconds);
-        command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        return await reader.ReadAsync(cancellationToken) ? mapper.Map<ConferenceHall>(RowMapper.Hall(reader)) : null;
+        try
+        {
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            await using var command = SqlProcedure.Create(connection, "booking_api.hall_get", connections.CommandTimeoutSeconds);
+            command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            return await reader.ReadAsync(cancellationToken) ? mapper.Map<ConferenceHall>(RowMapper.Hall(reader)) : null;
+
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, "ConferenceHallRepository.GetByIdAsync", cancellationToken);
+        }
     }
 
     /// <summary>Creates a hall and persists its editable fields immediately.</summary>
@@ -44,19 +52,27 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
 
     private async Task<bool> WriteAsync(ConferenceHall hall, bool update, CancellationToken cancellationToken)
     {
-        await using var connection = await connections.OpenAsync(cancellationToken);
-        var entity = mapper.Map<ConferenceHallEntity>(hall);
-        await using var command = SqlProcedure.Create(connection, update ? "booking_api.hall_update" : "booking_api.hall_create", connections.CommandTimeoutSeconds);
-        command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
-        command.Parameter("@Name", SqlDbType.NVarChar, entity.Name, 100);
-        command.Parameter("@Capacity", SqlDbType.Int, entity.Capacity);
-        command.Decimal("@HourlyRate", entity.HourlyRate);
-        command.Parameter("@Currency", SqlDbType.NVarChar, entity.Currency, 3);
-        command.Parameter("@Amenities", SqlDbType.NVarChar, entity.Amenities, 100);
-        // LastBookedOnUtc is deliberately excluded so stale catalog edits cannot overwrite reservations.
-        var outcome = update ? command.Output("@Updated") : null;
-        await command.ExecuteNonQueryAsync(cancellationToken);
-        return outcome is null || (int)outcome.Value == 1;
+        try
+        {
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            var entity = mapper.Map<ConferenceHallEntity>(hall);
+            await using var command = SqlProcedure.Create(connection, update ? "booking_api.hall_update" : "booking_api.hall_create", connections.CommandTimeoutSeconds);
+            command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
+            command.Parameter("@Name", SqlDbType.NVarChar, entity.Name, 100);
+            command.Parameter("@Capacity", SqlDbType.Int, entity.Capacity);
+            command.Decimal("@HourlyRate", entity.HourlyRate);
+            command.Parameter("@Currency", SqlDbType.NVarChar, entity.Currency, 3);
+            command.Parameter("@Amenities", SqlDbType.NVarChar, entity.Amenities, 100);
+            // LastBookedOnUtc is deliberately excluded so stale catalog edits cannot overwrite reservations.
+            var outcome = update ? command.Output("@Updated") : null;
+            await command.ExecuteNonQueryAsync(cancellationToken);
+            return outcome is null || (int)outcome.Value == 1;
+
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, "ConferenceHallRepository.WriteAsync", cancellationToken);
+        }
     }
 
     /// <summary>Deletes a hall only when no booking references it.</summary>
@@ -67,13 +83,21 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
     /// <exception cref="InvalidDataException">The procedure returns an unknown outcome.</exception>
     public async Task<HallRemovalOutcome> RemoveAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        await using var connection = await connections.OpenAsync(cancellationToken);
-        await using var command = SqlProcedure.Create(connection, "booking_api.hall_delete", connections.CommandTimeoutSeconds);
-        command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
-        var outcome = command.Output("@Outcome");
-        await command.ExecuteNonQueryAsync(cancellationToken);
-        var result = (HallRemovalOutcome)(int)outcome.Value;
-        return Enum.IsDefined(result) ? result : throw new InvalidDataException("Unknown hall removal outcome");
+        try
+        {
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            await using var command = SqlProcedure.Create(connection, "booking_api.hall_delete", connections.CommandTimeoutSeconds);
+            command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
+            var outcome = command.Output("@Outcome");
+            await command.ExecuteNonQueryAsync(cancellationToken);
+            var result = (HallRemovalOutcome)(int)outcome.Value;
+            return Enum.IsDefined(result) ? result : throw new InvalidDataException("Unknown hall removal outcome");
+
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, "ConferenceHallRepository.RemoveAsync", cancellationToken);
+        }
     }
 
     /// <summary>Reads one deterministically ordered page of halls.</summary>
@@ -84,10 +108,18 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
     /// <exception cref="ArgumentOutOfRangeException">Page or page size is not positive.</exception>
     public async Task<IReadOnlyCollection<ConferenceHall>> GetListPaginatedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        await using var connection = await connections.OpenAsync(cancellationToken);
-        await using var command = SqlProcedure.Create(connection, "booking_api.hall_list", connections.CommandTimeoutSeconds);
-        command.Page(page, pageSize);
-        return await ReadAsync(command, cancellationToken);
+        try
+        {
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            await using var command = SqlProcedure.Create(connection, "booking_api.hall_list", connections.CommandTimeoutSeconds);
+            command.Page(page, pageSize);
+            return await ReadAsync(command, cancellationToken);
+
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, "ConferenceHallRepository.GetListPaginatedAsync", cancellationToken);
+        }
     }
 
     /// <summary>Reads halls with sufficient capacity and no overlapping reservation.</summary>
@@ -98,12 +130,20 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
     /// <remarks>Availability is advisory; reservation creation rechecks occupancy atomically.</remarks>
     public async Task<IEnumerable<ConferenceHall>> GetAvailableConferenceHallsAsync(DateRange dateRange, Capacity seats, CancellationToken cancellationToken = default)
     {
-        await using var connection = await connections.OpenAsync(cancellationToken);
-        await using var command = SqlProcedure.Create(connection, "booking_api.hall_available", connections.CommandTimeoutSeconds);
-        command.Utc("@Start", dateRange.Start);
-        command.Utc("@End", dateRange.End);
-        command.Parameter("@Capacity", SqlDbType.Int, seats.Value);
-        return await ReadAsync(command, cancellationToken);
+        try
+        {
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            await using var command = SqlProcedure.Create(connection, "booking_api.hall_available", connections.CommandTimeoutSeconds);
+            command.Utc("@Start", dateRange.Start);
+            command.Utc("@End", dateRange.End);
+            command.Parameter("@Capacity", SqlDbType.Int, seats.Value);
+            return await ReadAsync(command, cancellationToken);
+
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, "ConferenceHallRepository.GetAvailableConferenceHallsAsync", cancellationToken);
+        }
     }
 
     private async Task<IReadOnlyCollection<ConferenceHall>> ReadAsync(SqlCommand command, CancellationToken cancellationToken)

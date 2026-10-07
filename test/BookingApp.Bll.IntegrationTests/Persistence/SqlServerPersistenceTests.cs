@@ -1,3 +1,4 @@
+using BookingApp.Bll.Common.Shared.Exceptions;
 using AutoMapper;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.Bookings.Models;
@@ -104,8 +105,9 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
         var booking = Reservation(hall.Id, start, start.AddHours(2));
         booking.TotalPrice = new Money(-1m, Currency.Uah); // Force an insert constraint failure after the hall UPDATE.
         Func<Task> reserve = async () => await Bookings.CreateReservationAsync(booking, Token);
-        var failure = await reserve.Should().ThrowAsync<SqlException>();
-        failure.Which.Number.Should().Be(547);
+        var failure = await reserve.Should().ThrowAsync<PersistenceException>();
+        failure.Which.Error.Should().Be(PersistenceError.ConstraintViolation);
+        failure.Which.InnerException.Should().BeNull();
         (await Halls.GetByIdAsync(hall.Id, Token))!.LastBookedOnUtc.Should().BeNull();
         (await Bookings.GetByIdAsync(booking.Id, Token)).Should().BeNull();
     }
@@ -190,7 +192,7 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
         user.Email = new Email($"{Guid.NewGuid():N}@booking.local");
         user.Roles.Add(new Role(999999, "Missing"));
         Func<Task> create = () => users.AddAsync(user, Token);
-        await create.Should().ThrowAsync<SqlException>();
+        await create.Should().ThrowAsync<PersistenceException>();
         (await users.GetByIdAsync(user.Id, Token)).Should().BeNull();
     }
 

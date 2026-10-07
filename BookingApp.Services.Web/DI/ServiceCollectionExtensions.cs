@@ -101,12 +101,12 @@ public static class ServiceCollectionExtensions
 
         services.Configure<DatabaseSeedingOptions>(configuration.GetSection(DatabaseSeedingOptions.SectionName));
         // An optional seeding identity can override the main connection; missing/blank values reuse it.
-        services.AddScoped<IDatabaseSeeder>(_ =>
+        services.AddScoped<IDatabaseSeeder>(provider =>
         {
             var seedingConnection = configuration.GetConnectionString("Seeding");
             return new DatabaseSeeder(
                 string.IsNullOrWhiteSpace(seedingConnection) ? connectionString : seedingConnection,
-                commandTimeout);
+                commandTimeout, provider.GetRequiredService<ILoggerFactory>());
         });
         services.AddSingleton<StartupDataSeeder>();
 

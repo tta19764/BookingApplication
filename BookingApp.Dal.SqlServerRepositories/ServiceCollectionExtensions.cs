@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.Users;
@@ -19,7 +20,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddSqlServerDataAccess(this IServiceCollection services,
         string connectionString, int commandTimeoutSeconds = 30)
     {
-        services.AddSingleton(new SqlConnectionFactory(connectionString, commandTimeoutSeconds));
+        services.AddSingleton(provider => new SqlConnectionFactory(connectionString, commandTimeoutSeconds,
+            provider.GetRequiredService<ILoggerFactory>()));
         services.AddScoped<IConferenceHallRepository, ConferenceHallRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IUserRepository, UserRepository>();

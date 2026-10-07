@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Data.SqlClient;
 
 namespace BookingApp.Dal.SqlServerRepositories.Infrastructure;
@@ -6,21 +7,26 @@ namespace BookingApp.Dal.SqlServerRepositories.Infrastructure;
 public sealed class SqlConnectionFactory
 {
     private readonly string _connectionString;
+    internal ILogger? Logger { get; }
+    internal Exception Translate(SqlException exception, string operation, CancellationToken token) =>
+        SqlFailure.Translate(exception, operation, Logger, token);
     /// <summary>Gets the positive command execution timeout, in seconds.</summary>
     public int CommandTimeoutSeconds { get; }
 
     /// <summary>Validates the connection configuration without connecting to SQL Server.</summary>
     /// <param name="connectionString">The externally supplied SQL Server connection string.</param>
     /// <param name="commandTimeoutSeconds">The positive command timeout in seconds.</param>
+    /// <param name="loggerFactory">Optional logger factory; supplied by application DI.</param>
     /// <exception cref="ArgumentException">The connection string is empty or malformed.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The command timeout is not positive.</exception>
-    public SqlConnectionFactory(string connectionString, int commandTimeoutSeconds = 30)
+    public SqlConnectionFactory(string connectionString, int commandTimeoutSeconds = 30, ILoggerFactory? loggerFactory = null)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
             throw new ArgumentException("Configure ConnectionStrings:Database for the remote SQL Server.", nameof(connectionString));
         _ = new SqlConnectionStringBuilder(connectionString);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(commandTimeoutSeconds);
         _connectionString = connectionString;
+        Logger = loggerFactory?.CreateLogger<SqlConnectionFactory>();
         CommandTimeoutSeconds = commandTimeoutSeconds;
     }
 
@@ -35,6 +41,11 @@ public sealed class SqlConnectionFactory
         {
             await connection.OpenAsync(cancellationToken);
             return connection;
+        }
+        catch (SqlException exception)
+        {
+            await connection.DisposeAsync();
+            throw Translate(exception, "OpenConnection", cancellationToken);
         }
         catch
         {

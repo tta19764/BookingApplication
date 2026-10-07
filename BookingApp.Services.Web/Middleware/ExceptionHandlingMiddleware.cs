@@ -65,7 +65,9 @@ public class ExceptionHandlingMiddleware(
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
+        // DAL already records sanitized persistence diagnostics with an incident identifier.
+        if (exception is not PersistenceException)
+            logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
 
         var exceptionDetails = GetExceptionDetails(exception);
 
@@ -82,6 +84,9 @@ public class ExceptionHandlingMiddleware(
             problemDetails.Extensions["errors"] = exceptionDetails.Errors;
         }
 
+        if (exception is PersistenceException persistence)
+            problemDetails.Extensions["incidentId"] = persistence.IncidentId;
+
         context.Response.StatusCode = exceptionDetails.Status;
         await ModifyHeaderAsync(context, problemDetails);
     }
@@ -90,6 +95,13 @@ public class ExceptionHandlingMiddleware(
     {
         return exception switch
         {
+            PersistenceException => new ExceptionDetails(
+                StatusCodes.Status500InternalServerError,
+                "PersistenceFailure",
+                "Database operation failed",
+                "The database operation could not be completed.",
+                null),
+
             ValidationException validationException => new ExceptionDetails(
                 StatusCodes.Status400BadRequest,
                 "ValidationFailure",
