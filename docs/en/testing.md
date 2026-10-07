@@ -31,7 +31,7 @@ Both test projects link `test/Shared/SqlServerWebAppFactory.cs`. The fixture sta
 The SQL Server 2022 image is pinned by digest. Override `BOOKINGAPP_TEST_SQL_IMAGE` to match the remote engine major version and align compatibility level/collation/isolation where needed. Allow time/resources for the first image pull; CI failures to start SQL Server are reported as test failures. Optional remote staging smoke tests separately validate TLS, authentication and network access. See [database deployment](database-initialization.md).
 
 
-The current suite defines 108 tests: Common 1, BLL unit 27, BLL integration 50 and Web integration 30. Entity architecture checks cover Guid/integer typed identity inheritance and prevent business/provider types in DAL entity properties. The Database folder contains only personal files excluded from application scope. Test bootstrap uses Initialization scripts and data seeder methods.
+The current suite defines 111 tests: Common 1, BLL unit 27, BLL integration 50 and Web integration 33. Entity architecture checks cover Guid/integer typed identity inheritance and prevent business/provider types in DAL entity properties. The Database folder contains only personal files excluded from application scope. Test bootstrap uses Initialization scripts and data seeder methods.
 
 `DatabaseSeederTests` creates a separate schema-only database for each test in the shared SQL Server container. It checks empty data inspection, missing-table SQL failures, existing data preservation, partial reference repair, conflicting identities, insert rollback, concurrent idempotency and rejection of runtime credentials. It never alters the shared application-test schema or the remote database.
 

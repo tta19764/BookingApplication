@@ -31,3 +31,5 @@ Data methods використовують спільне application lock та s
 Поточна схема — `TymchenkoOV`, назви таблиць і процедур починаються з `BookingApp.`: `[TymchenkoOV].[BookingApp.Users]`, `[TymchenkoOV].[BookingApp.user_get]`. Крапка є частиною назви об’єкта, тому brackets обов’язкові. Назва бази в connection string не змінюється.
 
 Скрипти 001-003 одразу створюють prefixed таблиці, процедури й runtime role. Initializer створює `[TymchenkoOV].[BookingApp.SchemaVersions]`; перейменування та перенесення старих об’єктів немає. Це baseline для нової бази. Checksum protection залишається: раніше застосований baseline потребує нової бази або окремого перевіреного setup, а не очищення checksum. Azure database не змінюється самим редагуванням коду.
+
+DAL включає `Microsoft.Data.SqlClient.Extensions.Azure` 7.1.1 для Entra authentication modes. `Active Directory Default` використовує наявні Azure credentials; `Active Directory Interactive` дозволяє interactive/MFA sign-in. Встановлення пакета не надає доступ до tenant або database.
