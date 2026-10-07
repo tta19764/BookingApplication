@@ -50,7 +50,7 @@ Registration validates the connection string and command timeout but does not op
 `Initialization/DatabaseSeeder` implements the Common `IDatabaseSeeder` interface; its result models also live in Common. InitializeAsync runs script initialization before data seeding at enabled startup. The Services composition root always registers it as scoped and registers `StartupDataSeeder` to run it before requests/background jobs when enabled. An optional seeding connection string can override the main connection. Otherwise the main connection is reused and must have SELECT/INSERT permissions for seeding.
 
 ```csharp
-var seeder = new DatabaseSeeder(setupConnectionString);
+var seeder = new DatabaseSeeder(setupConnectionString, logger); // ILogger<DatabaseSeeder>
 await seeder.InitializeAsync(cancellationToken);
 var inspection = await seeder.InspectAsync(cancellationToken);
 var reference = await seeder.SeedReferenceDataAsync(cancellationToken);
@@ -79,4 +79,4 @@ Optionally provide `ConnectionStrings__Seeding` through environment variables or
 
 Enabled startup now executes scripts before data methods. The target database must already exist. Use credentials that can create tables/procedures/roles and grant permissions when initialization is needed. Existing unjournaled tables are not silently adopted: for external code-first/manual schemas, establish an explicit reviewed baseline before enabling the runner. Add versioned scripts for changes instead of editing applied ones.
 
-DAL logs record SQL number/state/class and the incident ID, excluding SQL text, parameter values, connection strings and provider messages. Application DI supplies the logger factory; explicit setup callers can pass a logger factory to `DatabaseSeeder` or a logger to `DatabaseInitializer.ApplyAsync`. Without an explicit logger, direct construction still translates failures but emits no DAL diagnostic log.
+DAL logs record SQL number/state/class and the incident ID, excluding SQL text, parameter values, connection strings and provider messages. Application DI supplies loggers directly: `ILogger<SqlConnectionFactory>` for the runtime connection factory and `ILogger<DatabaseSeeder>` for setup. `DatabaseSeeder` requires its logger and passes it to its setup connection factory and initializer. Tests that do not inspect logs pass `NullLogger<T>.Instance` explicitly. Direct `DatabaseInitializer.ApplyAsync` calls can supply an optional logger.

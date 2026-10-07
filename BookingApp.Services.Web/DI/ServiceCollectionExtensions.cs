@@ -106,7 +106,7 @@ public static class ServiceCollectionExtensions
             var seedingConnection = configuration.GetConnectionString("Seeding");
             return new DatabaseSeeder(
                 string.IsNullOrWhiteSpace(seedingConnection) ? connectionString : seedingConnection,
-                commandTimeout, provider.GetRequiredService<ILoggerFactory>());
+                provider.GetRequiredService<ILogger<DatabaseSeeder>>(), commandTimeout);
         });
         services.AddSingleton<StartupDataSeeder>();
 

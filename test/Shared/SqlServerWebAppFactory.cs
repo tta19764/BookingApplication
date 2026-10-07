@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using BookingApp.Dal.SqlServerRepositories.Initialization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -62,7 +63,7 @@ public class SqlServerWebAppFactory : WebApplicationFactory<Program>, IAsyncLife
             var admin = new SqlConnectionStringBuilder(_container.GetConnectionString()) { InitialCatalog = "BookingAppTests" };
             AdminConnectionString = admin.ConnectionString;
             await DatabaseInitializer.ApplyAsync(AdminConnectionString, timeout.Token);
-            var seeder = new DatabaseSeeder(AdminConnectionString);
+            var seeder = new DatabaseSeeder(AdminConnectionString, NullLogger<DatabaseSeeder>.Instance);
             await seeder.SeedReferenceDataAsync(timeout.Token);
             await seeder.SeedDemoDataAsync(timeout.Token);
             await using (var connection = new SqlConnection(AdminConnectionString))

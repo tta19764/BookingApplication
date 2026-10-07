@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging;
 using BookingApp.Bll.Common.Shared.Exceptions;
 using System.Text.RegularExpressions;
@@ -13,7 +14,7 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
 {
     private readonly string _database = "SeederTests_" + Guid.NewGuid().ToString("N");
     private string _connectionString = string.Empty;
-    private DatabaseSeeder Seeder => new(_connectionString);
+    private DatabaseSeeder Seeder => new(_connectionString, NullLogger<DatabaseSeeder>.Instance);
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
     public async ValueTask InitializeAsync()
@@ -59,8 +60,7 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
         await ExecuteAsync(_connectionString, "DROP TABLE dbo.bookings");
         var action = () => Seeder.SeedReferenceDataAsync(Token);
         using var logs = new CapturingLogger();
-        using var loggerFactory = LoggerFactory.Create(builder => builder.AddProvider(logs));
-        action = () => new DatabaseSeeder(_connectionString, loggerFactory: loggerFactory).SeedReferenceDataAsync(Token);
+        action = () => new DatabaseSeeder(_connectionString, logs).SeedReferenceDataAsync(Token);
         var exception = await action.Should().ThrowAsync<PersistenceException>();
         logs.Messages.Should().ContainSingle().Which.Should().Contain(exception.Which.IncidentId.ToString());
         logs.Messages.Single().Should().NotContain("Invalid object name").And.NotContain(_connectionString);
@@ -150,14 +150,13 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
     [Fact]
     public async Task RuntimeCredentials_CannotInspectOrSeed()
     {
-        var action = () => new DatabaseSeeder(factory.RuntimeConnectionString).SeedReferenceDataAsync(Token);
+        var action = () => new DatabaseSeeder(factory.RuntimeConnectionString, NullLogger<DatabaseSeeder>.Instance).SeedReferenceDataAsync(Token);
         var exception = await action.Should().ThrowAsync<PersistenceException>();
         exception.Which.Error.Should().Be(PersistenceError.AccessDenied);
     }
-    private sealed class CapturingLogger : ILoggerProvider, ILogger
+    private sealed class CapturingLogger : ILogger<DatabaseSeeder>, IDisposable
     {
         public List<string> Messages { get; } = [];
-        public ILogger CreateLogger(string categoryName) => this;
         public void Dispose() { }
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
         public bool IsEnabled(LogLevel logLevel) => true;
