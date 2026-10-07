@@ -22,4 +22,18 @@ public sealed class PersistenceBoundaryTests
         typeof(BookingRepository).Assembly.GetReferencedAssemblies().Should().NotContain(reference =>
             reference.Name!.Contains("EntityFramework") || reference.Name.Contains("Services.Web"));
     }
+    [Fact]
+    public void Initialization_EmbedsOnlyApplicationScriptsAndExcludesPersonalDatabaseTypes()
+    {
+        var assembly = typeof(BookingRepository).Assembly;
+        assembly.GetManifestResourceNames().Where(name => name.EndsWith(".sql"))
+            .Should().BeEquivalentTo(new[]
+            {
+                "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.001_schema.sql",
+                "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.002_stored_procedures.sql",
+                "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.003_permissions.sql"
+            });
+        assembly.GetTypes().Should().NotContain(type =>
+            (type.Namespace ?? "").StartsWith("BookingApp.Dal.SqlServerRepositories.Database"));
+    }
 }

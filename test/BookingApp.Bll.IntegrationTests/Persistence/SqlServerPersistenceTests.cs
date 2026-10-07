@@ -7,7 +7,7 @@ using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Users;
 using BookingApp.Bll.Common.Users.Models;
 using BookingApp.Bll.IntegrationTests.Infrastructure;
-using BookingApp.Dal.SqlServerRepositories.Database;
+using BookingApp.Dal.SqlServerRepositories.Initialization;
 using BookingApp.Dal.SqlServerRepositories.Infrastructure;
 using BookingApp.Dal.SqlServerRepositories.Repositories;
 using BookingApp.Services.Web.Services;
@@ -213,7 +213,7 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
     [Fact]
     public async Task DeploymentRerun_IsNoOp_AndRejectsChangedChecksum()
     {
-        await DatabaseDeployment.ApplyAsync(Factory.AdminConnectionString, true, Token);
+        await DatabaseInitializer.ApplyAsync(Factory.AdminConnectionString, Token);
         await using var admin = new SqlConnection(Factory.AdminConnectionString);
         await admin.OpenAsync(Token);
         await using var change = new SqlCommand("UPDATE dbo.booking_schema_versions SET checksum=@Checksum OUTPUT deleted.checksum WHERE version=N'002_stored_procedures.sql'", admin);
@@ -221,7 +221,7 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
         var previous = (string)(await change.ExecuteScalarAsync(Token))!;
         try
         {
-            Func<Task> deploy = () => DatabaseDeployment.ApplyAsync(Factory.AdminConnectionString, true, Token);
+            Func<Task> deploy = () => DatabaseInitializer.ApplyAsync(Factory.AdminConnectionString, Token);
             await deploy.Should().ThrowAsync<InvalidOperationException>().WithMessage("*changed after deployment*");
         }
         finally
