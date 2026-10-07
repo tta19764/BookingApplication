@@ -3,7 +3,7 @@
 Run the entire suite with:
 
 ```powershell
-dotnet test BookingApplicationSolution.sln
+dotnet test --solution BookingApplicationSolution.sln
 ```
 
 Docker Desktop or another compatible Docker engine is required for integration tests.
@@ -31,7 +31,7 @@ Both test projects link `test/Shared/SqlServerWebAppFactory.cs`. The fixture sta
 The SQL Server 2022 image is pinned by digest. Override `BOOKINGAPP_TEST_SQL_IMAGE` to match the remote engine major version and align compatibility level/collation/isolation where needed. Allow time/resources for the first image pull; CI failures to start SQL Server are reported as test failures. Optional remote staging smoke tests separately validate TLS, authentication and network access. See [database deployment](database-initialization.md).
 
 
-The current suite defines 111 tests: Common 1, BLL unit 27, BLL integration 50 and Web integration 33. Entity architecture checks cover Guid/integer typed identity inheritance and prevent business/provider types in DAL entity properties. The Database folder contains only personal files excluded from application scope. Test bootstrap uses Initialization scripts and data seeder methods.
+The current suite defines 116 tests: Common 1, BLL unit 27, BLL integration 51 and Web integration 37. Entity architecture checks cover Guid/integer typed identity inheritance and prevent business/provider types in DAL entity properties. The Database folder contains only personal files excluded from application scope. Test bootstrap uses Initialization scripts and data seeder methods.
 
 `DatabaseSeederTests` creates a separate schema-only database for each test in the shared SQL Server container. It checks empty data inspection, missing-table SQL failures, existing data preservation, partial reference repair, conflicting identities, insert rollback, concurrent idempotency and rejection of runtime credentials. It never alters the shared application-test schema or the remote database.
 
@@ -40,3 +40,5 @@ StartupDataSeederTests verifies interface registration, disabled behavior withou
 `RepositoryExceptionTests` exercises actual SQL Server failures through hall, booking and user repositories. Its 18 cases cover read/write errors, missing schema, command timeouts, connection failures and cancellation. It verifies provider-independent categories, sanitized exception contents, incident correlation and exactly one error log. Each case owns a disposable database; production procedure signatures are retained while test bodies inject failures.
 
 `SqlObjectNamingTests` verifies fresh creation of all eight prefixed tables (including the journal), 14 procedures and three journaled scripts, without legacy schema, runtime role or tables.
+
+The updated xUnit packages use Microsoft Testing Platform. Root `global.json` selects this runner for .NET 10. Use `dotnet test --solution BookingApplicationSolution.sln`; a class filter uses `-- --filter-class "*CompleteBookingsJobTests"`. Completion job tests verify the Quartz 4 cancellation parameter, one cutoff, bounded batching, failure propagation and the registered job/trigger interval.

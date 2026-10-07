@@ -3,7 +3,7 @@
 Запуск повного набору:
 
 ```powershell
-dotnet test BookingApplicationSolution.sln
+dotnet test --solution BookingApplicationSolution.sln
 ```
 
 Для integration-тестів потрібен Docker Desktop або сумісний рушій Docker.
@@ -30,7 +30,7 @@ HTTP-тести використовують HttpClient та тимчасови�
 
 Docker потрібен для integration tests. Образ SQL Server 2022 зафіксовано digest; `BOOKINGAPP_TEST_SQL_IMAGE` дозволяє узгодити його з віддаленим сервером. Перше завантаження потребує часу та ресурсів. TLS, мережу та автентифікацію віддаленого deployment перевіряють окремо. Див. [SQL Server setup](../en/database-initialization.md).
 
-Поточний набір містить 111 тестів: Common 1, BLL unit 27, BLL integration 50 та Web integration 33. Архітектурні перевірки entities перевіряють Guid inheritance та відсутність бізнес/provider типів у властивостях DAL. Database містить лише персональні файли поза application scope. Test bootstrap використовує Initialization scripts і data seeder methods.
+Поточний набір містить 116 тестів: Common 1, BLL unit 27, BLL integration 51 та Web integration 37. Архітектурні перевірки entities перевіряють Guid inheritance та відсутність бізнес/provider типів у властивостях DAL. Database містить лише персональні файли поза application scope. Test bootstrap використовує Initialization scripts і data seeder methods.
 
 `DatabaseSeederTests` створює окрему schema-only базу для кожного тесту у спільному SQL Server container. Перевіряються порожній стан даних, SQL-помилки відсутніх таблиць, збереження наявних даних, відновлення пропущених reference rows, конфлікти IDs, rollback, конкурентна ідемпотентність та відмова для runtime credentials. Спільна application-test схема й віддалена база не змінюються.
 
