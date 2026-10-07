@@ -1,4 +1,7 @@
 using Asp.Versioning;
+using BookingApp.Bll.Common.Initialization;
+using BookingApp.Dal.SqlServerRepositories.Initialization;
+using BookingApp.Services.Web.Services.Initialization;
 using BookingApp.Services.Web.Configuration;
 using BookingApp.Services.Web.Mappings;
 using System.Text.Json.Serialization;
@@ -93,7 +96,19 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("Database")
             ?? throw new InvalidOperationException("The Database connection string is not configured.");
 
-        services.AddSqlServerDataAccess(connectionString, configuration.GetValue("Database:CommandTimeoutSeconds", 30));
+        var commandTimeout = configuration.GetValue("Database:CommandTimeoutSeconds", 30);
+        services.AddSqlServerDataAccess(connectionString, commandTimeout);
+
+        services.Configure<DatabaseSeedingOptions>(configuration.GetSection(DatabaseSeedingOptions.SectionName));
+        // An optional seeding identity can override the main connection; missing/blank values reuse it.
+        services.AddScoped<IDatabaseSeeder>(_ =>
+        {
+            var seedingConnection = configuration.GetConnectionString("Seeding");
+            return new DatabaseSeeder(
+                string.IsNullOrWhiteSpace(seedingConnection) ? connectionString : seedingConnection,
+                commandTimeout);
+        });
+        services.AddSingleton<StartupDataSeeder>();
 
         services.Configure<CompleteBookingsOptions>(
             configuration.GetSection(CompleteBookingsOptions.SectionName));

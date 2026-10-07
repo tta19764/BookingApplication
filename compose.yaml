@@ -9,6 +9,9 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__Database: ${ConnectionStrings__Database:?Set the remote SQL Server connection string}
+      DatabaseSeeding__Enabled: "${DatabaseSeeding__Enabled:-false}"
+      DatabaseSeeding__IncludeDemoData: "${DatabaseSeeding__IncludeDemoData:-false}"
+      ConnectionStrings__Seeding: "${ConnectionStrings__Seeding:-}"
       Serilog__WriteTo__1__Args__serverUrl: http://bookingapp.seq:5341
     ports:
       - "8080:8080"
