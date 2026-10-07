@@ -33,3 +33,5 @@ GET    /api/v1/reports/bookings-summary
 Багаторазова колекція Postman у `test/Postman/` надає сценарій ручної перевірки. Автоматичну поведінку HTTP перевіряє `BookingApp.Services.Web.IntegrationTests`.
 
 Services реєструє Common `IDatabaseSeeder` як scoped і await-ить `StartupDataSeeder` до HTTP/scheduler startup за `DatabaseSeeding:Enabled=true`. `IncludeDemoData` керує demo halls. Необов’язковий `ConnectionStrings:Seeding` перевизначає основний connection; відсутнє/порожнє значення використовує Database. Потрібні SELECT/INSERT права; помилки зупиняють startup. Enabled startup спочатку застосовує потрібні schema/procedure/permission scripts.
+
+Exception middleware спочатку класифікує помилку. Validation, authorization, missing-resource і task-timeout логуються як Information без stack trace; неочікувані помилки — Error із exception. Persistence failures уже логуються DAL і не дублюються в middleware. HTTP status і validation details збережено.
