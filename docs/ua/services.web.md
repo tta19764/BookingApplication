@@ -26,8 +26,10 @@ GET    /api/v1/reports/bookings-summary
 - Централізована обробка винятків не розкриває клієнтам внутрішні деталі.
 - Контекстне журналювання запитів через Serilog і Seq.
 - Перенаправлення на HTTPS у конвеєрі проміжного програмного забезпечення.
-- Початкову базу створюють через code first, потім генерують SQL-скрипт setup; startup не змінює віддалену базу.
+- Початкову базу створюють через code first, потім генерують SQL-скрипт setup; startup initialization можна увімкнути конфігурацією: scripts виконуються перед data seeding.
 
 Поточне API використовує попередньо створеного користувача. Для промислового середовища слід додати автентифікацію, політики авторизації, безпечне керування секретами, обмеження частоти запитів і налаштування довірених проксі-серверів.
 
 Багаторазова колекція Postman у `test/Postman/` надає сценарій ручної перевірки. Автоматичну поведінку HTTP перевіряє `BookingApp.Services.Web.IntegrationTests`.
+
+Services реєструє Common `IDatabaseSeeder` як scoped і await-ить `StartupDataSeeder` до HTTP/scheduler startup за `DatabaseSeeding:Enabled=true`. `IncludeDemoData` керує demo halls. Необов’язковий `ConnectionStrings:Seeding` перевизначає основний connection; відсутнє/порожнє значення використовує Database. Потрібні SELECT/INSERT права; помилки зупиняють startup. Enabled startup спочатку застосовує потрібні schema/procedure/permission scripts.

@@ -1,6 +1,6 @@
 # EF Core / PostgreSQL to ADO.NET / remote SQL Server: migration plan
 
-Status: the SQL Server DAL and container integration tests are implemented on the ADO migration branch based on `refactor/layered-architecture-v2`. Application changes are organized into functional commits; `BookingApp.Dal.SqlServerRepositories/Database/` is intentionally excluded from those commits. Local database artifacts remain necessary for the test bootstrap. The deployment-tool project and its source files are removed. Initial setup will use a code-first database followed by a generated SQL setup script. No remote database has been changed. Existing-data transfer and remote verification remain environment-specific steps.
+Status: the SQL Server DAL and container integration tests are implemented on the ADO migration branch based on `refactor/layered-architecture-v2`. Application changes are organized into functional commits; `BookingApp.Dal.SqlServerRepositories/Database/` is intentionally excluded from those commits. Schema/procedure/permission scripts and their runner now belong to Initialization; the Database folder is personal-only and outside application scope. The deployment-tool project and its source files are removed. Initial setup will use a code-first database followed by a generated SQL setup script. The local development database has been initialized and seeded through the startup flow. Existing-data transfer and production verification remain environment-specific steps.
 
 This document retains the migration design and operational acceptance gates. The DAL guide describes the implemented API; remote verification, optional data transfer, monitoring and cutover remain deployment work. Recommendations below are not a claim that each operational enhancement is implemented.
 
@@ -29,7 +29,7 @@ Whether existing PostgreSQL data needs transfer remains a scope decision. If no 
 | Occupancy | Booking precheck considers all statuses; availability considers only Reserved | Agree one blocking-status policy and apply it everywhere. |
 | Background completion | Select due reservations, update individually, save batches | Use an atomic guarded completion procedure or transactional guarded writes. |
 | Reporting | Booking pages of 500 aggregated by `ReportManager` | Preserve initially; database aggregation is optional later work. |
-| Bootstrap | Development startup invokes EF migrations and EF seeding/EnsureCreated | Replace with external code-first setup, stored procedures/reference data and a generated setup script. |
+| Bootstrap | Development startup invokes EF migrations and EF seeding/EnsureCreated | Replace with opt-in script initialization followed by interface-based reference/demo data seeding; external code-first setup and generated personal scripts remain a separate workflow. |
 | Schema | Seven PostgreSQL application tables and PostgreSQL EF migrations | Create a T-SQL schema; old provider-specific migrations are historical references only. |
 | Tests | Two PostgreSQL Testcontainers factories and direct DbContext assertions | Replace with Testcontainers.MsSql and isolated SQL Server container fixtures. |
 | Compose | `compose.yaml` defines PostgreSQL service, connection string, health check and volume | Remove database service and dependencies. Any retained API container connects to the remote server. |
@@ -60,7 +60,8 @@ Infrastructure/   connection factory and typed procedure parameters
 Repositories/     hall, booking, user repositories
 Entities/         DAL persistence representations
 Mappings/         SqlDataReader-to-entity hydration and entity/model AutoMapper profiles
-Database/         T-SQL baseline, migrations, procedures, grants
+Initialization/   explicit script runner and data seeders
+    Scripts/      schema, procedures and permission scripts
 ```
 
 Register a stateless connection factory and scoped repositories. Create a SqlConnection per operation, or one connection per explicit transaction; use SqlClient pooling instead of retaining a singleton open connection. Dispose connection, transaction, command and reader reliably. Materialize a page before returning it and do not share a connection across concurrent tasks. Keep Multiple Active Result Sets disabled unless a verified requirement justifies it.
@@ -182,7 +183,7 @@ Do not automatically replay writes after an uncertain commit/network loss. Recon
 
 ## 8. Schema deployment and optional cross-engine data transfer
 
-For initial setup, create SQL Server schema using the user's code-first approach, add the stored procedures and required data/permissions, then generate a reusable setup script from that database. Verify its schema matches the DAL contract and rehearse it on an empty database. Include required seed data explicitly when schema-only scripting omits it. No repository deployment-tool project is included; use separate administrative credentials, never web startup. The checksummed script helper remains only for disposable integration-test setup.
+For initial setup, create SQL Server schema using the user's code-first approach, add the stored procedures and required data/permissions, then generate a reusable setup script from that database. Verify its schema matches the DAL contract and rehearse it on an empty database. Include required seed data explicitly when schema-only scripting omits it. No repository deployment-tool project is included; schema setup requires appropriate administrative privileges. When DatabaseSeeding:Enabled is true, startup invokes IDatabaseSeeder.InitializeAsync to apply unapplied scripts before reference/demo data methods. The main database connection is used unless an optional Seeding connection overrides it. Integration fixtures use the same runner and data seeders.
 
 Installation paths:
 
@@ -201,7 +202,7 @@ Transfer steps when required:
 - Freeze old writes for final export/load and drain the completion job. Without a designed incremental replication path, plan a maintenance window rather than running both writable systems.
 - Record transfer completion and retain source backup/export under an agreed retention policy; do not destroy the source as part of routine cutover.
 
-Current reference SQL includes the mandatory role/permission catalog and temporary API user. Demo halls are a separate optional script. Replace the temporary user when authentication is implemented. Seeds are idempotent and target-checked. Demo seeds are explicit development/test actions, never automatic against a production remote connection.
+The reference seeder includes the mandatory role/permission catalog and temporary API user. Demo halls are a separate optional seeder method. Replace the temporary user when authentication is implemented. Seeds are idempotent and target-checked. Demo seeds are explicit development/test actions, never automatic against a production remote connection.
 
 ## 9. SQL Server integration-test containers
 

@@ -6,13 +6,13 @@ Readers заповнюють DAL entities та відновлюють UTC. DAL A
 
 Лише Reserved блокує зал. Процедура бронювання під блокуванням залу атомарно перевіряє перетин, додає бронювання та оновлює час останнього бронювання. Суміжні інтервали дозволені. Редагування залу не перезаписує цей час; видалення залу з бронюваннями повертає конфлікт. Завершення виконується обмеженими атомарними пакетами.
 
-Застосунок підключається до віддаленого SQL Server. Початкову базу створюють через code first, потім генерують SQL setup із процедурами та reference data; deployment tool видалено. [Інструкції](../../BookingApp.Dal.SqlServerRepositories/Database/README.md). Startup не змінює базу. Runtime має лише EXECUTE; integration tests зберігають SQL Server Testcontainers.
+Застосунок підключається до віддаленого SQL Server. Початкову базу створюють через code first, потім генерують SQL setup із процедурами та reference data; deployment tool видалено. [Інструкції](../en/database-initialization.md). Startup initialization є необов’язковим: спочатку застосовуються потрібні schema/procedure/permission scripts, потім data seeding. Runtime має лише EXECUTE; integration tests зберігають SQL Server Testcontainers.
 
 Quartz і TimeProvider залишаються в Services, ціноутворення та валідація — у BLL. Див. [Тестування](testing.md).
 
 ## Сутності та межа зіставлення
 
-`Entity` надає `Guid Id` для `BookingEntity`, `ConferenceHallEntity` та `UserEntity`. `RoleEntity` і `PermissionEntity` мають цілочислові ключі. `UserRoleEntity` та `RolePermissionEntity` визначаються складеним ключем із двох зовнішніх ключів і не мають додаткового Guid.
+`Entity<TKey>` надає типізований первинний ключ для сутностей з одним ключем. `BookingEntity`, `ConferenceHallEntity` та `UserEntity` успадковують `Entity<Guid>`, а `RoleEntity` і `PermissionEntity` — `Entity<int>`. `UserRoleEntity` та `RolePermissionEntity` визначаються складеним ключем із двох зовнішніх ключів і не мають додаткового Guid.
 
 Entities зберігають примітиви: decimal суми, трилітерні коди валют, назви статусів і перелік числових значень amenities через кому. Таблицю валют не додано. `RowMapper` читає іменовані колонки, а DAL `AutoMapperConfig` відновлює об’єкти-значення Common і виконує зворотне зіставлення для запису. AutoMapper не завантажує дані. Hall та booking reads не завантажують навігаційні колекції або пов’язані halls/users.
 
@@ -39,3 +39,26 @@ Services реєструє DAL AutoMapper profile разом із BLL/HTTP profil
 Обов’язковий connection string: `ConnectionStrings:Database`, через `ConnectionStrings__Database` або user secrets. `Database:CommandTimeoutSeconds` має додатне значення, типово 30 секунд; connection timeout задається у connection string. `BackgroundJobs:CompleteBookings:Enabled` типово true; `IntervalSeconds` та `PageSize` задають розклад і розмір пакета у web appsettings.
 
 Реєстрація перевіряє формат connection string та timeout, але не відкриває з’єднання й не застосовує SQL. Схему, права й доступність віддаленого сервера перевіряють окремо. Integration fixtures використовують локальні embedded SQL artifacts та EXECUTE-only identity, без віддалених credentials.
+
+## Явне заповнення бази
+
+`Initialization/DatabaseSeeder` реалізує Common `IDatabaseSeeder`; result models також розміщено в Common. Services завжди реєструє scoped seeder і `StartupDataSeeder`, який викликає його до запуску HTTP/background jobs, якщо прапорець увімкнено. Seeding connection є необов’язковим; основний connection використовується як fallback і має мати SELECT/INSERT права.
+
+```csharp
+var seeder = new DatabaseSeeder(setupConnectionString);
+var inspection = await seeder.InspectAsync(cancellationToken);
+var reference = await seeder.SeedReferenceDataAsync(cancellationToken);
+var demo = await seeder.SeedDemoDataAsync(cancellationToken); // Необов’язково.
+```
+
+Перед викликом застосуйте скрипти схеми та процедур. Metadata schema inspector відсутній. InitializeAsync застосовує потрібні scripts із journal/checksum перевіркою; для нових scripts потрібні schema/procedure/permission setup права. Data methods потребують SELECT/INSERT. Відсутні таблиці або несумісні визначення спричиняють звичайні SQL-помилки; скрипти визначають контракт схеми. Системні бази відхиляються.
+
+`InspectAsync` повертає `RowCounts` для кожної таблиці та `HasData`. Кожна операція читає кількість наявних рядків під serializable transaction і спільним transaction-owned application lock. `SeedResult` містить стан до запису, кількість committed inserts та прапорець пропуску demo. Помилки й скасування відкочують операцію.
+
+Reference seeding доповнює лише відсутні обов’язкові рядки навіть за наявності інших даних. Конфлікти зарезервованих IDs/names або email тимчасового користувача спричиняють помилку без перезапису. Demo додає Hall A/B/C лише за порожнього `conference_halls`; будь-який наявний зал повністю вимикає demo inserts. Наявні reference rows не блокують demo. Процедури та runtime grants встановлюють окремо перед генерацією setup script із потрібними даними.
+
+## Необов’язковий startup data seeding
+
+`DatabaseSeeding:Enabled=true` запускає reference seeding; `IncludeDemoData=true` додатково запускає demo seeding після успішного reference seeding. Обидва прапорці типово false. Якщо Enabled=false, seeder не resolve-иться й операції не виконуються незалежно від demo flag, але interface registration залишається.
+
+`ConnectionStrings__Seeding` є необов’язковим: відсутнє або порожнє значення використовує `ConnectionStrings__Database`. Обрана identity потребує SELECT/INSERT прав. Окремий seeding connection дозволяє залишити runtime EXECUTE-only. Конфлікти, помилки БД та cancellation зупиняють startup. Координатор await-ить methods в async DI scope до `app.Run` і журналює committed counts без credentials. Спочатку викликається IDatabaseSeeder.InitializeAsync, який через DatabaseInitializer застосовує потрібні schema/procedure/permission scripts. API fixtures явно вимикають startup seeding й окремо заповнюють disposable database.

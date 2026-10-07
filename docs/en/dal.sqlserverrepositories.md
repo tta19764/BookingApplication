@@ -6,13 +6,13 @@ Readers hydrate DAL persistence entities and restore UTC timestamp kinds. The DA
 
 Only Reserved bookings block occupancy. The precheck is advisory; the atomic write enforces overlap under a transaction-owned per-hall application lock. Adjacent periods are valid. Hall edits preserve last-booked timestamps and deleting a referenced hall returns a controlled conflict. Completion uses guarded bounded updates and reports actual counts.
 
-Use remote SQL Server for the application. Build the initial schema with the external code-first setup, install procedures/reference data and generate the reusable setup script from the database. No EF context or code-first bootstrap project is included here. Consult the [versioned SQL scripts](../../BookingApp.Dal.SqlServerRepositories/Database/README.md) explicitly with separate deployment credentials. The runtime role has EXECUTE only; startup does not create databases or seed data. SQL Server containers exist only in integration tests and run the same scripts using the production DAL.
+Use remote SQL Server for the application. Build the initial schema with the external code-first setup, install procedures/reference data and generate the reusable setup script from the database. No EF context or code-first bootstrap project is included here. Consult the [versioned SQL scripts](database-initialization.md) explicitly with separate deployment credentials. The runtime role has EXECUTE only; startup never creates the database itself; when enabled it applies schema/procedure/permission scripts before seeding data. SQL Server containers exist only in integration tests and run the same scripts using the production DAL.
 
 Quartz, TimeProvider and event handlers remain in Services. Pricing/validation remain in BLL. See [Testing](testing.md) and the [migration plan](ef-to-ado-net-migration-plan.md).
 
 ## Entities and mapping boundary
 
-`Entity` supplies a `Guid Id` to `BookingEntity`, `ConferenceHallEntity` and `UserEntity`. `RoleEntity` and `PermissionEntity` have integer catalog keys. `UserRoleEntity` and `RolePermissionEntity` use their two foreign keys as a composite identity; they have no artificial Guid key.
+`Entity<TKey>` supplies a typed primary key to single-key persistence entities. `BookingEntity`, `ConferenceHallEntity` and `UserEntity` inherit `Entity<Guid>`; `RoleEntity` and `PermissionEntity` inherit `Entity<int>` for their catalog keys. `UserRoleEntity` and `RolePermissionEntity` use their two foreign keys as a composite identity; they have no artificial Guid key.
 
 Storage values are primitives: decimal price amounts, three-letter currency codes, status names and comma-separated numeric amenity values. A currency lookup table has not been added. Nullable lifecycle timestamps remain nullable. `RowMapper` uses named result columns to hydrate entities; the DAL `AutoMapperConfig` reconstructs Common value objects and maps writes back to storage values. The repository assembles relationships; AutoMapper does not fetch data. Hall and booking reads do not load related bookings, halls or users.
 
@@ -44,3 +44,37 @@ The Services composition root registers the DAL AutoMapper profile together with
 | `BackgroundJobs:CompleteBookings:IntervalSeconds` / `PageSize` | Completion schedule and bounded write size, configured in web appsettings. |
 
 Registration validates the connection string and command timeout but does not open a connection, verify remote access or apply SQL. Provision and validate the remote schema, permissions and connectivity separately. Integration fixtures use the local embedded SQL artifacts and an EXECUTE-only identity; they never use the remote application connection string.
+
+## Explicit database seeding
+
+`Initialization/DatabaseSeeder` implements the Common `IDatabaseSeeder` interface; its result models also live in Common. InitializeAsync runs script initialization before data seeding at enabled startup. The Services composition root always registers it as scoped and registers `StartupDataSeeder` to run it before requests/background jobs when enabled. An optional seeding connection string can override the main connection. Otherwise the main connection is reused and must have SELECT/INSERT permissions for seeding.
+
+```csharp
+var seeder = new DatabaseSeeder(setupConnectionString);
+await seeder.InitializeAsync(cancellationToken);
+var inspection = await seeder.InspectAsync(cancellationToken);
+var reference = await seeder.SeedReferenceDataAsync(cancellationToken);
+// Optional; explicit invocation only for development/test setup.
+var demo = await seeder.SeedDemoDataAsync(cancellationToken);
+```
+
+Apply schema and procedure scripts before invoking this service. The seeder has no metadata schema inspector. InitializeAsync applies required scripts using the journal; it needs schema/procedure/permission setup rights when scripts are unapplied. Data methods require SELECT/INSERT. Scripts own the schema contract. System databases are rejected.
+
+`InspectAsync` reports `RowCounts` for each table and `HasData` when any application table contains rows. Each seed operation reads the existing data counts under a serializable transaction and a common transaction-owned application lock. `SeedResult` returns the before-state, committed inserted-row count and demo skip flag. Failed writes or cancellation roll back the operation.
+
+Reference seeding adds only missing required rows, even when unrelated application data already exists. Reserved IDs/names and the temporary user email must agree with existing identities; conflicts fail without overwriting existing data. Demo seeding adds Hall A/B/C only when `conference_halls` is empty; any existing hall causes a complete skip, including a partial demo catalog. Existing reference data does not prevent demo seeding. The data methods install no procedures or runtime grants; `InitializeAsync` applies those scripts first. Include the required data before exporting a personal reusable setup script.
+
+## Opt-in startup data seeding
+
+```json
+"DatabaseSeeding": {
+  "Enabled": true,
+  "IncludeDemoData": false
+}
+```
+
+Both flags default to false. `Enabled=true` first initializes scripts, then runs reference seeding; `IncludeDemoData=true` additionally seeds demo halls after reference seeding succeeds. With Enabled=false neither operation runs, regardless of the demo flag, and the seeder is not resolved. Registration remains present through the Common interface.
+
+Optionally provide `ConnectionStrings__Seeding` through environment variables or user secrets. When missing or blank it falls back to `ConnectionStrings__Database`. The selected identity needs SELECT/INSERT access for data and setup rights for unapplied schema/procedure/permission scripts; a separate identity permits keeping runtime EXECUTE-only. Conflicts, database failures or cancellation prevent startup rather than allowing requests with incomplete required data. The startup coordinator awaits the methods inside an async DI scope before `app.Run`; it logs committed counts without credentials. It first calls IDatabaseSeeder.InitializeAsync, which applies unapplied schema/procedure/permission scripts through DatabaseInitializer. API test fixtures explicitly disable startup seeding and seed their disposable database separately.
+
+Enabled startup now executes scripts before data methods. The target database must already exist. Use credentials that can create tables/procedures/roles and grant permissions when initialization is needed. Existing unjournaled tables are not silently adopted: for external code-first/manual schemas, establish an explicit reviewed baseline before enabling the runner. Add versioned scripts for changes instead of editing applied ones.

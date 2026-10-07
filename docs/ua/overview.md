@@ -30,11 +30,11 @@ Booking Application керує орендою конференц-залів. К�
 
 ## Початкові дані
 
-Reference SQL створює користувача `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa`, якого використовує API до впровадження автентифікації. Необов'язковий 004_demo_seed.sql створює Hall A, Hall B і Hall C. Startup не заповнює базу.
+Reference seeder створює користувача `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa`, якого використовує API до впровадження автентифікації. Необов'язковий `SeedDemoDataAsync` створює Hall A, Hall B і Hall C. Startup data seeding типово вимкнено; його можна увімкнути через конфігурацію.
 
 ## Запуск
 
-Застосуйте [SQL-скрипти](../../BookingApp.Dal.SqlServerRepositories/Database/README.md) до віддаленої бази та налаштуйте `ConnectionStrings__Database` для runtime-користувача. Для необов'язкового запуску API/Seq у Docker:
+Застосуйте [SQL-скрипти](../en/database-initialization.md) до віддаленої бази та налаштуйте `ConnectionStrings__Database` для runtime-користувача. Для необов'язкового запуску API/Seq у Docker:
 
 ```powershell
 docker compose up --build
