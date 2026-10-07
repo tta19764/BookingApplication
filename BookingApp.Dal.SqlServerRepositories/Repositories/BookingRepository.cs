@@ -22,11 +22,19 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     /// <remarks>Related bookings are not loaded.</remarks>
     public async Task<Booking?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        await using var connection = await connections.OpenAsync(cancellationToken);
-        await using var command = SqlProcedure.Create(connection, "booking_api.booking_get", connections.CommandTimeoutSeconds);
-        command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        return await reader.ReadAsync(cancellationToken) ? mapper.Map<Booking>(RowMapper.Booking(reader)) : null;
+        try
+        {
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            await using var command = SqlProcedure.Create(connection, "booking_api.booking_get", connections.CommandTimeoutSeconds);
+            command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
+            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+            return await reader.ReadAsync(cancellationToken) ? mapper.Map<Booking>(RowMapper.Booking(reader)) : null;
+
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, "BookingRepository.GetByIdAsync", cancellationToken);
+        }
     }
 
     /// <summary>Checks whether a reserved booking overlaps the requested half-open period.</summary>
@@ -37,12 +45,20 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     /// <remarks>This check is advisory. CreateReservationAsync performs the authoritative check under a database lock.</remarks>
     public async Task<bool> HasOverlapAsync(Guid conferenceHallId, DateRange duration, CancellationToken cancellationToken = default)
     {
-        await using var connection = await connections.OpenAsync(cancellationToken);
-        await using var command = SqlProcedure.Create(connection, "booking_api.booking_has_overlap", connections.CommandTimeoutSeconds);
-        command.Parameter("@HallId", SqlDbType.UniqueIdentifier, conferenceHallId);
-        command.Utc("@Start", duration.Start);
-        command.Utc("@End", duration.End);
-        return (bool)(await command.ExecuteScalarAsync(cancellationToken))!;
+        try
+        {
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            await using var command = SqlProcedure.Create(connection, "booking_api.booking_has_overlap", connections.CommandTimeoutSeconds);
+            command.Parameter("@HallId", SqlDbType.UniqueIdentifier, conferenceHallId);
+            command.Utc("@Start", duration.Start);
+            command.Utc("@End", duration.End);
+            return (bool)(await command.ExecuteScalarAsync(cancellationToken))!;
+
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, "BookingRepository.HasOverlapAsync", cancellationToken);
+        }
     }
 
     /// <summary>Atomically creates a reservation and updates the hall booking timestamp.</summary>
@@ -54,27 +70,35 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     /// <exception cref="InvalidDataException">The procedure returns an unknown outcome.</exception>
     public async Task<ReservationOutcome> CreateReservationAsync(Booking booking, CancellationToken cancellationToken = default)
     {
-        if (booking.Status != BookingStatus.Reserved) throw new ArgumentException("Only reservations can be created.", nameof(booking));
-        var entity = mapper.Map<BookingEntity>(booking);
-        await using var connection = await connections.OpenAsync(cancellationToken);
-        await using var command = SqlProcedure.Create(connection, "booking_api.booking_reserve", connections.CommandTimeoutSeconds);
-        command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
-        command.Parameter("@HallId", SqlDbType.UniqueIdentifier, entity.ConferenceHallId);
-        command.Parameter("@UserId", SqlDbType.UniqueIdentifier, entity.UserId);
-        command.Utc("@Start", entity.Start);
-        command.Utc("@End", entity.End);
-        command.Utc("@CreatedOnUtc", entity.CreatedOnUtc);
-        command.Decimal("@PriceForPeriod", entity.PriceForPeriodAmount);
-        command.Decimal("@AmenitiesUpCharge", entity.AmenitiesUpChargeAmount);
-        command.Decimal("@TotalPrice", entity.TotalPriceAmount);
-        command.Parameter("@PriceCurrency", SqlDbType.NVarChar, entity.PriceForPeriodCurrency, 3);
-        command.Parameter("@AmenitiesCurrency", SqlDbType.NVarChar, entity.AmenitiesUpChargeCurrency, 3);
-        command.Parameter("@TotalCurrency", SqlDbType.NVarChar, entity.TotalPriceCurrency, 3);
-        // The procedure commits both writes before reporting a business outcome.
-        var outcome = command.Output("@Outcome");
-        await command.ExecuteNonQueryAsync(cancellationToken);
-        var result = (ReservationOutcome)(int)outcome.Value;
-        return Enum.IsDefined(result) ? result : throw new InvalidDataException("Unknown reservation outcome");
+        try
+        {
+            if (booking.Status != BookingStatus.Reserved) throw new ArgumentException("Only reservations can be created.", nameof(booking));
+            var entity = mapper.Map<BookingEntity>(booking);
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            await using var command = SqlProcedure.Create(connection, "booking_api.booking_reserve", connections.CommandTimeoutSeconds);
+            command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
+            command.Parameter("@HallId", SqlDbType.UniqueIdentifier, entity.ConferenceHallId);
+            command.Parameter("@UserId", SqlDbType.UniqueIdentifier, entity.UserId);
+            command.Utc("@Start", entity.Start);
+            command.Utc("@End", entity.End);
+            command.Utc("@CreatedOnUtc", entity.CreatedOnUtc);
+            command.Decimal("@PriceForPeriod", entity.PriceForPeriodAmount);
+            command.Decimal("@AmenitiesUpCharge", entity.AmenitiesUpChargeAmount);
+            command.Decimal("@TotalPrice", entity.TotalPriceAmount);
+            command.Parameter("@PriceCurrency", SqlDbType.NVarChar, entity.PriceForPeriodCurrency, 3);
+            command.Parameter("@AmenitiesCurrency", SqlDbType.NVarChar, entity.AmenitiesUpChargeCurrency, 3);
+            command.Parameter("@TotalCurrency", SqlDbType.NVarChar, entity.TotalPriceCurrency, 3);
+            // The procedure commits both writes before reporting a business outcome.
+            var outcome = command.Output("@Outcome");
+            await command.ExecuteNonQueryAsync(cancellationToken);
+            var result = (ReservationOutcome)(int)outcome.Value;
+            return Enum.IsDefined(result) ? result : throw new InvalidDataException("Unknown reservation outcome");
+
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, "BookingRepository.CreateReservationAsync", cancellationToken);
+        }
     }
 
     /// <summary>Reads one deterministically ordered page of bookings.</summary>
@@ -85,10 +109,18 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     /// <exception cref="ArgumentOutOfRangeException">Page or page size is not positive.</exception>
     public async Task<IReadOnlyCollection<Booking>> GetListPaginatedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        await using var connection = await connections.OpenAsync(cancellationToken);
-        await using var command = SqlProcedure.Create(connection, "booking_api.booking_list", connections.CommandTimeoutSeconds);
-        command.Page(page, pageSize);
-        return await ReadAsync(command, cancellationToken);
+        try
+        {
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            await using var command = SqlProcedure.Create(connection, "booking_api.booking_list", connections.CommandTimeoutSeconds);
+            command.Page(page, pageSize);
+            return await ReadAsync(command, cancellationToken);
+
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, "BookingRepository.GetListPaginatedAsync", cancellationToken);
+        }
     }
 
     /// <summary>Enumerates booking pages until the first empty page.</summary>
@@ -115,12 +147,20 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     /// <remarks>Use CompleteDueAsync for an atomic status transition; this read does not claim rows.</remarks>
     public async Task<IReadOnlyCollection<Booking>> GetReservedBookingsDueForCompletionAsync(DateTime utcNow, int pageSize, CancellationToken cancellationToken = default)
     {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
-        await using var connection = await connections.OpenAsync(cancellationToken);
-        await using var command = SqlProcedure.Create(connection, "booking_api.booking_due", connections.CommandTimeoutSeconds);
-        command.Utc("@UtcNow", utcNow);
-        command.Parameter("@PageSize", SqlDbType.Int, pageSize);
-        return await ReadAsync(command, cancellationToken);
+        try
+        {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            await using var command = SqlProcedure.Create(connection, "booking_api.booking_due", connections.CommandTimeoutSeconds);
+            command.Utc("@UtcNow", utcNow);
+            command.Parameter("@PageSize", SqlDbType.Int, pageSize);
+            return await ReadAsync(command, cancellationToken);
+
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, "BookingRepository.GetReservedBookingsDueForCompletionAsync", cancellationToken);
+        }
     }
 
     /// <summary>Atomically completes a bounded batch of due reservations.</summary>
@@ -131,15 +171,23 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     /// <remarks>Guarded database updates allow repeat calls and competing workers without completing a reservation twice.</remarks>
     public async Task<int> CompleteDueAsync(DateTime utcNow, int pageSize, CancellationToken cancellationToken = default)
     {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
-        await using var connection = await connections.OpenAsync(cancellationToken);
-        await using var command = SqlProcedure.Create(connection, "booking_api.booking_complete_due", connections.CommandTimeoutSeconds);
-        command.Utc("@UtcNow", utcNow);
-        command.Parameter("@PageSize", SqlDbType.Int, pageSize);
-        // NOCOUNT makes ExecuteNonQuery row counts unsuitable; use the explicit transition count.
-        var count = command.Output("@CompletedCount");
-        await command.ExecuteNonQueryAsync(cancellationToken);
-        return (int)count.Value;
+        try
+        {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            await using var command = SqlProcedure.Create(connection, "booking_api.booking_complete_due", connections.CommandTimeoutSeconds);
+            command.Utc("@UtcNow", utcNow);
+            command.Parameter("@PageSize", SqlDbType.Int, pageSize);
+            // NOCOUNT makes ExecuteNonQuery row counts unsuitable; use the explicit transition count.
+            var count = command.Output("@CompletedCount");
+            await command.ExecuteNonQueryAsync(cancellationToken);
+            return (int)count.Value;
+
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, "BookingRepository.CompleteDueAsync", cancellationToken);
+        }
     }
 
     private async Task<IReadOnlyCollection<Booking>> ReadAsync(SqlCommand command, CancellationToken cancellationToken)

@@ -166,7 +166,7 @@ Use separate deployment and runtime identities, and a dedicated runtime database
 
 Use same-owner static SQL ownership chaining for procedure access to tables. Where it is insufficient, use narrowly scoped module signing or documented execution context reviewed for the remote environment. Dynamic SQL does not receive ordinary ownership-chain protection; avoid it or handle permissions explicitly. Do not blindly DENY table access without testing any signed/execution-context design. Verify with runtime credentials that approved procedures succeed and direct SELECT/INSERT/UPDATE/DELETE and DDL fail.
 
-The implementation maps explicit procedure outcome codes for known business conflicts and propagates unexpected SQL failures. It does not translate SqlException numbers or retry writes. If operation-specific translation or retries are introduced later, use error numbers rather than localized messages; the following table is guidance for that future work:
+The implementation maps explicit procedure outcomes for known business conflicts. Unexpected SQL failures are logged in DAL and translated by SQL number into provider-independent `PersistenceException` categories, without retaining raw provider exceptions. It does not retry writes. The following table remains guidance for operation-specific business translation or future retry policies:
 
 | Failure | Handling |
 |---|---|

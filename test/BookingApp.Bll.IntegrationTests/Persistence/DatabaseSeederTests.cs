@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using BookingApp.Bll.Common.Shared.Exceptions;
 using System.Text.RegularExpressions;
 using BookingApp.Bll.IntegrationTests.Infrastructure;
 using BookingApp.Dal.SqlServerRepositories.Initialization;
@@ -52,12 +54,18 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
     }
 
     [Fact]
-    public async Task MissingTable_PropagatesSqlErrorWithoutCreatingSchema()
+    public async Task MissingTable_ReportsSchemaFailureWithoutCreatingSchema()
     {
         await ExecuteAsync(_connectionString, "DROP TABLE dbo.bookings");
         var action = () => Seeder.SeedReferenceDataAsync(Token);
-        var exception = await action.Should().ThrowAsync<SqlException>();
-        exception.Which.Number.Should().Be(208);
+        using var logs = new CapturingLogger();
+        using var loggerFactory = LoggerFactory.Create(builder => builder.AddProvider(logs));
+        action = () => new DatabaseSeeder(_connectionString, loggerFactory: loggerFactory).SeedReferenceDataAsync(Token);
+        var exception = await action.Should().ThrowAsync<PersistenceException>();
+        logs.Messages.Should().ContainSingle().Which.Should().Contain(exception.Which.IncidentId.ToString());
+        logs.Messages.Single().Should().NotContain("Invalid object name").And.NotContain(_connectionString);
+        exception.Which.Error.Should().Be(PersistenceError.SchemaMismatch);
+        exception.Which.InnerException.Should().BeNull();
     }
 
     [Fact]
@@ -112,7 +120,7 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
     {
         await ExecuteAsync(_connectionString, "INSERT dbo.permissions(Id,name) VALUES(1,N'custom:permission')");
         var action = () => Seeder.SeedReferenceDataAsync(Token);
-        await action.Should().ThrowAsync<SqlException>().WithMessage("*conflict*");
+        await action.Should().ThrowAsync<PersistenceException>();
         var state = await Seeder.InspectAsync(Token);
         state.RowCounts["permissions"].Should().Be(1);
         state.RowCounts["roles"].Should().Be(0);
@@ -127,7 +135,7 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
             BEGIN THROW 51011, 'Test insertion failure', 1; END;
             """);
         var action = () => Seeder.SeedReferenceDataAsync(Token);
-        await action.Should().ThrowAsync<SqlException>().WithMessage("*Test insertion failure*");
+        await action.Should().ThrowAsync<PersistenceException>();
         (await Seeder.InspectAsync(Token)).HasData.Should().BeFalse();
     }
 
@@ -143,7 +151,17 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
     public async Task RuntimeCredentials_CannotInspectOrSeed()
     {
         var action = () => new DatabaseSeeder(factory.RuntimeConnectionString).SeedReferenceDataAsync(Token);
-        var exception = await action.Should().ThrowAsync<SqlException>();
-        exception.Which.Number.Should().Be(229);
+        var exception = await action.Should().ThrowAsync<PersistenceException>();
+        exception.Which.Error.Should().Be(PersistenceError.AccessDenied);
+    }
+    private sealed class CapturingLogger : ILoggerProvider, ILogger
+    {
+        public List<string> Messages { get; } = [];
+        public ILogger CreateLogger(string categoryName) => this;
+        public void Dispose() { }
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter) => Messages.Add(formatter(state, exception));
     }
 }

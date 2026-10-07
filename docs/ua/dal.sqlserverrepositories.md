@@ -30,7 +30,7 @@ Entities зберігають примітиви: decimal суми, триліт
 | Due read / complete | `booking_due`, `booking_complete_due` | Обмежене читання без захоплення рядків; атомарне завершення повертає фактичну кількість змін. |
 | User get / create | `user_get`, `user_create` | Користувач із ролями/дозволами; атомарний запис користувача та зв’язків ролей. |
 
-Нумерація сторінок починається з 1; розміри сторінки й пакета мають бути додатними. `ListAsync` відкриває окреме з’єднання для кожної сторінки та не гарантує спільний snapshot під час конкурентних записів. Параметри часу мають UTC kind і тип datetime2(7); суми — decimal(18,2). Відомі outcomes повертаються output-параметрами, невідомі значення спричиняють помилку. SQL-помилки передаються до централізованої обробки API; автоматичні повтори та перетворення SqlException на бізнес-помилки не реалізовані.
+Нумерація сторінок починається з 1; розміри сторінки й пакета мають бути додатними. `ListAsync` відкриває окреме з’єднання для кожної сторінки та не гарантує спільний snapshot під час конкурентних записів. Параметри часу мають UTC kind і тип datetime2(7); суми — decimal(18,2). Відомі outcomes повертаються output-параметрами, невідомі значення спричиняють помилку. SQL-помилки логуються в DAL і перетворюються на provider-independent PersistenceException; автоматичних повторів немає. Очікувані бізнес-конфлікти залишаються procedure outcomes.
 
 ## Реєстрація та конфігурація
 
@@ -62,3 +62,5 @@ Reference seeding доповнює лише відсутні обов’язко
 `DatabaseSeeding:Enabled=true` запускає reference seeding; `IncludeDemoData=true` додатково запускає demo seeding після успішного reference seeding. Обидва прапорці типово false. Якщо Enabled=false, seeder не resolve-иться й операції не виконуються незалежно від demo flag, але interface registration залишається.
 
 `ConnectionStrings__Seeding` є необов’язковим: відсутнє або порожнє значення використовує `ConnectionStrings__Database`. Обрана identity потребує SELECT/INSERT прав. Окремий seeding connection дозволяє залишити runtime EXECUTE-only. Конфлікти, помилки БД та cancellation зупиняють startup. Координатор await-ить methods в async DI scope до `app.Run` і журналює committed counts без credentials. Спочатку викликається IDatabaseSeeder.InitializeAsync, який через DatabaseInitializer застосовує потрібні schema/procedure/permission scripts. API fixtures явно вимикають startup seeding й окремо заповнюють disposable database.
+
+SQL-помилки DAL перетворює на Common `PersistenceException` із категорією та incident ID, без raw `SqlException` у inner exception. DAL логує SQL number/state/class без тексту запиту, параметрів або connection string. API повертає generic HTTP 500 з incident ID. Cancellation не перетворюється на persistence failure; автоматичних retries немає.

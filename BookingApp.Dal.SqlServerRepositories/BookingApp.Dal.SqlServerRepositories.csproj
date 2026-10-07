@@ -8,6 +8,7 @@
     <PackageReference Include="AutoMapper" Version="16.2.0" />
     <ProjectReference Include="..\BookingApp.Bll.Common\BookingApp.Bll.Common.csproj" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
   </ItemGroup>
   <ItemGroup>
