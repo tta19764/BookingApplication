@@ -47,13 +47,6 @@ public static partial class DatabaseInitializer
                     SET XACT_ABORT ON;
                     BEGIN TRANSACTION;
                     IF SCHEMA_ID(N'TymchenkoOV') IS NULL EXEC(N'CREATE SCHEMA [TymchenkoOV] AUTHORIZATION dbo');
-                    IF OBJECT_ID(N'dbo.booking_schema_versions', N'U') IS NOT NULL
-                    BEGIN
-                        IF OBJECT_ID(N'[TymchenkoOV].[BookingApp.SchemaVersions]', N'U') IS NOT NULL
-                            THROW 51000, 'Both legacy and prefixed initialization journals exist; review before proceeding.', 1;
-                        ALTER SCHEMA [TymchenkoOV] TRANSFER dbo.booking_schema_versions;
-                        EXEC sys.sp_rename N'[TymchenkoOV].[booking_schema_versions]', N'BookingApp.SchemaVersions', N'OBJECT';
-                    END;
                     IF OBJECT_ID(N'[TymchenkoOV].[BookingApp.SchemaVersions]', N'U') IS NULL
                         CREATE TABLE [TymchenkoOV].[BookingApp.SchemaVersions](
                             version nvarchar(100) NOT NULL PRIMARY KEY, checksum varchar(64) NOT NULL,

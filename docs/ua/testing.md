@@ -36,4 +36,4 @@ Docker потрібен для integration tests. Образ SQL Server 2022 з�
 
 `RepositoryExceptionTests` містить 18 перевірок для hall, booking і user repositories: read/write SQL failures, відсутня схема, timeout, помилка підключення та cancellation. Перевіряються sanitized PersistenceException, incident ID і один error log. Кожен тест використовує окрему disposable базу.
 
-`SqlObjectMigrationTests` перевіряє upgrade journaled схеми, збереження даних, зв’язків і role membership, prefixed об’єкти та повторний запуск.
+`SqlObjectNamingTests` перевіряє fresh setup восьми prefixed таблиць, 14 процедур і трьох journaled scripts без legacy об’єктів.
