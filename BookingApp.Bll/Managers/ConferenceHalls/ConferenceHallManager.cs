@@ -1,13 +1,9 @@
 using AutoMapper;
 using BookingApp.Bll.Managers.Bookings;
-using BookingApp.Bll.Common.Shared;
-using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.ConferenceHalls.Errors;
-using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared.Models;
-using BookingApp.Bll.Managers.ConferenceHalls.Validation;
 using BookingApp.Bll.Managers.Shared.Validation;
 using FluentValidation;
 

@@ -64,7 +64,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     /// <summary>Atomically creates a reservation and updates the hall booking timestamp.</summary>
     /// <param name="booking">A Reserved booking with UTC timestamps and calculated price snapshots.</param>
     /// <param name="cancellationToken">Cancels connection opening and database execution.</param>
-    /// <returns>Created, Overlap, HallNotFound or UserNotFound as reported by the procedure.</returns>
+    /// <returns>Created, Overlap, HallNotFound, or UserNotFound as reported by the procedure.</returns>
     /// <remarks>The procedure owns the transaction and per-hall concurrency lock. Infrastructure failures propagate rather than becoming business outcomes.</remarks>
     /// <exception cref="ArgumentException">The booking status is not Reserved or a timestamp is not UTC.</exception>
     /// <exception cref="InvalidDataException">The procedure returns an unknown outcome.</exception>
@@ -123,7 +123,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
         }
     }
 
-    /// <summary>Enumerates booking pages until the first empty page.</summary>
+    /// <summary>Lists booking pages until the first empty page.</summary>
     /// <param name="pageSize">The positive maximum number of bookings per page.</param>
     /// <param name="cancellationToken">Cancels connection opening and database execution.</param>
     /// <returns>Materialized pages, each fetched using its own connection.</returns>

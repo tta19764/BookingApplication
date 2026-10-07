@@ -78,7 +78,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
     /// <summary>Deletes a hall only when no booking references it.</summary>
     /// <param name="id">The hall identifier.</param>
     /// <param name="cancellationToken">Cancels connection opening and database execution.</param>
-    /// <returns>Removed, NotFound or HasBookings as reported by the procedure.</returns>
+    /// <returns>Removed, NotFound, or HasBookings as reported by the procedure.</returns>
     /// <remarks>Deletion shares the reservation procedure's per-hall lock to coordinate concurrent writes.</remarks>
     /// <exception cref="InvalidDataException">The procedure returns an unknown outcome.</exception>
     public async Task<HallRemovalOutcome> RemoveAsync(Guid id, CancellationToken cancellationToken = default)
