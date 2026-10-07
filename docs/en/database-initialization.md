@@ -35,7 +35,7 @@ This example uses Windows authentication and a trusted local development certifi
 | `DatabaseSeeding:Enabled` | Enables scripts and reference seeding; base configuration defaults to false. |
 | `DatabaseSeeding:IncludeDemoData` | Adds demo halls after reference seeding; base configuration defaults to false and this flag has no effect when `Enabled=false`. |
 
-The current development appsettings enables both flags. Environment variables override appsettings; use double underscores, for example `DatabaseSeeding__Enabled`. Compose explicitly defaults both flags to false and requires `ConnectionStrings__Database` from the shell or Compose `.env`; it does not read appsettings to interpolate `${...}`. Set the Compose flags explicitly when container startup should initialize data.
+`appsettings.Development.json` is local-only and ignored by Git; configure its flags explicitly. The tracked base appsettings disables both flags. Environment variables override appsettings; use double underscores, for example `DatabaseSeeding__Enabled`. Compose explicitly defaults both flags to false and requires `ConnectionStrings__Database` from the shell or Compose `.env`; it does not read appsettings to interpolate `${...}`. Set the Compose flags explicitly when container startup should initialize data.
 
 A single connection string is sufficient when its identity has setup permissions. If the application uses an EXECUTE-only runtime identity, supply a separate `Seeding` identity. New scripts require table/procedure/role creation and permission-grant rights; data methods require SELECT/INSERT access. The permission script defines a runtime role but does not provision a login or assign an application user to it. Keep credentials outside committed configuration.
 
