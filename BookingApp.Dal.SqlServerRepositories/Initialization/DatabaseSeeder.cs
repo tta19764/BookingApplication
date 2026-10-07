@@ -25,7 +25,7 @@ public sealed class DatabaseSeeder : IDatabaseSeeder
         _connectionString = setupConnectionString;
     }
 
-    /// <summary>Applies unapplied schema, procedure and permission scripts before data seeding.</summary>
+    /// <summary>Applies unapplied schema, procedure, and permission scripts before data seeding.</summary>
     /// <param name="cancellationToken">Cancels script initialization.</param>
     /// <returns>A task completed when all embedded initialization scripts have been applied or verified.</returns>
     /// <remarks>Applied checksums prevent replay and detect changed scripts. An existing unjournaled schema is not automatically adopted.</remarks>
@@ -50,7 +50,7 @@ public sealed class DatabaseSeeder : IDatabaseSeeder
         }
     }
 
-    /// <summary>Atomically adds missing roles, permissions, links and the temporary API user.</summary>
+    /// <summary>Atomically adds missing roles, permissions, links, and the temporary API user.</summary>
     /// <param name="cancellationToken">Cancels database operations, including lock acquisition.</param>
     /// <returns>The previous data counts and number of committed inserts; repeated execution adds no duplicates.</returns>
     /// <remarks>Existing values are preserved. Conflicting reserved IDs or names fail and roll back the entire operation. This method does not install procedures or grant permissions.</remarks>

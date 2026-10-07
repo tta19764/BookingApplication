@@ -8,15 +8,15 @@ using Microsoft.Data.SqlClient;
 
 namespace BookingApp.Dal.SqlServerRepositories.Initialization;
 
-/// <summary>Explicitly applies embedded schema, procedure and permission scripts to an application database.</summary>
+/// <summary>Explicitly applies embedded schema, procedure, and permission scripts to an application database.</summary>
 /// <remarks>Invoked through IDatabaseSeeder before data seeding when startup seeding is enabled, or explicitly during setup.</remarks>
 public static partial class DatabaseInitializer
 {
     /// <summary>Applies unapplied initialization scripts transactionally, rejecting changes to already-applied scripts.</summary>
     /// <param name="connectionString">Administrative connection string for the target application database.</param>
-    /// <param name="cancellationToken">Cancels connection opening, script execution and transaction commits.</param>
+    /// <param name="cancellationToken">Cancels connection opening, script execution, and transaction commits.</param>
     /// <param name="logger">Optional DAL diagnostic logger.</param>
-    /// <returns>A task that completes after schema, procedures and permissions are initialized.</returns>
+    /// <returns>A task that completes after schema, procedures, and permissions are initialized.</returns>
     /// <exception cref="InvalidOperationException">A system database is selected, the initialization lock cannot be acquired, or an applied script checksum changed.</exception>
     public static async Task ApplyAsync(string connectionString,
         CancellationToken cancellationToken = default, ILogger? logger = null)
@@ -37,7 +37,8 @@ public static partial class DatabaseInitializer
                 EXEC @result = sys.sp_getapplock @Resource=N'BookingApplication.Deployment',
                     @LockMode='Exclusive', @LockOwner='Session', @LockTimeout=30000;
                 SELECT @result;
-                """, connection) { CommandTimeout = 60 };
+                """, connection);
+            acquire.CommandTimeout = 60;
             if ((int)(await acquire.ExecuteScalarAsync(cancellationToken))! < 0)
                 throw new InvalidOperationException("Could not acquire database deployment lock.");
             try
@@ -75,7 +76,8 @@ public static partial class DatabaseInitializer
                     await using var transaction = (SqlTransaction)await connection.BeginTransactionAsync(cancellationToken);
                     foreach (var batch in BatchSeparator().Split(sql).Where(batch => !string.IsNullOrWhiteSpace(batch)))
                     {
-                        await using var command = new SqlCommand(batch, connection, transaction) { CommandTimeout = 60 };
+                        await using var command = new SqlCommand(batch, connection, transaction);
+                        command.CommandTimeout = 60;
                         await command.ExecuteNonQueryAsync(cancellationToken);
                     }
                     await using var record = new SqlCommand("INSERT dbo.booking_schema_versions(version, checksum) VALUES (@Version, @Checksum)", connection, transaction);
