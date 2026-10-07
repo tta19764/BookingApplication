@@ -1,7 +1,7 @@
 namespace BookingApp.Dal.SqlServerRepositories.Entities;
 
 /// <summary>Stores user values and explicitly hydrated role relationships.</summary>
-public sealed class UserEntity : Entity
+public sealed class UserEntity : Entity<Guid>
 {
     /// <summary>Gets or sets the stored first name.</summary>
     public string FirstName { get; set; } = string.Empty;
