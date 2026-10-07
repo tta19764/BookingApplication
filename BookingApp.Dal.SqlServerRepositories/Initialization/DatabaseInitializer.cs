@@ -8,7 +8,7 @@ using Microsoft.Data.SqlClient;
 
 namespace BookingApp.Dal.SqlServerRepositories.Initialization;
 
-/// <summary>Explicitly applies embedded schema, procedure, and permission scripts to an application database.</summary>
+/// <summary>Explicitly applies embedded schema and procedure scripts, with optional permission setup to an application database.</summary>
 /// <remarks>Invoked through IDatabaseSeeder before data seeding when startup seeding is enabled, or explicitly during setup.</remarks>
 public static partial class DatabaseInitializer
 {
@@ -16,10 +16,11 @@ public static partial class DatabaseInitializer
     /// <param name="connectionString">Administrative connection string for the target application database.</param>
     /// <param name="cancellationToken">Cancels connection opening, script execution, and transaction commits.</param>
     /// <param name="logger">Optional DAL diagnostic logger.</param>
-    /// <returns>A task that completes after schema, procedures, and permissions are initialized.</returns>
+    /// <param name="includePermissions">Includes administrative role and grant setup when true. Disabled by default.</param>
+    /// <returns>A task that completes after the selected initialization scripts are applied.</returns>
     /// <exception cref="InvalidOperationException">A system database is selected, the initialization lock cannot be acquired, or an applied script checksum changed.</exception>
     public static async Task ApplyAsync(string connectionString,
-        CancellationToken cancellationToken = default, ILogger? logger = null)
+        CancellationToken cancellationToken = default, ILogger? logger = null, bool includePermissions = false)
     {
         try
         {
@@ -58,6 +59,7 @@ public static partial class DatabaseInitializer
                 const string prefix = "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.";
                 var scripts = assembly.GetManifestResourceNames()
                     .Where(name => name.StartsWith(prefix, StringComparison.Ordinal) && name.EndsWith(".sql", StringComparison.Ordinal))
+                    .Where(name => includePermissions || !name.Equals(prefix + "003_permissions.sql", StringComparison.Ordinal))
                     .OrderBy(name => name, StringComparer.Ordinal);
                 foreach (var resourceName in scripts)
                 {

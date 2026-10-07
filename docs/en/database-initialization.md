@@ -45,7 +45,7 @@ The DAL embeds these scripts from `Initialization/Scripts`:
 
 - [001_schema.sql](../../BookingApp.Dal.SqlServerRepositories/Initialization/Scripts/001_schema.sql): seven application tables, keys, checks and indexes.
 - [002_stored_procedures.sql](../../BookingApp.Dal.SqlServerRepositories/Initialization/Scripts/002_stored_procedures.sql): `[TymchenkoOV].[BookingApp.*]` procedure contracts.
-- [003_permissions.sql](../../BookingApp.Dal.SqlServerRepositories/Initialization/Scripts/003_permissions.sql): `TymchenkoOV.BookingApp.Runtime` role and EXECUTE grant; no application data.
+- [003_permissions.sql](../../BookingApp.Dal.SqlServerRepositories/Initialization/Scripts/003_permissions.sql): `TymchenkoOV.BookingApp.Runtime` role and EXECUTE grant; optional administrative setup, skipped by default; no application data.
 
 `DatabaseInitializer.ApplyAsync` acquires an initialization lock and applies scripts in filename order. Each script and its journal entry commit together. `[TymchenkoOV].[BookingApp.SchemaVersions]` stores the version, normalized SHA256 checksum and application time. Unchanged applied scripts are skipped; editing an applied script causes failure. Add a new versioned script for changes. The runner supports standalone `GO` separators, not arbitrary sqlcmd directives.
 
@@ -90,9 +90,9 @@ All current application tables and procedures use schema `TymchenkoOV` and an ob
 
 Application tables are `ConferenceHalls`, `Users`, `Roles`, `Permissions`, `RolePermissions`, `UserRoles` and `Bookings`, plus the initializer's `SchemaVersions` journal, each with the `BookingApp.` object prefix. Inspection retains its existing logical row-count keys for interface compatibility.
 
-Scripts 001-003 create the prefixed schema, tables, procedures and runtime role directly. Initialization creates the prefixed journal and records those three scripts. There are no transfer/rename steps or legacy-object adoption.
+Scripts 001-003 create the prefixed schema, tables, procedures and runtime role directly. Initialization creates the prefixed journal and records scripts 001 and 002 by default. Script 003 is optional: run it manually as an administrator or call `DatabaseInitializer.ApplyAsync(..., includePermissions: true)`. Startup data seeding does not require or execute it. Integration fixtures explicitly opt in to test restricted runtime access. There are no transfer/rename steps or legacy-object adoption.
 
-These scripts define a fresh database setup. Applied scripts still have checksum protection: a database journaled with earlier script contents cannot reuse this rewritten baseline. Use a fresh database or a separately reviewed setup for such a database; do not clear checksums to bypass verification. Setup credentials need schema/table/procedure creation and role/permission management rights. Editing this source does not connect to or modify the Azure database.
+These scripts define a fresh database setup. Applied scripts still have checksum protection: a database journaled with earlier script contents cannot reuse this rewritten baseline. Use a fresh database or a separately reviewed setup for such a database; do not clear checksums to bypass verification. Setup credentials need schema/table/procedure creation rights. Role/permission management rights are required only for optional script 003. Editing this source does not connect to or modify the Azure database.
 
 ## Azure SQL authentication
 

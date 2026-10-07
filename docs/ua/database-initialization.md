@@ -16,7 +16,7 @@ Environment variables використовують подвійне підкре
 
 ## Скрипти та повторний запуск
 
-`Initialization/Scripts` містить `001_schema.sql`, `002_stored_procedures.sql` і `003_permissions.sql`. `DatabaseInitializer` застосовує їх по черзі з окремими транзакціями та записує версії й SHA256 у `[TymchenkoOV].[BookingApp.SchemaVersions]`. Незмінені застосовані скрипти пропускаються; зміна checksum зупиняє запуск. Для змін додавайте новий versioned script.
+`Initialization/Scripts` містить `001_schema.sql`, `002_stored_procedures.sql` і `003_permissions.sql`. `DatabaseInitializer` за замовчуванням застосовує лише 001 та 002; 003 є необов’язковим адміністративним setup (вручну або `includePermissions: true`). Startup data seeding не запускає 003. Integration fixtures явно вмикають його для перевірки restricted runtime access. Вибрані скрипти застосовуються по черзі з окремими транзакціями та записує версії й SHA256 у `[TymchenkoOV].[BookingApp.SchemaVersions]`. Незмінені застосовані скрипти пропускаються; зміна checksum зупиняє запуск. Для змін додавайте новий versioned script.
 
 База має існувати до запуску. Системні бази заборонені. Початковий скрипт відхиляє наявні application tables без journal; для зовнішньої code-first схеми потрібен перевірений baseline. `Database/` призначено для особистих файлів, ігнорується Git і виключено з ресурсів застосунку.
 
