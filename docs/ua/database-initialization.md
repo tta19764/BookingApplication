@@ -8,7 +8,7 @@ Common визначає `IDatabaseSeeder`; DAL реалізує його, а Ser
 
 ## Конфігурація та права
 
-Обидва прапорці в базовій конфігурації мають значення false; поточний development appsettings вмикає обидва. `ConnectionStrings:Database` використовується і для DAL, і для seeding. Необов’язковий `ConnectionStrings:Seeding` перевизначає підключення для setup; порожнє значення використовує `Database`.
+Обидва прапорці в базовій конфігурації мають значення false. `appsettings.Development.json` є локальним файлом, ігнорується Git; його прапорці налаштовуйте явно. `ConnectionStrings:Database` використовується і для DAL, і для seeding. Необов’язковий `ConnectionStrings:Seeding` перевизначає підключення для setup; порожнє значення використовує `Database`.
 
 Для нових скриптів потрібні права створення таблиць, процедур, ролей і надання дозволів; для даних — SELECT/INSERT. Окрема setup identity дозволяє залишити runtime лише EXECUTE. Скрипт прав не створює login і не призначає користувача до ролі.
 
