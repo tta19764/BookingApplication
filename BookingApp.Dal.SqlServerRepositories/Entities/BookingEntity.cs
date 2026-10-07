@@ -1,7 +1,7 @@
 namespace BookingApp.Dal.SqlServerRepositories.Entities;
 
 /// <summary>Stores booking relationships, UTC lifecycle timestamps and calculated price snapshots.</summary>
-public sealed class BookingEntity : Entity
+public sealed class BookingEntity : Entity<Guid>
 {
     /// <summary>Gets or sets the referenced hall identifier.</summary>
     public Guid ConferenceHallId { get; set; }

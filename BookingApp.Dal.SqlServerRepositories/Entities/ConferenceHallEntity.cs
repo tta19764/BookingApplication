@@ -1,7 +1,7 @@
 namespace BookingApp.Dal.SqlServerRepositories.Entities;
 
 /// <summary>Stores hall catalog values and the reservation-managed last-booked timestamp.</summary>
-public sealed class ConferenceHallEntity : Entity
+public sealed class ConferenceHallEntity : Entity<Guid>
 {
     /// <summary>Gets or sets the stored name.</summary>
     public string Name { get; set; } = string.Empty;
