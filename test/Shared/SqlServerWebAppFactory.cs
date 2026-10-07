@@ -1,4 +1,4 @@
-using BookingApp.Dal.SqlServerRepositories.Database;
+using BookingApp.Dal.SqlServerRepositories.Initialization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
@@ -25,7 +25,8 @@ public class SqlServerWebAppFactory : WebApplicationFactory<Program>, IAsyncLife
             new Dictionary<string, string?>
             {
                 ["ConnectionStrings:Database"] = RuntimeConnectionString,
-                ["BackgroundJobs:CompleteBookings:Enabled"] = "false"
+                ["BackgroundJobs:CompleteBookings:Enabled"] = "false",
+                ["DatabaseSeeding:Enabled"] = "false"
             }));
         return base.CreateHost(builder);
     }
@@ -37,7 +38,8 @@ public class SqlServerWebAppFactory : WebApplicationFactory<Program>, IAsyncLife
             new Dictionary<string, string?>
             {
                 ["ConnectionStrings:Database"] = RuntimeConnectionString,
-                ["BackgroundJobs:CompleteBookings:Enabled"] = "false"
+                ["BackgroundJobs:CompleteBookings:Enabled"] = "false",
+                ["DatabaseSeeding:Enabled"] = "false"
             }));
     }
 
@@ -59,7 +61,10 @@ public class SqlServerWebAppFactory : WebApplicationFactory<Program>, IAsyncLife
             }
             var admin = new SqlConnectionStringBuilder(_container.GetConnectionString()) { InitialCatalog = "BookingAppTests" };
             AdminConnectionString = admin.ConnectionString;
-            await DatabaseDeployment.ApplyAsync(AdminConnectionString, includeDemoData: true, timeout.Token);
+            await DatabaseInitializer.ApplyAsync(AdminConnectionString, timeout.Token);
+            var seeder = new DatabaseSeeder(AdminConnectionString);
+            await seeder.SeedReferenceDataAsync(timeout.Token);
+            await seeder.SeedDemoDataAsync(timeout.Token);
             await using (var connection = new SqlConnection(AdminConnectionString))
             {
                 await connection.OpenAsync(timeout.Token);
