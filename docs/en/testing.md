@@ -39,4 +39,4 @@ StartupDataSeederTests verifies interface registration, disabled behavior withou
 
 `RepositoryExceptionTests` exercises actual SQL Server failures through hall, booking and user repositories. Its 18 cases cover read/write errors, missing schema, command timeouts, connection failures and cancellation. It verifies provider-independent categories, sanitized exception contents, incident correlation and exactly one error log. Each case owns a disposable database; production procedure signatures are retained while test bodies inject failures.
 
-`SqlObjectMigrationTests` verifies upgrade from the original journaled schema, preservation of rows/relationships and role membership, all prefixed objects, unchanged unrelated tables and repeat initialization.
+`SqlObjectNamingTests` verifies fresh creation of all eight prefixed tables (including the journal), 14 procedures and three journaled scripts, without legacy schema, runtime role or tables.

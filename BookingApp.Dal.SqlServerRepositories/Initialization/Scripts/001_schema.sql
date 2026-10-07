@@ -1,14 +1,14 @@
 -- SQL Server 2019+; run in the intended database, not master.
 -- The deployment runner journals this baseline. Existing unrelated tables are not adopted.
-IF OBJECT_ID(N'dbo.conference_halls', N'U') IS NOT NULL OR OBJECT_ID(N'dbo.bookings', N'U') IS NOT NULL
-   OR OBJECT_ID(N'dbo.users', N'U') IS NOT NULL OR OBJECT_ID(N'dbo.roles', N'U') IS NOT NULL
-   OR OBJECT_ID(N'dbo.permissions', N'U') IS NOT NULL OR OBJECT_ID(N'dbo.user_roles', N'U') IS NOT NULL
-   OR OBJECT_ID(N'dbo.role_permissions', N'U') IS NOT NULL
+IF OBJECT_ID(N'[TymchenkoOV].[BookingApp.ConferenceHalls]', N'U') IS NOT NULL OR OBJECT_ID(N'[TymchenkoOV].[BookingApp.Bookings]', N'U') IS NOT NULL
+   OR OBJECT_ID(N'[TymchenkoOV].[BookingApp.Users]', N'U') IS NOT NULL OR OBJECT_ID(N'[TymchenkoOV].[BookingApp.Roles]', N'U') IS NOT NULL
+   OR OBJECT_ID(N'[TymchenkoOV].[BookingApp.Permissions]', N'U') IS NOT NULL OR OBJECT_ID(N'[TymchenkoOV].[BookingApp.UserRoles]', N'U') IS NOT NULL
+   OR OBJECT_ID(N'[TymchenkoOV].[BookingApp.RolePermissions]', N'U') IS NOT NULL
     THROW 51000, 'Application tables already exist without this migration baseline; review the schema before adoption.', 1;
 GO
-IF SCHEMA_ID(N'booking_api') IS NULL EXEC(N'CREATE SCHEMA booking_api AUTHORIZATION dbo');
+IF SCHEMA_ID(N'TymchenkoOV') IS NULL EXEC(N'CREATE SCHEMA [TymchenkoOV] AUTHORIZATION dbo');
 GO
-CREATE TABLE dbo.conference_halls (
+CREATE TABLE [TymchenkoOV].[BookingApp.ConferenceHalls] (
     Id uniqueidentifier NOT NULL CONSTRAINT PK_conference_halls PRIMARY KEY,
     name nvarchar(100) NOT NULL,
     capacity int NOT NULL CONSTRAINT CK_hall_capacity CHECK (capacity > 0),
@@ -17,34 +17,34 @@ CREATE TABLE dbo.conference_halls (
     last_booked_on_utc datetime2(7) NULL,
     amenities nvarchar(100) NOT NULL
 );
-CREATE TABLE dbo.users (
+CREATE TABLE [TymchenkoOV].[BookingApp.Users] (
     Id uniqueidentifier NOT NULL CONSTRAINT PK_users PRIMARY KEY,
     first_name nvarchar(100) NOT NULL,
     last_name nvarchar(100) NOT NULL,
     email nvarchar(320) NOT NULL CONSTRAINT UQ_user_email UNIQUE
 );
-CREATE TABLE dbo.roles (
+CREATE TABLE [TymchenkoOV].[BookingApp.Roles] (
     Id int NOT NULL CONSTRAINT PK_roles PRIMARY KEY,
     name nvarchar(100) NOT NULL CONSTRAINT UQ_role_name UNIQUE
 );
-CREATE TABLE dbo.permissions (
+CREATE TABLE [TymchenkoOV].[BookingApp.Permissions] (
     Id int NOT NULL CONSTRAINT PK_permissions PRIMARY KEY,
     name nvarchar(100) NOT NULL CONSTRAINT UQ_permission_name UNIQUE
 );
-CREATE TABLE dbo.role_permissions (
-    role_id int NOT NULL REFERENCES dbo.roles(Id),
-    permission_id int NOT NULL REFERENCES dbo.permissions(Id),
+CREATE TABLE [TymchenkoOV].[BookingApp.RolePermissions] (
+    role_id int NOT NULL REFERENCES [TymchenkoOV].[BookingApp.Roles](Id),
+    permission_id int NOT NULL REFERENCES [TymchenkoOV].[BookingApp.Permissions](Id),
     CONSTRAINT PK_role_permissions PRIMARY KEY (role_id, permission_id)
 );
-CREATE TABLE dbo.user_roles (
-    user_id uniqueidentifier NOT NULL REFERENCES dbo.users(Id),
-    role_id int NOT NULL REFERENCES dbo.roles(Id),
+CREATE TABLE [TymchenkoOV].[BookingApp.UserRoles] (
+    user_id uniqueidentifier NOT NULL REFERENCES [TymchenkoOV].[BookingApp.Users](Id),
+    role_id int NOT NULL REFERENCES [TymchenkoOV].[BookingApp.Roles](Id),
     CONSTRAINT PK_user_roles PRIMARY KEY (user_id, role_id)
 );
-CREATE TABLE dbo.bookings (
+CREATE TABLE [TymchenkoOV].[BookingApp.Bookings] (
     Id uniqueidentifier NOT NULL CONSTRAINT PK_bookings PRIMARY KEY,
-    conference_hall_id uniqueidentifier NOT NULL CONSTRAINT FK_booking_hall REFERENCES dbo.conference_halls(Id),
-    user_id uniqueidentifier NOT NULL CONSTRAINT FK_booking_user REFERENCES dbo.users(Id),
+    conference_hall_id uniqueidentifier NOT NULL CONSTRAINT FK_booking_hall REFERENCES [TymchenkoOV].[BookingApp.ConferenceHalls](Id),
+    user_id uniqueidentifier NOT NULL CONSTRAINT FK_booking_user REFERENCES [TymchenkoOV].[BookingApp.Users](Id),
     [start] datetime2(7) NOT NULL,
     [end] datetime2(7) NOT NULL,
     price_for_period_amount decimal(18,2) NOT NULL,
@@ -65,8 +65,8 @@ CREATE TABLE dbo.bookings (
     CONSTRAINT CK_booking_currency CHECK (price_for_period_currency = N'UAH'
         AND amenities_up_charge_currency = N'UAH' AND total_price_currency = N'UAH')
 );
-CREATE INDEX IX_booking_occupancy ON dbo.bookings(conference_hall_id, status, [start]) INCLUDE ([end]);
-CREATE INDEX IX_booking_due ON dbo.bookings([end], Id) WHERE status = N'Reserved';
-CREATE INDEX IX_booking_user ON dbo.bookings(user_id);
-CREATE INDEX IX_user_roles_role ON dbo.user_roles(role_id);
-CREATE INDEX IX_role_permissions_permission ON dbo.role_permissions(permission_id);
+CREATE INDEX IX_booking_occupancy ON [TymchenkoOV].[BookingApp.Bookings](conference_hall_id, status, [start]) INCLUDE ([end]);
+CREATE INDEX IX_booking_due ON [TymchenkoOV].[BookingApp.Bookings]([end], Id) WHERE status = N'Reserved';
+CREATE INDEX IX_booking_user ON [TymchenkoOV].[BookingApp.Bookings](user_id);
+CREATE INDEX IX_user_roles_role ON [TymchenkoOV].[BookingApp.UserRoles](role_id);
+CREATE INDEX IX_role_permissions_permission ON [TymchenkoOV].[BookingApp.RolePermissions](permission_id);

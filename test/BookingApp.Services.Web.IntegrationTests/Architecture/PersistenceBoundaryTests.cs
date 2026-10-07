@@ -31,8 +31,7 @@ public sealed class PersistenceBoundaryTests
             {
                 "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.001_schema.sql",
                 "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.002_stored_procedures.sql",
-                "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.003_permissions.sql",
-                "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.004_prefix_objects.sql"
+                "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.003_permissions.sql"
             });
         assembly.GetTypes().Should().NotContain(type =>
             (type.Namespace ?? "").StartsWith("BookingApp.Dal.SqlServerRepositories.Database"));

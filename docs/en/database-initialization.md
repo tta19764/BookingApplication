@@ -44,9 +44,8 @@ A single connection string is sufficient when its identity has setup permissions
 The DAL embeds these scripts from `Initialization/Scripts`:
 
 - [001_schema.sql](../../BookingApp.Dal.SqlServerRepositories/Initialization/Scripts/001_schema.sql): seven application tables, keys, checks and indexes.
-- [002_stored_procedures.sql](../../BookingApp.Dal.SqlServerRepositories/Initialization/Scripts/002_stored_procedures.sql): legacy `booking_api` procedure contracts.
-- [003_permissions.sql](../../BookingApp.Dal.SqlServerRepositories/Initialization/Scripts/003_permissions.sql): legacy runtime role and EXECUTE grant; no application data.
-- [004_prefix_objects.sql](../../BookingApp.Dal.SqlServerRepositories/Initialization/Scripts/004_prefix_objects.sql): moves legacy tables and installs the prefixed procedures and runtime role.
+- [002_stored_procedures.sql](../../BookingApp.Dal.SqlServerRepositories/Initialization/Scripts/002_stored_procedures.sql): `[TymchenkoOV].[BookingApp.*]` procedure contracts.
+- [003_permissions.sql](../../BookingApp.Dal.SqlServerRepositories/Initialization/Scripts/003_permissions.sql): `TymchenkoOV.BookingApp.Runtime` role and EXECUTE grant; no application data.
 
 `DatabaseInitializer.ApplyAsync` acquires an initialization lock and applies scripts in filename order. Each script and its journal entry commit together. `[TymchenkoOV].[BookingApp.SchemaVersions]` stores the version, normalized SHA256 checksum and application time. Unchanged applied scripts are skipped; editing an applied script causes failure. Add a new versioned script for changes. The runner supports standalone `GO` separators, not arbitrary sqlcmd directives.
 
@@ -85,12 +84,12 @@ Integration fixtures apply the same embedded scripts and invoke the data methods
 
 SQL errors from initialization, inspection and data seeding become sanitized Common `PersistenceException` values and are logged by DAL when a logger is configured. Startup still fails; the exception carries an incident ID for correlation. Raw SqlClient exceptions are not exposed through the Common interface.
 
-## SQL object naming and upgrade
+## SQL object naming and fresh setup
 
 All current application tables and procedures use schema `TymchenkoOV` and an object name beginning with `BookingApp.`. For example, `[TymchenkoOV].[BookingApp.Users]` and `[TymchenkoOV].[BookingApp.user_get]`. The dot inside the object name is literal and must remain inside brackets: unquoted `TymchenkoOV.BookingApp.Users` would mean database/schema/table, which is a different name. The database name in the connection string stays unchanged.
 
 Application tables are `ConferenceHalls`, `Users`, `Roles`, `Permissions`, `RolePermissions`, `UserRoles` and `Bookings`, plus the initializer's `SchemaVersions` journal, each with the `BookingApp.` object prefix. Inspection retains its existing logical row-count keys for interface compatibility.
 
-Scripts 001-003 remain immutable historical baselines. Fresh initialization applies them and then 004; an already journaled database skips them and applies 004. The initializer moves the legacy journal into its prefixed location while preserving checksums. Migration 004 transfers and renames the tables, preserving rows and foreign-key relationships, installs 14 prefixed procedures, removes the old application procedures and renames the runtime role while retaining membership. The old schema is retained to avoid deleting unrelated objects. Existing target tables are rejected rather than overwritten.
+Scripts 001-003 create the prefixed schema, tables, procedures and runtime role directly. Initialization creates the prefixed journal and records those three scripts. There are no transfer/rename steps or legacy-object adoption.
 
-Apply this upgrade while application traffic and background jobs are stopped; older application versions call the legacy procedure names. Setup credentials need schema creation/transfer, object rename, procedure and role management rights. The source change does not itself connect to or modify the Azure database. When enabled initialization is run on the configured database, these changes will be applied.
+These scripts define a fresh database setup. Applied scripts still have checksum protection: a database journaled with earlier script contents cannot reuse this rewritten baseline. Use a fresh database or a separately reviewed setup for such a database; do not clear checksums to bypass verification. Setup credentials need schema/table/procedure creation and role/permission management rights. Editing this source does not connect to or modify the Azure database.
