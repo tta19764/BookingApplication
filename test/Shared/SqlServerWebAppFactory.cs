@@ -71,7 +71,7 @@ public class SqlServerWebAppFactory : WebApplicationFactory<Program>, IAsyncLife
                 await connection.OpenAsync(timeout.Token);
                 await using var grants = new SqlCommand("""
                     CREATE USER booking_test_runtime FOR LOGIN booking_test_runtime;
-                    ALTER ROLE booking_runtime ADD MEMBER booking_test_runtime;
+                    ALTER ROLE [TymchenkoOV.BookingApp.Runtime] ADD MEMBER booking_test_runtime;
                     """, connection);
                 await grants.ExecuteNonQueryAsync(timeout.Token);
             }

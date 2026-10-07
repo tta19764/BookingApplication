@@ -24,7 +24,7 @@ public sealed class UserRepository(SqlConnectionFactory connections, IMapper map
         try
         {
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.user_get", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.user_get]", connections.CommandTimeoutSeconds);
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
             if (!await reader.ReadAsync(cancellationToken)) return null;
@@ -56,7 +56,7 @@ public sealed class UserRepository(SqlConnectionFactory connections, IMapper map
         {
             var entity = mapper.Map<UserEntity>(user);
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.user_create", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.user_create]", connections.CommandTimeoutSeconds);
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
             command.Parameter("@FirstName", SqlDbType.NVarChar, entity.FirstName, 100);
             command.Parameter("@LastName", SqlDbType.NVarChar, entity.LastName, 100);

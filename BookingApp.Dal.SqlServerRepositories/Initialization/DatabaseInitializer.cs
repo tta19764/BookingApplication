@@ -44,10 +44,21 @@ public static partial class DatabaseInitializer
             try
             {
                 await using var journal = new SqlCommand("""
-                    IF OBJECT_ID(N'dbo.booking_schema_versions', N'U') IS NULL
-                        CREATE TABLE dbo.booking_schema_versions(
+                    SET XACT_ABORT ON;
+                    BEGIN TRANSACTION;
+                    IF SCHEMA_ID(N'TymchenkoOV') IS NULL EXEC(N'CREATE SCHEMA [TymchenkoOV] AUTHORIZATION dbo');
+                    IF OBJECT_ID(N'dbo.booking_schema_versions', N'U') IS NOT NULL
+                    BEGIN
+                        IF OBJECT_ID(N'[TymchenkoOV].[BookingApp.SchemaVersions]', N'U') IS NOT NULL
+                            THROW 51000, 'Both legacy and prefixed initialization journals exist; review before proceeding.', 1;
+                        ALTER SCHEMA [TymchenkoOV] TRANSFER dbo.booking_schema_versions;
+                        EXEC sys.sp_rename N'[TymchenkoOV].[booking_schema_versions]', N'BookingApp.SchemaVersions', N'OBJECT';
+                    END;
+                    IF OBJECT_ID(N'[TymchenkoOV].[BookingApp.SchemaVersions]', N'U') IS NULL
+                        CREATE TABLE [TymchenkoOV].[BookingApp.SchemaVersions](
                             version nvarchar(100) NOT NULL PRIMARY KEY, checksum varchar(64) NOT NULL,
                             applied_on_utc datetime2(7) NOT NULL DEFAULT SYSUTCDATETIME());
+                    COMMIT;
                     """, connection);
                 await journal.ExecuteNonQueryAsync(cancellationToken);
                 var assembly = typeof(DatabaseInitializer).Assembly;
@@ -63,7 +74,7 @@ public static partial class DatabaseInitializer
                     // Git may check out SQL with CRLF on Windows and LF on Linux; checksums must be identical.
                     var sql = (await reader.ReadToEndAsync(cancellationToken)).Replace("\r\n", "\n");
                     var checksum = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(sql)));
-                    await using var applied = new SqlCommand("SELECT checksum FROM dbo.booking_schema_versions WHERE version=@Version", connection);
+                    await using var applied = new SqlCommand("SELECT checksum FROM [TymchenkoOV].[BookingApp.SchemaVersions] WHERE version=@Version", connection);
                     applied.Parameters.Add("@Version", SqlDbType.NVarChar, 100).Value = version;
                     var previous = await applied.ExecuteScalarAsync(cancellationToken);
                     if (previous is not null)
@@ -80,7 +91,7 @@ public static partial class DatabaseInitializer
                         command.CommandTimeout = 60;
                         await command.ExecuteNonQueryAsync(cancellationToken);
                     }
-                    await using var record = new SqlCommand("INSERT dbo.booking_schema_versions(version, checksum) VALUES (@Version, @Checksum)", connection, transaction);
+                    await using var record = new SqlCommand("INSERT [TymchenkoOV].[BookingApp.SchemaVersions](version, checksum) VALUES (@Version, @Checksum)", connection, transaction);
                     record.Parameters.Add("@Version", SqlDbType.NVarChar, 100).Value = version;
                     record.Parameters.Add("@Checksum", SqlDbType.VarChar, 64).Value = checksum;
                     await record.ExecuteNonQueryAsync(cancellationToken);

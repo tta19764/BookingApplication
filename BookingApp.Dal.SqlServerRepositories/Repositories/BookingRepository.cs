@@ -25,7 +25,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
         try
         {
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.booking_get", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.booking_get]", connections.CommandTimeoutSeconds);
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
             return await reader.ReadAsync(cancellationToken) ? mapper.Map<Booking>(RowMapper.Booking(reader)) : null;
@@ -48,7 +48,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
         try
         {
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.booking_has_overlap", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.booking_has_overlap]", connections.CommandTimeoutSeconds);
             command.Parameter("@HallId", SqlDbType.UniqueIdentifier, conferenceHallId);
             command.Utc("@Start", duration.Start);
             command.Utc("@End", duration.End);
@@ -75,7 +75,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
             if (booking.Status != BookingStatus.Reserved) throw new ArgumentException("Only reservations can be created.", nameof(booking));
             var entity = mapper.Map<BookingEntity>(booking);
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.booking_reserve", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.booking_reserve]", connections.CommandTimeoutSeconds);
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
             command.Parameter("@HallId", SqlDbType.UniqueIdentifier, entity.ConferenceHallId);
             command.Parameter("@UserId", SqlDbType.UniqueIdentifier, entity.UserId);
@@ -112,7 +112,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
         try
         {
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.booking_list", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.booking_list]", connections.CommandTimeoutSeconds);
             command.Page(page, pageSize);
             return await ReadAsync(command, cancellationToken);
 
@@ -151,7 +151,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
         {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.booking_due", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.booking_due]", connections.CommandTimeoutSeconds);
             command.Utc("@UtcNow", utcNow);
             command.Parameter("@PageSize", SqlDbType.Int, pageSize);
             return await ReadAsync(command, cancellationToken);
@@ -175,7 +175,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
         {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.booking_complete_due", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.booking_complete_due]", connections.CommandTimeoutSeconds);
             command.Utc("@UtcNow", utcNow);
             command.Parameter("@PageSize", SqlDbType.Int, pageSize);
             // NOCOUNT makes ExecuteNonQuery row counts unsuitable; use the explicit transition count.

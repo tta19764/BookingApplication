@@ -55,13 +55,13 @@ public sealed class RepositoryExceptionTests(IntegrationTestWebAppFactory factor
         await ExecuteAsync(_connectionString, header + " AS BEGIN SET NOCOUNT ON; " + body + " END;");
     }
 
-    private static string Procedure(string repository, bool write) => "booking_api." + (repository, write) switch
+    private static string Procedure(string repository, bool write) => "[TymchenkoOV].[BookingApp." + ((repository, write) switch
     {
         ("Hall", false) => "hall_get", ("Hall", true) => "hall_create",
         ("Booking", false) => "booking_get", ("Booking", true) => "booking_reserve",
         ("User", false) => "user_get", ("User", true) => "user_create",
         _ => throw new ArgumentException("Unknown test repository")
-    };
+    }) + "]";
 
     private async Task InvokeAsync(string repository, bool write, CancellationToken token, int timeout = 30,
         string? connectionString = null)

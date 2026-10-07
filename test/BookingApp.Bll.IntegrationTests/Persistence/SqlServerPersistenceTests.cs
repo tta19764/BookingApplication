@@ -87,7 +87,7 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
         await Bookings.CreateReservationAsync(booking, Token);
         await using var admin = new SqlConnection(Factory.AdminConnectionString);
         await admin.OpenAsync(Token);
-        await using var change = new SqlCommand("UPDATE dbo.bookings SET status=@Status WHERE Id=@Id", admin);
+        await using var change = new SqlCommand("UPDATE [TymchenkoOV].[BookingApp.Bookings] SET status=@Status WHERE Id=@Id", admin);
         change.Parameters.AddWithValue("@Status", status.ToString());
         change.Parameters.AddWithValue("@Id", booking.Id);
         await change.ExecuteNonQueryAsync(Token);
@@ -198,10 +198,10 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
     }
 
     [Theory]
-    [InlineData("SELECT * FROM dbo.bookings")]
-    [InlineData("INSERT dbo.roles(Id,name) VALUES(99,N'Unauthorized')")]
-    [InlineData("UPDATE dbo.conference_halls SET name=N'Unauthorized'")]
-    [InlineData("DELETE dbo.bookings")]
+    [InlineData("SELECT * FROM [TymchenkoOV].[BookingApp.Bookings]")]
+    [InlineData("INSERT [TymchenkoOV].[BookingApp.Roles](Id,name) VALUES(99,N'Unauthorized')")]
+    [InlineData("UPDATE [TymchenkoOV].[BookingApp.ConferenceHalls] SET name=N'Unauthorized'")]
+    [InlineData("DELETE [TymchenkoOV].[BookingApp.Bookings]")]
     [InlineData("CREATE TABLE dbo.unauthorized(Id int)")]
     public async Task RuntimeIdentity_CannotAccessTablesOrDdl(string sql)
     {
@@ -219,7 +219,7 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
         await DatabaseInitializer.ApplyAsync(Factory.AdminConnectionString, Token);
         await using var admin = new SqlConnection(Factory.AdminConnectionString);
         await admin.OpenAsync(Token);
-        await using var change = new SqlCommand("UPDATE dbo.booking_schema_versions SET checksum=@Checksum OUTPUT deleted.checksum WHERE version=N'002_stored_procedures.sql'", admin);
+        await using var change = new SqlCommand("UPDATE [TymchenkoOV].[BookingApp.SchemaVersions] SET checksum=@Checksum OUTPUT deleted.checksum WHERE version=N'002_stored_procedures.sql'", admin);
         change.Parameters.AddWithValue("@Checksum", new string('0', 64));
         var previous = (string)(await change.ExecuteScalarAsync(Token))!;
         try
@@ -229,7 +229,7 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
         }
         finally
         {
-            await using var restore = new SqlCommand("UPDATE dbo.booking_schema_versions SET checksum=@Checksum WHERE version=N'002_stored_procedures.sql'", admin);
+            await using var restore = new SqlCommand("UPDATE [TymchenkoOV].[BookingApp.SchemaVersions] SET checksum=@Checksum WHERE version=N'002_stored_procedures.sql'", admin);
             restore.Parameters.AddWithValue("@Checksum", previous);
             await restore.ExecuteNonQueryAsync(Token);
         }

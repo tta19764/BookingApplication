@@ -20,7 +20,7 @@ Entities зберігають примітиви: decimal суми, триліт
 
 ## Контракти операцій
 
-| Операція | Процедура у схемі `booking_api` | Результат |
+| Операція | Процедура у схемі `TymchenkoOV` | Результат |
 | --- | --- | --- |
 | Hall get / list / availability | `hall_get`, `hall_list`, `hall_available` | Зал або null, матеріалізована сторінка, доступні зали за місткістю. |
 | Hall create / update | `hall_create`, `hall_update` | Негайний запис; update повертає false для відсутнього залу й зберігає last-booked time. |

@@ -1,6 +1,6 @@
 # Ініціалізація SQL Server та наповнення даними
 
-DAL використовує ADO.NET (`Microsoft.Data.SqlClient`) і процедури `booking_api` замість EF/PostgreSQL. Застосунок підключається до налаштованої бази SQL Server; контейнери SQL Server використовуються лише в інтеграційних тестах.
+DAL використовує ADO.NET (`Microsoft.Data.SqlClient`) і процедури `TymchenkoOV` замість EF/PostgreSQL. Застосунок підключається до налаштованої бази SQL Server; контейнери SQL Server використовуються лише в інтеграційних тестах.
 
 ## Порядок запуску
 
@@ -16,7 +16,7 @@ Environment variables використовують подвійне підкре
 
 ## Скрипти та повторний запуск
 
-`Initialization/Scripts` містить `001_schema.sql`, `002_stored_procedures.sql` і `003_permissions.sql`. `DatabaseInitializer` застосовує їх по черзі з окремими транзакціями та записує версії й SHA256 у `dbo.booking_schema_versions`. Незмінені застосовані скрипти пропускаються; зміна checksum зупиняє запуск. Для змін додавайте новий versioned script.
+`Initialization/Scripts` містить `001_schema.sql`, `002_stored_procedures.sql` і `003_permissions.sql`. `DatabaseInitializer` застосовує їх по черзі з окремими транзакціями та записує версії й SHA256 у `[TymchenkoOV].[BookingApp.SchemaVersions]`. Незмінені застосовані скрипти пропускаються; зміна checksum зупиняє запуск. Для змін додавайте новий versioned script.
 
 База має існувати до запуску. Системні бази заборонені. Початковий скрипт відхиляє наявні application tables без journal; для зовнішньої code-first схеми потрібен перевірений baseline. `Database/` призначено для особистих файлів, ігнорується Git і виключено з ресурсів застосунку.
 
@@ -25,3 +25,9 @@ Reference seeding додає відсутні ролі, дозволи, зв’�
 Data methods використовують спільне application lock та serializable transactions. Скрипти й кожне наповнення комітяться окремо; помилка пізнішого кроку не скасовує попередні кроки. `InspectAsync` повертає row counts і `HasData`, а не перевіряє metadata схеми. Перед inspection/data methods викликайте `InitializeAsync`. Прапорці керують startup, але не забороняють явні виклики через scoped `IDatabaseSeeder`; HTTP endpoint для seeding немає.
 
 Детальні приклади, посилання на скрипти та troubleshooting: [English initialization guide](../en/database-initialization.md). Архітектура: [рефакторинг](refactoring.md). Тести: [тестування](testing.md).
+
+## Назви SQL-об’єктів
+
+Поточна схема — `TymchenkoOV`, назви таблиць і процедур починаються з `BookingApp.`: `[TymchenkoOV].[BookingApp.Users]`, `[TymchenkoOV].[BookingApp.user_get]`. Крапка є частиною назви об’єкта, тому brackets обов’язкові. Назва бази в connection string не змінюється.
+
+Скрипти 001-003 збережено для checksum compatibility; новий `004_prefix_objects.sql` переносить і перейменовує таблиці без втрати даних, створює prefixed процедури та видаляє старі application procedures. Initializer переносить старий journal до `[TymchenkoOV].[BookingApp.SchemaVersions]`. Runtime role перейменовано на `TymchenkoOV.BookingApp.Runtime` зі збереженням membership. Під час upgrade зупиніть API і background jobs; потрібні setup permissions. Наявні target tables не перезаписуються. Azure database не змінюється самим редагуванням коду.

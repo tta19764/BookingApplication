@@ -25,7 +25,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
         try
         {
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.hall_get", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.hall_get]", connections.CommandTimeoutSeconds);
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
             return await reader.ReadAsync(cancellationToken) ? mapper.Map<ConferenceHall>(RowMapper.Hall(reader)) : null;
@@ -56,7 +56,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
         {
             await using var connection = await connections.OpenAsync(cancellationToken);
             var entity = mapper.Map<ConferenceHallEntity>(hall);
-            await using var command = SqlProcedure.Create(connection, update ? "booking_api.hall_update" : "booking_api.hall_create", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, update ? "[TymchenkoOV].[BookingApp.hall_update]" : "[TymchenkoOV].[BookingApp.hall_create]", connections.CommandTimeoutSeconds);
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
             command.Parameter("@Name", SqlDbType.NVarChar, entity.Name, 100);
             command.Parameter("@Capacity", SqlDbType.Int, entity.Capacity);
@@ -86,7 +86,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
         try
         {
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.hall_delete", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.hall_delete]", connections.CommandTimeoutSeconds);
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
             var outcome = command.Output("@Outcome");
             await command.ExecuteNonQueryAsync(cancellationToken);
@@ -111,7 +111,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
         try
         {
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.hall_list", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.hall_list]", connections.CommandTimeoutSeconds);
             command.Page(page, pageSize);
             return await ReadAsync(command, cancellationToken);
 
@@ -133,7 +133,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
         try
         {
             await using var connection = await connections.OpenAsync(cancellationToken);
-            await using var command = SqlProcedure.Create(connection, "booking_api.hall_available", connections.CommandTimeoutSeconds);
+            await using var command = SqlProcedure.Create(connection, "[TymchenkoOV].[BookingApp.hall_available]", connections.CommandTimeoutSeconds);
             command.Utc("@Start", dateRange.Start);
             command.Utc("@End", dateRange.End);
             command.Parameter("@Capacity", SqlDbType.Int, seats.Value);

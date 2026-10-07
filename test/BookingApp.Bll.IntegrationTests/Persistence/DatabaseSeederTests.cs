@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging;
 using BookingApp.Bll.Common.Shared.Exceptions;
-using System.Text.RegularExpressions;
 using BookingApp.Bll.IntegrationTests.Infrastructure;
 using BookingApp.Dal.SqlServerRepositories.Initialization;
 using FluentAssertions;
@@ -21,13 +20,8 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
     {
         await ExecuteAsync(factory.AdminConnectionString, $"CREATE DATABASE [{_database}]");
         _connectionString = new SqlConnectionStringBuilder(factory.AdminConnectionString) { InitialCatalog = _database }.ConnectionString;
-        // Create schema only so these tests exercise the seeder independently from script-based reference seeds.
-        var assembly = typeof(DatabaseSeeder).Assembly;
-        await using var stream = assembly.GetManifestResourceStream("BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.001_schema.sql")!;
-        using var reader = new StreamReader(stream);
-        var sql = await reader.ReadToEndAsync(Token);
-        foreach (var batch in Regex.Split(sql, @"^\s*GO\s*$", RegexOptions.Multiline | RegexOptions.IgnoreCase).Where(batch => !string.IsNullOrWhiteSpace(batch)))
-            await ExecuteAsync(_connectionString, batch);
+        // Install scripts without seeding application rows.
+        await DatabaseInitializer.ApplyAsync(_connectionString, Token);
     }
 
     public async ValueTask DisposeAsync()
@@ -57,7 +51,7 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
     [Fact]
     public async Task MissingTable_ReportsSchemaFailureWithoutCreatingSchema()
     {
-        await ExecuteAsync(_connectionString, "DROP TABLE dbo.bookings");
+        await ExecuteAsync(_connectionString, "DROP TABLE [TymchenkoOV].[BookingApp.Bookings]");
         var action = () => Seeder.SeedReferenceDataAsync(Token);
         using var logs = new CapturingLogger();
         action = () => new DatabaseSeeder(_connectionString, logs).SeedReferenceDataAsync(Token);
@@ -73,9 +67,9 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
     {
         (await Seeder.SeedReferenceDataAsync(Token)).InsertedRows.Should().Be(11);
         await ExecuteAsync(_connectionString, """
-            UPDATE dbo.users SET first_name=N'Edited' WHERE Id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-            DELETE dbo.role_permissions WHERE permission_id=4;
-            DELETE dbo.permissions WHERE Id=4;
+            UPDATE [TymchenkoOV].[BookingApp.Users] SET first_name=N'Edited' WHERE Id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+            DELETE [TymchenkoOV].[BookingApp.RolePermissions] WHERE permission_id=4;
+            DELETE [TymchenkoOV].[BookingApp.Permissions] WHERE Id=4;
             """);
         var result = await Seeder.SeedReferenceDataAsync(Token);
         result.Before.HasData.Should().BeTrue();
@@ -83,7 +77,7 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
         (await Seeder.SeedReferenceDataAsync(Token)).InsertedRows.Should().Be(0);
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(Token);
-        await using var command = new SqlCommand("SELECT first_name FROM dbo.users", connection);
+        await using var command = new SqlCommand("SELECT first_name FROM [TymchenkoOV].[BookingApp.Users]", connection);
         (await command.ExecuteScalarAsync(Token)).Should().Be("Edited");
     }
 
@@ -95,7 +89,7 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
         initial.Before.HasData.Should().BeTrue();
         initial.InsertedRows.Should().Be(3);
         initial.Skipped.Should().BeFalse();
-        await ExecuteAsync(_connectionString, "UPDATE dbo.conference_halls SET name=N'Edited'; DELETE dbo.conference_halls WHERE Id='33333333-3333-3333-3333-333333333333'");
+        await ExecuteAsync(_connectionString, "UPDATE [TymchenkoOV].[BookingApp.ConferenceHalls] SET name=N'Edited'; DELETE [TymchenkoOV].[BookingApp.ConferenceHalls] WHERE Id='33333333-3333-3333-3333-333333333333'");
         var repeated = await Seeder.SeedDemoDataAsync(Token);
         repeated.Skipped.Should().BeTrue();
         repeated.InsertedRows.Should().Be(0);
@@ -106,7 +100,7 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
     public async Task CustomCatalog_IsPreservedAndNotSupplementedWithDemoData()
     {
         await ExecuteAsync(_connectionString, """
-            INSERT dbo.conference_halls(Id,name,capacity,hourly_rate,currency,amenities)
+            INSERT [TymchenkoOV].[BookingApp.ConferenceHalls](Id,name,capacity,hourly_rate,currency,amenities)
             VALUES(NEWID(),N'Custom',20,100,N'UAH',N'1');
             """);
         var result = await Seeder.SeedDemoDataAsync(Token);
@@ -118,7 +112,7 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
     [Fact]
     public async Task ConflictingReferenceIdentity_IsRejectedWithoutPartialWrites()
     {
-        await ExecuteAsync(_connectionString, "INSERT dbo.permissions(Id,name) VALUES(1,N'custom:permission')");
+        await ExecuteAsync(_connectionString, "INSERT [TymchenkoOV].[BookingApp.Permissions](Id,name) VALUES(1,N'custom:permission')");
         var action = () => Seeder.SeedReferenceDataAsync(Token);
         await action.Should().ThrowAsync<PersistenceException>();
         var state = await Seeder.InspectAsync(Token);
@@ -131,7 +125,7 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
     public async Task InsertFailure_RollsBackEarlierReferenceWrites()
     {
         await ExecuteAsync(_connectionString, """
-            CREATE TRIGGER dbo.reject_seed_user ON dbo.users AFTER INSERT AS
+            CREATE TRIGGER [TymchenkoOV].[BookingApp.reject_seed_user] ON [TymchenkoOV].[BookingApp.Users] AFTER INSERT AS
             BEGIN THROW 51011, 'Test insertion failure', 1; END;
             """);
         var action = () => Seeder.SeedReferenceDataAsync(Token);
