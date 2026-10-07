@@ -62,7 +62,7 @@ public class SqlServerWebAppFactory : WebApplicationFactory<Program>, IAsyncLife
             }
             var admin = new SqlConnectionStringBuilder(_container.GetConnectionString()) { InitialCatalog = "BookingAppTests" };
             AdminConnectionString = admin.ConnectionString;
-            await DatabaseInitializer.ApplyAsync(AdminConnectionString, timeout.Token);
+            await DatabaseInitializer.ApplyAsync(AdminConnectionString, timeout.Token, includePermissions: true);
             var seeder = new DatabaseSeeder(AdminConnectionString, NullLogger<DatabaseSeeder>.Instance);
             await seeder.SeedReferenceDataAsync(timeout.Token);
             await seeder.SeedDemoDataAsync(timeout.Token);

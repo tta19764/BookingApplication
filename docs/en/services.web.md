@@ -32,7 +32,7 @@ The current API uses a seeded user. Production deployment should add authenticat
 
 The reusable Postman collection under `test/Postman/` provides an additional manual workflow. Automated HTTP behavior is covered by `BookingApp.Services.Web.IntegrationTests`.
 
-Services registers Common `IDatabaseSeeder` as scoped and awaits `StartupDataSeeder` before HTTP/scheduler startup when `DatabaseSeeding:Enabled=true`. `IncludeDemoData` controls optional halls. An optional `ConnectionStrings:Seeding` overrides the main database connection; absent/blank values reuse Database. Seeding requires SELECT/INSERT permissions; failures prevent startup. Enabled startup applies required schema/procedure/permission scripts first; unchanged journaled scripts are skipped.
+Services registers Common `IDatabaseSeeder` as scoped and awaits `StartupDataSeeder` before HTTP/scheduler startup when `DatabaseSeeding:Enabled=true`. `IncludeDemoData` controls optional halls. An optional `ConnectionStrings:Seeding` overrides the main database connection; absent/blank values reuse Database. Seeding requires SELECT/INSERT permissions; failures prevent startup. Enabled startup applies required schema/procedure scripts (permission setup is optional and skipped at startup) first; unchanged journaled scripts are skipped.
 
 Exception middleware classifies failures before logging. Validation, authorization, missing-resource and task-timeout exceptions produce Information logs without stack traces; unexpected failures produce Error logs with the exception. Persistence failures retain their DAL incident ID and are not logged again by middleware. HTTP status and validation details are preserved.
 
