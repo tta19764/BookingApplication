@@ -20,8 +20,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddSqlServerDataAccess(this IServiceCollection services,
         string connectionString, int commandTimeoutSeconds = 30)
     {
-        services.AddSingleton(provider => new SqlConnectionFactory(connectionString, commandTimeoutSeconds,
-            provider.GetRequiredService<ILoggerFactory>()));
+        services.AddSingleton(provider => new SqlConnectionFactory(connectionString,
+            provider.GetRequiredService<ILogger<SqlConnectionFactory>>(), commandTimeoutSeconds));
         services.AddScoped<IConferenceHallRepository, ConferenceHallRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IUserRepository, UserRepository>();

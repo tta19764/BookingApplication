@@ -7,7 +7,7 @@ namespace BookingApp.Dal.SqlServerRepositories.Infrastructure;
 public sealed class SqlConnectionFactory
 {
     private readonly string _connectionString;
-    internal ILogger? Logger { get; }
+    internal ILogger Logger { get; }
     internal Exception Translate(SqlException exception, string operation, CancellationToken token) =>
         SqlFailure.Translate(exception, operation, Logger, token);
     /// <summary>Gets the positive command execution timeout, in seconds.</summary>
@@ -16,17 +16,18 @@ public sealed class SqlConnectionFactory
     /// <summary>Validates the connection configuration without connecting to SQL Server.</summary>
     /// <param name="connectionString">The externally supplied SQL Server connection string.</param>
     /// <param name="commandTimeoutSeconds">The positive command timeout in seconds.</param>
-    /// <param name="loggerFactory">Optional logger factory; supplied by application DI.</param>
+    /// <param name="logger">Required diagnostic logger, supplied directly by the caller or DI.</param>
     /// <exception cref="ArgumentException">The connection string is empty or malformed.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The command timeout is not positive.</exception>
-    public SqlConnectionFactory(string connectionString, int commandTimeoutSeconds = 30, ILoggerFactory? loggerFactory = null)
+    public SqlConnectionFactory(string connectionString, ILogger logger, int commandTimeoutSeconds = 30)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
             throw new ArgumentException("Configure ConnectionStrings:Database for the remote SQL Server.", nameof(connectionString));
         _ = new SqlConnectionStringBuilder(connectionString);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(commandTimeoutSeconds);
         _connectionString = connectionString;
-        Logger = loggerFactory?.CreateLogger<SqlConnectionFactory>();
+        ArgumentNullException.ThrowIfNull(logger);
+        Logger = logger;
         CommandTimeoutSeconds = commandTimeoutSeconds;
     }
 

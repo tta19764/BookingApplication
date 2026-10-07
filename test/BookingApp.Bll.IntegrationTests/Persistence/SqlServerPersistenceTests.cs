@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using BookingApp.Bll.Common.Shared.Exceptions;
 using AutoMapper;
 using BookingApp.Bll.Common.Bookings;
@@ -50,7 +51,7 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
         async Task<ReservationOutcome> Attempt(Booking booking)
         {
             await ready.Task;
-            var repository = new BookingRepository(new SqlConnectionFactory(Factory.RuntimeConnectionString), Factory.Services.GetRequiredService<IMapper>());
+            var repository = new BookingRepository(new SqlConnectionFactory(Factory.RuntimeConnectionString, NullLogger<SqlConnectionFactory>.Instance), Factory.Services.GetRequiredService<IMapper>());
             return await repository.CreateReservationAsync(booking, Token);
         }
         var attempt1 = Attempt(first);
@@ -172,7 +173,7 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
         var hall = await CreateHallAsync();
         var cutoff = DateTime.UtcNow.AddDays(-20);
         await Bookings.CreateReservationAsync(Reservation(hall.Id, cutoff.AddHours(-1), cutoff), Token);
-        var repository = new BookingRepository(new SqlConnectionFactory(Factory.RuntimeConnectionString), Factory.Services.GetRequiredService<IMapper>());
+        var repository = new BookingRepository(new SqlConnectionFactory(Factory.RuntimeConnectionString, NullLogger<SqlConnectionFactory>.Instance), Factory.Services.GetRequiredService<IMapper>());
         var counts = await Task.WhenAll(repository.CompleteDueAsync(cutoff, 10, Token), repository.CompleteDueAsync(cutoff, 10, Token));
         counts.Sum().Should().Be(1);
     }

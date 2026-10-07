@@ -45,7 +45,7 @@ Services реєструє DAL AutoMapper profile разом із BLL/HTTP profil
 `Initialization/DatabaseSeeder` реалізує Common `IDatabaseSeeder`; result models також розміщено в Common. Services завжди реєструє scoped seeder і `StartupDataSeeder`, який викликає його до запуску HTTP/background jobs, якщо прапорець увімкнено. Seeding connection є необов’язковим; основний connection використовується як fallback і має мати SELECT/INSERT права.
 
 ```csharp
-var seeder = new DatabaseSeeder(setupConnectionString);
+var seeder = new DatabaseSeeder(setupConnectionString, logger); // ILogger<DatabaseSeeder>
 var inspection = await seeder.InspectAsync(cancellationToken);
 var reference = await seeder.SeedReferenceDataAsync(cancellationToken);
 var demo = await seeder.SeedDemoDataAsync(cancellationToken); // Необов’язково.
