@@ -93,3 +93,9 @@ Application tables are `ConferenceHalls`, `Users`, `Roles`, `Permissions`, `Role
 Scripts 001-003 create the prefixed schema, tables, procedures and runtime role directly. Initialization creates the prefixed journal and records those three scripts. There are no transfer/rename steps or legacy-object adoption.
 
 These scripts define a fresh database setup. Applied scripts still have checksum protection: a database journaled with earlier script contents cannot reuse this rewritten baseline. Use a fresh database or a separately reviewed setup for such a database; do not clear checksums to bypass verification. Setup credentials need schema/table/procedure creation and role/permission management rights. Editing this source does not connect to or modify the Azure database.
+
+## Azure SQL authentication
+
+The DAL includes `Microsoft.Data.SqlClient.Extensions.Azure` 7.1.1 alongside SqlClient 7.1.1. This extension supplies providers for connection-string Entra authentication modes, including `Active Directory Default`, `Active Directory Interactive` and managed identity. Without it, connection opening fails with an authentication-provider configuration error before SQL execution.
+
+`Active Directory Default` uses available Azure credentials; it does not automatically display an interactive sign-in prompt. For local development, authenticate a supported credential source in the database's tenant, or use `Active Directory Interactive` for an interactive/MFA sign-in. Azure-hosted unattended applications can use managed identity. Package installation does not grant tenant membership or database permissions. Keep local settings untracked and secrets external.
