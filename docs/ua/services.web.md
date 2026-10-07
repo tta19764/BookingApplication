@@ -35,3 +35,5 @@ GET    /api/v1/reports/bookings-summary
 Services реєструє Common `IDatabaseSeeder` як scoped і await-ить `StartupDataSeeder` до HTTP/scheduler startup за `DatabaseSeeding:Enabled=true`. `IncludeDemoData` керує demo halls. Необов’язковий `ConnectionStrings:Seeding` перевизначає основний connection; відсутнє/порожнє значення використовує Database. Потрібні SELECT/INSERT права; помилки зупиняють startup. Enabled startup спочатку застосовує потрібні schema/procedure/permission scripts.
 
 Exception middleware спочатку класифікує помилку. Validation, authorization, missing-resource і task-timeout логуються як Information без stack trace; неочікувані помилки — Error із exception. Persistence failures уже логуються DAL і не дублюються в middleware. HTTP status і validation details збережено.
+
+Quartz 4 використовує `ValueTask Execute(IJobExecutionContext, CancellationToken)`; job передає token до DAL. Job і trigger реєструються через `IQuartzBuilder` у `AddQuartz`, інтервал задається через `WithInterval(TimeSpan)`. Видалено невикористаний built-in ASP.NET OpenAPI package, що конфліктував із оновленим OpenAPI 3.x; Swagger працює через Swashbuckle.

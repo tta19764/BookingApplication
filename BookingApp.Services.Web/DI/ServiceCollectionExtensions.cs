@@ -107,9 +107,8 @@ public static class ServiceCollectionExtensions
             configuration.GetSection(CompleteBookingsOptions.SectionName));
         if (configuration.GetValue("BackgroundJobs:CompleteBookings:Enabled", true))
         {
-            services.AddQuartz();
+            services.AddQuartz(CompleteBookingsJobSettings.Configure);
             services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
-            services.ConfigureOptions<CompleteBookingsJobSettings>();
         }
     }
 }

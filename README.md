@@ -59,7 +59,7 @@ docker compose up --build
 Run all tests / Запуск усіх тестів:
 
 ```powershell
-dotnet test BookingApplicationSolution.sln
+dotnet test --solution BookingApplicationSolution.sln
 ```
 
 Integration tests start ephemeral SQL Server containers with the real scripts and restricted runtime credentials. They require Docker and do not connect to the remote application database. Startup initialization is opt-in through `DatabaseSeeding:Enabled` and defaults to false. When enabled, required scripts run before reference and optional demo data. Existing PostgreSQL data requires a deliberate export/import; deployment does not transfer it.

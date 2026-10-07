@@ -1,5 +1,4 @@
 using BookingApp.Bll.Common.Bookings;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Quartz;
 
@@ -15,19 +14,23 @@ public sealed class CompleteBookingsJob(
     IOptions<CompleteBookingsOptions> options,
     ILogger<CompleteBookingsJob> logger) : IJob
 {
-    public async Task Execute(IJobExecutionContext context)
+    /// <summary>Completes expired reservations in bounded batches using one UTC cutoff.</summary>
+    /// <param name="context">Quartz execution context.</param>
+    /// <param name="cancellationToken">Quartz interruption or shutdown token, forwarded to every database operation.</param>
+    /// <returns>A task completed after all due batches are processed or cancellation stops the loop.</returns>
+    public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
         var completedCount = 0;
         var pageSize = options.Value.PageSize;
         var utcNow = timeProvider.GetUtcNow().UtcDateTime;
 
         // Process repeatedly in bounded batches so one run can drain a backlog without loading everything.
-        while (!context.CancellationToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             var count = await bookingRepository.CompleteDueAsync(
                 utcNow,
                 pageSize,
-                context.CancellationToken);
+                cancellationToken);
 
             if (count == 0)
             {
