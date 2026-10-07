@@ -72,9 +72,14 @@ public sealed class DatabaseSeeder : IDatabaseSeeder
 
         var counts = new Dictionary<string, long>();
         // Table names are fixed application values. Scripts own schema setup; SQL errors propagate if it is missing.
-        foreach (var table in new[] { "conference_halls", "users", "roles", "permissions", "role_permissions", "user_roles", "bookings" })
+        foreach (var (table, objectName) in new[]
         {
-            await using var command = new SqlCommand($"SELECT COUNT_BIG(*) FROM dbo.[{table}]", connection, transaction);
+            ("conference_halls", "ConferenceHalls"), ("users", "Users"), ("roles", "Roles"),
+            ("permissions", "Permissions"), ("role_permissions", "RolePermissions"),
+            ("user_roles", "UserRoles"), ("bookings", "Bookings")
+        })
+        {
+            await using var command = new SqlCommand($"SELECT COUNT_BIG(*) FROM [TymchenkoOV].[BookingApp.{objectName}]", connection, transaction);
             command.CommandTimeout = _connections.CommandTimeoutSeconds;
             counts[table] = (long)(await command.ExecuteScalarAsync(cancellationToken))!;
         }

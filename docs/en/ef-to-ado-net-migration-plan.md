@@ -47,7 +47,7 @@ HTTP controllers / Quartz job
     -> Bll.Common persistence contracts
     -> SQL Server DAL repositories
     -> Microsoft.Data.SqlClient
-    -> booking_api stored procedures on remote SQL Server
+    -> [TymchenkoOV].[BookingApp.*] stored procedures on remote SQL Server
     -> application tables
 ```
 
@@ -107,7 +107,7 @@ Preserve the existing post-commit event-delivery limit: a handler can fail after
 
 ## 5. Stored procedure catalog and ADO.NET execution
 
-Use a dedicated `booking_api` schema, explicit names and documented parameter/result contracts. Use SqlCommand with `CommandType.StoredProcedure`, schema-qualified names and typed SqlParameters. Avoid AddWithValue; set SqlDbType, string size, decimal precision/scale and DBNull explicitly.
+Use a dedicated `TymchenkoOV` schema, explicit names and documented parameter/result contracts. Use SqlCommand with `CommandType.StoredProcedure`, schema-qualified names and typed SqlParameters. Avoid AddWithValue; set SqlDbType, string size, decimal precision/scale and DBNull explicitly.
 
 | Current operation | Procedure | Result/behavior |
 |---|---|---|
