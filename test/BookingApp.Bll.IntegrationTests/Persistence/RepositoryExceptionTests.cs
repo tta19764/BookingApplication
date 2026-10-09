@@ -114,7 +114,7 @@ public sealed class RepositoryExceptionTests(IntegrationTestWebAppFactory factor
 
     [Theory]
     [InlineData("Hall", false, "ConferenceHallRepository.GetByIdAsync")]
-    [InlineData("Hall", true, "ConferenceHallRepository.WriteAsync")]
+    [InlineData("Hall", true, "ConferenceHallRepository.AddAsync")]
     [InlineData("Booking", false, "BookingRepository.GetByIdAsync")]
     [InlineData("Booking", true, "BookingRepository.CreateReservationAsync")]
     [InlineData("User", false, "UserRepository.GetByIdAsync")]

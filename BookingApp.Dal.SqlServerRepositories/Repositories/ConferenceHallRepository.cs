@@ -48,7 +48,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
     {
         var entity = mapper.Map<ConferenceHallEntity>(hall);
         return await SqlProcedure.ExecuteAsync(connections, update ? "[TymchenkoOV].[BookingApp.hall_update]" : "[TymchenkoOV].[BookingApp.hall_create]",
-            "ConferenceHallRepository.WriteAsync", async command =>
+            update ? "ConferenceHallRepository.UpdateAsync" : "ConferenceHallRepository.AddAsync", async command =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
             command.Parameter("@Name", SqlDbType.NVarChar, entity.Name, 100);
