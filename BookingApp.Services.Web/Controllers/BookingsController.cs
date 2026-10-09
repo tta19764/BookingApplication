@@ -2,6 +2,8 @@ using Asp.Versioning;
 using AutoMapper;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.Bookings.Models;
+using BookingApp.Bll.Common.ConferenceHalls.Errors;
+using BookingApp.Bll.Common.Users.Errors;
 using BookingApp.Bll.Common.Shared.Models;
 using BookingApp.Services.Web.Configuration;
 using BookingApp.Services.Web.Dtos;
@@ -57,7 +59,7 @@ public sealed class BookingsController(IBookingManager bookingManager, IMapper m
                 response);
         }
 
-        return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
+        return result.Error == ConferenceHallErrors.NotFound || result.Error == UserErrors.NotFound
             ? NotFound(response)
             : BadRequest(response);
     }

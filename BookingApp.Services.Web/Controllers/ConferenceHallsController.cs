@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using AutoMapper;
 using BookingApp.Bll.Common.ConferenceHalls;
+using BookingApp.Bll.Common.ConferenceHalls.Errors;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared.Models;
 using BookingApp.Services.Web.Configuration;
@@ -87,7 +88,7 @@ public sealed class ConferenceHallsController(IConferenceHallManager hallManager
             return NoContent();
         }
 
-        return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
+        return result.Error == ConferenceHallErrors.NotFound
             ? NotFound(result.MapToApiResponse())
             : BadRequest(result.MapToApiResponse());
     }
@@ -100,7 +101,7 @@ public sealed class ConferenceHallsController(IConferenceHallManager hallManager
     {
         var result = await hallManager.RemoveHallAsync(new HallReferenceModel(hallId), cancellationToken);
         if (result.IsSuccess) return NoContent();
-        return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
+        return result.Error == ConferenceHallErrors.NotFound
             ? NotFound(result.MapToApiResponse())
             : Conflict(result.MapToApiResponse());
     }
