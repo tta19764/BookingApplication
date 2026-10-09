@@ -6,6 +6,9 @@ namespace BookingApp.Dal.SqlServerRepositories.Infrastructure;
 /// <summary>Creates short-lived pooled connections. No connection is shared between operations.</summary>
 public sealed class SqlConnectionFactory
 {
+    /// <summary>Default command execution timeout in seconds.</summary>
+    public const int DefaultCommandTimeoutSeconds = 30;
+
     private readonly string _connectionString;
     internal ILogger Logger { get; }
     internal Exception Translate(SqlException exception, string operation, CancellationToken token) =>
@@ -19,7 +22,7 @@ public sealed class SqlConnectionFactory
     /// <param name="logger">Required diagnostic logger, supplied directly by the caller or DI.</param>
     /// <exception cref="ArgumentException">The connection string is empty or malformed.</exception>
     /// <exception cref="ArgumentOutOfRangeException">The command timeout is not positive.</exception>
-    public SqlConnectionFactory(string connectionString, ILogger logger, int commandTimeoutSeconds = 30)
+    public SqlConnectionFactory(string connectionString, ILogger logger, int commandTimeoutSeconds = DefaultCommandTimeoutSeconds)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
             throw new ArgumentException("Configure ConnectionStrings:Database for the remote SQL Server.", nameof(connectionString));

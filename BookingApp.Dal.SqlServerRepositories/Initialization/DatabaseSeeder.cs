@@ -19,7 +19,7 @@ public sealed class DatabaseSeeder : IDatabaseSeeder
     /// <param name="setupConnectionString">Connection string for the already-created application database with administrative setup permissions.</param>
     /// <param name="logger">Required seeder diagnostic logger, supplied by the caller or DI.</param>
     /// <param name="commandTimeoutSeconds">Positive execution timeout in seconds, defaulting to 30.</param>
-    public DatabaseSeeder(string setupConnectionString, ILogger<DatabaseSeeder> logger, int commandTimeoutSeconds = 30)
+    public DatabaseSeeder(string setupConnectionString, ILogger<DatabaseSeeder> logger, int commandTimeoutSeconds = SqlConnectionFactory.DefaultCommandTimeoutSeconds)
     {
         _connections = new SqlConnectionFactory(setupConnectionString, logger, commandTimeoutSeconds);
         _connectionString = setupConnectionString;
@@ -30,7 +30,8 @@ public sealed class DatabaseSeeder : IDatabaseSeeder
     /// <returns>A task completed when all embedded initialization scripts have been applied or verified.</returns>
     /// <remarks>Applied checksums prevent replay and detect changed scripts. An existing unjournaled schema is not automatically adopted.</remarks>
     public Task InitializeAsync(CancellationToken cancellationToken = default) =>
-        DatabaseInitializer.ApplyAsync(_connectionString, cancellationToken, _connections.Logger);
+        DatabaseInitializer.ApplyAsync(_connectionString, cancellationToken, _connections.Logger,
+            commandTimeoutSeconds: _connections.CommandTimeoutSeconds);
 
     /// <summary>Counts existing rows in the seven application tables without modifying data.</summary>
     /// <param name="cancellationToken">Cancels connection opening and counting.</param>

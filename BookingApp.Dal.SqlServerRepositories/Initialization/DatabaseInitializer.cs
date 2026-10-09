@@ -17,11 +17,15 @@ public static partial class DatabaseInitializer
     /// <param name="cancellationToken">Cancels connection opening, script execution, and transaction commits.</param>
     /// <param name="logger">Optional DAL diagnostic logger.</param>
     /// <param name="includePermissions">Includes administrative role and grant setup when true. Disabled by default.</param>
+    /// <param name="commandTimeoutSeconds">Positive command and lock timeout in seconds.</param>
     /// <returns>A task that completes after the selected initialization scripts are applied.</returns>
     /// <exception cref="InvalidOperationException">A system database is selected, the initialization lock cannot be acquired, or an applied script checksum changed.</exception>
     public static async Task ApplyAsync(string connectionString,
-        CancellationToken cancellationToken = default, ILogger? logger = null, bool includePermissions = false)
+        CancellationToken cancellationToken = default, ILogger? logger = null, bool includePermissions = false,
+        int commandTimeoutSeconds = SqlConnectionFactory.DefaultCommandTimeoutSeconds)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(commandTimeoutSeconds);
+        var lockTimeoutMilliseconds = checked(commandTimeoutSeconds * 1000);
         try
         {
             await using var connection = new SqlConnection(connectionString);
@@ -36,10 +40,11 @@ public static partial class DatabaseInitializer
             await using var acquire = new SqlCommand("""
                 DECLARE @result int;
                 EXEC @result = sys.sp_getapplock @Resource=N'BookingApplication.Deployment',
-                    @LockMode='Exclusive', @LockOwner='Session', @LockTimeout=30000;
+                    @LockMode='Exclusive', @LockOwner='Session', @LockTimeout=@LockTimeout;
                 SELECT @result;
                 """, connection);
-            acquire.CommandTimeout = 60;
+            acquire.CommandTimeout = commandTimeoutSeconds;
+            acquire.Parameters.Add("@LockTimeout", SqlDbType.Int).Value = lockTimeoutMilliseconds;
             if ((int)(await acquire.ExecuteScalarAsync(cancellationToken))! < 0)
                 throw new InvalidOperationException("Could not acquire database deployment lock.");
             try
@@ -54,6 +59,7 @@ public static partial class DatabaseInitializer
                             applied_on_utc datetime2(7) NOT NULL DEFAULT SYSUTCDATETIME());
                     COMMIT;
                     """, connection);
+                journal.CommandTimeout = commandTimeoutSeconds;
                 await journal.ExecuteNonQueryAsync(cancellationToken);
                 var assembly = typeof(DatabaseInitializer).Assembly;
                 const string prefix = "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.";
@@ -70,6 +76,7 @@ public static partial class DatabaseInitializer
                     var sql = (await reader.ReadToEndAsync(cancellationToken)).Replace("\r\n", "\n");
                     var checksum = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(sql)));
                     await using var applied = new SqlCommand("SELECT checksum FROM [TymchenkoOV].[BookingApp.SchemaVersions] WHERE version=@Version", connection);
+                    applied.CommandTimeout = commandTimeoutSeconds;
                     applied.Parameters.Add("@Version", SqlDbType.NVarChar, 100).Value = version;
                     var previous = await applied.ExecuteScalarAsync(cancellationToken);
                     if (previous is not null)
@@ -83,10 +90,11 @@ public static partial class DatabaseInitializer
                     foreach (var batch in BatchSeparator().Split(sql).Where(batch => !string.IsNullOrWhiteSpace(batch)))
                     {
                         await using var command = new SqlCommand(batch, connection, transaction);
-                        command.CommandTimeout = 60;
+                        command.CommandTimeout = commandTimeoutSeconds;
                         await command.ExecuteNonQueryAsync(cancellationToken);
                     }
                     await using var record = new SqlCommand("INSERT [TymchenkoOV].[BookingApp.SchemaVersions](version, checksum) VALUES (@Version, @Checksum)", connection, transaction);
+                    record.CommandTimeout = commandTimeoutSeconds;
                     record.Parameters.Add("@Version", SqlDbType.NVarChar, 100).Value = version;
                     record.Parameters.Add("@Checksum", SqlDbType.VarChar, 64).Value = checksum;
                     await record.ExecuteNonQueryAsync(cancellationToken);
@@ -96,6 +104,7 @@ public static partial class DatabaseInitializer
             finally
             {
                 await using var release = new SqlCommand("EXEC sys.sp_releaseapplock @Resource=N'BookingApplication.Deployment', @LockOwner='Session'", connection);
+                release.CommandTimeout = commandTimeoutSeconds;
                 await release.ExecuteNonQueryAsync(CancellationToken.None);
             }
 
