@@ -1,3 +1,4 @@
+using BookingApp.Bll.Managers.Bookings;
 using Microsoft.Extensions.Logging.Abstractions;
 using BookingApp.Bll.Common.Shared.Exceptions;
 using AutoMapper;
@@ -195,6 +196,24 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
         Func<Task> create = () => users.AddAsync(user, Token);
         await create.Should().ThrowAsync<PersistenceException>();
         (await users.GetByIdAsync(user.Id, Token)).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Reservation_RoundTripsQuotedFractionalMinutePrice()
+    {
+        var hall = await CreateHallAsync();
+        var start = DateTime.UtcNow.Date.AddDays(10).AddHours(14);
+        var booking = Reservation(hall.Id, start, start.AddMinutes(1));
+        var quote = new PricingManager().CalculatePrice(hall, booking.Duration, [Amenity.Projector]);
+        booking.PriceForPeriod = quote.PriceForPeriod;
+        booking.AmenitiesUpCharge = quote.AmenitiesUpCharge;
+        booking.TotalPrice = quote.TotalPrice;
+
+        (await Bookings.CreateReservationAsync(booking, Token)).Should().Be(ReservationOutcome.Created);
+        var stored = (await Bookings.GetByIdAsync(booking.Id, Token))!;
+        stored.PriceForPeriod.Should().Be(quote.PriceForPeriod);
+        stored.AmenitiesUpCharge.Should().Be(quote.AmenitiesUpCharge);
+        stored.TotalPrice.Should().Be(quote.TotalPrice);
     }
 
     [Theory]

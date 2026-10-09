@@ -22,6 +22,24 @@ public class PricingManagerTests
             Amenity.WiFi
         ]);
 
+    [Theory]
+    [InlineData(100, 14, 0, 1, 1.67)]
+    [InlineData(0.30, 14, 0, 1, 0.01)]
+    [InlineData(0.30, 13, 59, 2, 0.01)]
+    public void CalculatePrice_RoundsCompletedComponentsBeforeAddingTotal(
+        decimal rate, int hour, int minute, int minutes, decimal expected)
+    {
+        var hall = new ConferenceHall(Guid.NewGuid(), new Name("Rounding"), new Capacity(10),
+            new Money(rate, Currency.Uah), [Amenity.Projector]);
+        var start = new DateTime(2026, 7, 20, hour, minute, 0);
+        var result = _sut.CalculatePrice(hall, DateRange.Create(start, start.AddMinutes(minutes)),
+            [Amenity.Projector]);
+
+        result.PriceForPeriod.Amount.Should().Be(expected);
+        result.AmenitiesUpCharge.Amount.Should().Be(500m);
+        result.TotalPrice.Amount.Should().Be(expected + 500m);
+    }
+
     [Fact]
     public void CalculatePrice_ShouldReturnStandardPrice_WhenTimeIsStandard()
     {

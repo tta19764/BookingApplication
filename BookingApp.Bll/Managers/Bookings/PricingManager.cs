@@ -1,8 +1,6 @@
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.Bookings.Models;
-using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
-using BookingApp.Bll.Common.Shared;
 
 namespace BookingApp.Bll.Managers.Bookings;
 
@@ -31,11 +29,11 @@ public sealed class PricingManager : IPricingManager
             }
         }
 
-        var priceForPeriod = CalculatePriceForPeriod(hall.Price, period);
+        var priceForPeriod = RoundToCents(CalculatePriceForPeriod(hall.Price, period));
 
-        var amenitiesUpCharge = CalculateAmenitiesPrice(
+        var amenitiesUpCharge = RoundToCents(CalculateAmenitiesPrice(
             hall.Price.Currency,
-            amenities ?? Enumerable.Empty<Amenity>());
+            amenities ?? Enumerable.Empty<Amenity>()));
 
         var totalPrice = priceForPeriod + amenitiesUpCharge;
 
@@ -44,6 +42,10 @@ public sealed class PricingManager : IPricingManager
             amenitiesUpCharge,
             totalPrice);
     }
+
+    // Round completed components once so quotes, totals and persisted snapshots agree.
+    private static Money RoundToCents(Money money) =>
+        money with { Amount = decimal.Round(money.Amount, 2, MidpointRounding.AwayFromZero) };
 
     private static Money CalculatePriceForPeriod(
         Money hourlyRate,
