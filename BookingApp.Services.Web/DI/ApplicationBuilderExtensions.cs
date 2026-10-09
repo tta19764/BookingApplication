@@ -1,7 +1,5 @@
 using Asp.Versioning.ApiExplorer;
 using BookingApp.Services.Web.Middleware;
-using BookingApp.Dal.SqlRepositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookingApp.Services.Web.DI;
 
@@ -53,12 +51,4 @@ public static class ApplicationBuilderExtensions
         return app;
     }
 
-    public static void ApplyMigrations(this IApplicationBuilder app)
-    {
-        using var scope = app.ApplicationServices.CreateScope();
-
-        using var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        dbContext.Database.Migrate();
-    }
 }

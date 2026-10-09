@@ -65,9 +65,14 @@ public class ExceptionHandlingMiddleware(
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
-
         var exceptionDetails = GetExceptionDetails(exception);
+        if (exceptionDetails.LoggingLevel is { } level)
+        {
+            // Expected request failures need no stack trace; DAL owns persistence diagnostics.
+            logger.Log(level, level == LogLevel.Error ? exception : null,
+                "Request failed with {FailureType} and HTTP {StatusCode}",
+                exceptionDetails.Type, exceptionDetails.Status);
+        }
 
         var problemDetails = new ProblemDetails
         {
@@ -82,6 +87,9 @@ public class ExceptionHandlingMiddleware(
             problemDetails.Extensions["errors"] = exceptionDetails.Errors;
         }
 
+        if (exception is PersistenceException persistence)
+            problemDetails.Extensions["incidentId"] = persistence.IncidentId;
+
         context.Response.StatusCode = exceptionDetails.Status;
         await ModifyHeaderAsync(context, problemDetails);
     }
@@ -90,6 +98,13 @@ public class ExceptionHandlingMiddleware(
     {
         return exception switch
         {
+            PersistenceException => new ExceptionDetails(
+                StatusCodes.Status500InternalServerError,
+                "PersistenceFailure",
+                "Database operation failed",
+                "The database operation could not be completed.",
+                null, LoggingLevel: null),
+
             ValidationException validationException => new ExceptionDetails(
                 StatusCodes.Status400BadRequest,
                 "ValidationFailure",
@@ -123,7 +138,7 @@ public class ExceptionHandlingMiddleware(
                 "ServerError",
                 "Server Error",
                 "An unexpected error has occurred on the server.",
-                null)
+                null, LoggingLevel: LogLevel.Error)
         };
     }
 
@@ -132,5 +147,6 @@ public class ExceptionHandlingMiddleware(
         string Type,
         string Title,
         string Detail,
-        IEnumerable<object>? Errors);
+        IEnumerable<object>? Errors,
+        LogLevel? LoggingLevel = LogLevel.Information);
 }

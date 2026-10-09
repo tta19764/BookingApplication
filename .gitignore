@@ -34,3 +34,9 @@ Thumbs.db
 *.tmp
 *.temp
 *.log
+
+# Personal SQL experiments/generated setup files; outside application scope.
+/BookingApp.Dal.SqlServerRepositories/Database/
+
+# Local development configuration stays outside version control.
+**/appsettings.Development.json

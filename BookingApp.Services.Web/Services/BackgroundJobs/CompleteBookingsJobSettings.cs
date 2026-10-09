@@ -1,34 +1,27 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Quartz;
 
 namespace BookingApp.Services.Web.Services.BackgroundJobs;
 
-/// <summary>
-/// Configures the Quartz schedule for completing expired booking reservations.
-/// </summary>
-public sealed class CompleteBookingsJobSettings(IOptions<CompleteBookingsOptions> options) : IConfigureOptions<QuartzOptions>
+/// <summary>Configures the Quartz 4 job and trigger through its registration builder.</summary>
+public static class CompleteBookingsJobSettings
 {
-    private readonly CompleteBookingsOptions _options = options.Value;
-    private static readonly TriggerKey TriggerKey = new($"{nameof(CompleteBookingsJob)}-trigger");
-
-    /// <summary>
-    /// Registers the job and its repeating trigger with Quartz.
-    /// </summary>
-    public void Configure(QuartzOptions options)
+    /// <summary>Registers a stable job identity and repeating trigger using configured options.</summary>
+    /// <param name="builder">Quartz registration builder.</param>
+    public static void Configure(IQuartzBuilder builder)
     {
         const string jobName = nameof(CompleteBookingsJob);
-
-        // Keep the trigger identity stable so Quartz can update the schedule predictably.
-        options.AddJob<CompleteBookingsJob>(jobConfigurator =>
-            jobConfigurator.WithIdentity(jobName))
-            .AddTrigger(triggerConfigurator =>
-                triggerConfigurator
-                    .ForJob(jobName)
-                    .WithIdentity(TriggerKey)
-                    .StartNow()
-                    .WithSimpleSchedule(scheduleBuilder =>
-                        scheduleBuilder
-                            .WithIntervalInSeconds(_options.IntervalSeconds)
-                            .RepeatForever()));
+        builder.AddJob<CompleteBookingsJob>(job => job.WithIdentity(jobName));
+        builder.AddTrigger((provider, trigger) =>
+        {
+            var options = provider.GetRequiredService<IOptions<CompleteBookingsOptions>>().Value;
+            trigger.ForJob(jobName)
+                .WithIdentity(new TriggerKey($"{jobName}-trigger"))
+                .StartNow()
+                .WithSimpleSchedule(schedule => schedule
+                    .WithInterval(TimeSpan.FromSeconds(options.IntervalSeconds))
+                    .RepeatForever());
+        });
     }
 }

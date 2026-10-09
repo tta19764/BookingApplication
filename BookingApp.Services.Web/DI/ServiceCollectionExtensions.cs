@@ -1,28 +1,22 @@
 using Asp.Versioning;
+using BookingApp.Bll.Common.Initialization;
+using BookingApp.Dal.SqlServerRepositories.Initialization;
+using BookingApp.Services.Web.Services.Initialization;
 using BookingApp.Services.Web.Configuration;
 using BookingApp.Services.Web.Mappings;
 using System.Text.Json.Serialization;
 using BookingApp.Bll.Managers.Bookings;
-using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Shared.Events;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.Bookings.Events;
 using BookingApp.Bll.Common.ConferenceHalls;
 using BookingApp.Bll.Common.Reports;
-using BookingApp.Bll.Common.Users;
 using BookingApp.Bll.Managers.ConferenceHalls;
 using BookingApp.Bll.Managers.Reports;
 using BookingApp.Bll.Managers.Bookings.Validation;
-using BookingApp.Bll.Managers.ConferenceHalls.Validation;
-using BookingApp.Bll.Managers.Shared.Validation;
-using BookingApp.Bll.Common.Bookings.Models;
-using BookingApp.Bll.Common.ConferenceHalls.Models;
-using BookingApp.Bll.Common.Shared.Models;
-using BookingApp.Dal.SqlRepositories;
-using BookingApp.Dal.SqlRepositories.Repositories;
+using BookingApp.Dal.SqlServerRepositories;
 using BookingApp.Services.Web.Services.BackgroundJobs;
 using BookingApp.Services.Web.Services.DomainEvents;
-using Microsoft.EntityFrameworkCore;
 using Quartz;
 using FluentValidation;
 
@@ -46,7 +40,7 @@ public static class ServiceCollectionExtensions
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
         services.AddAutoMapper(_ => { }, typeof(AutoMapperConfig), typeof(BookingApp.Bll.Mappings.AutoMapperConfig),
-            typeof(BookingApp.Dal.SqlRepositories.Mappings.AutoMapperConfig));
+            typeof(BookingApp.Dal.SqlServerRepositories.Mappings.AutoMapperConfig));
 
         AddBusinessLogic(services);
         AddDataAccess(services, configuration);
@@ -95,16 +89,26 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("Database")
             ?? throw new InvalidOperationException("The Database connection string is not configured.");
 
-        services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IConferenceHallRepository, ConferenceHallRepository>();
-        services.AddScoped<IBookingRepository, BookingRepository>();
-        services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<ApplicationDbContext>());
+        var commandTimeout = configuration.GetValue("Database:CommandTimeoutSeconds", 30);
+        services.AddSqlServerDataAccess(connectionString, commandTimeout);
+
+        services.Configure<DatabaseSeedingOptions>(configuration.GetSection(DatabaseSeedingOptions.SectionName));
+        // An optional seeding identity can override the main connection; missing/blank values reuse it.
+        services.AddScoped<IDatabaseSeeder>(provider =>
+        {
+            var seedingConnection = configuration.GetConnectionString("Seeding");
+            return new DatabaseSeeder(
+                string.IsNullOrWhiteSpace(seedingConnection) ? connectionString : seedingConnection,
+                provider.GetRequiredService<ILogger<DatabaseSeeder>>(), commandTimeout);
+        });
+        services.AddSingleton<StartupDataSeeder>();
 
         services.Configure<CompleteBookingsOptions>(
             configuration.GetSection(CompleteBookingsOptions.SectionName));
-        services.AddQuartz();
-        services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
-        services.ConfigureOptions<CompleteBookingsJobSettings>();
+        if (configuration.GetValue("BackgroundJobs:CompleteBookings:Enabled", true))
+        {
+            services.AddQuartz(CompleteBookingsJobSettings.Configure);
+            services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+        }
     }
 }

@@ -26,8 +26,14 @@ GET    /api/v1/reports/bookings-summary
 - Central exception handling prevents internal exception details from leaking to clients.
 - Request-context logging through Serilog and Seq.
 - HTTPS redirection in the middleware pipeline.
-- Development migrations and idempotent seed-data initialization.
+- Initial schema setup may use code first and a generated SQL script; enabled startup applies the embedded initialization scripts to an empty database; startup initialization applies required scripts before data seeding when enabled; it does not create the database itself.
 
 The current API uses a seeded user. Production deployment should add authentication, authorization policies, secret management, rate limiting, and environment-specific trust/proxy configuration.
 
 The reusable Postman collection under `test/Postman/` provides an additional manual workflow. Automated HTTP behavior is covered by `BookingApp.Services.Web.IntegrationTests`.
+
+Services registers Common `IDatabaseSeeder` as scoped and awaits `StartupDataSeeder` before HTTP/scheduler startup when `DatabaseSeeding:Enabled=true`. `IncludeDemoData` controls optional halls. An optional `ConnectionStrings:Seeding` overrides the main database connection; absent/blank values reuse Database. Seeding requires SELECT/INSERT permissions; failures prevent startup. Enabled startup applies required schema/procedure scripts (permission setup is optional and skipped at startup) first; unchanged journaled scripts are skipped.
+
+Exception middleware classifies failures before logging. Validation, authorization, missing-resource and task-timeout exceptions produce Information logs without stack traces; unexpected failures produce Error logs with the exception. Persistence failures retain their DAL incident ID and are not logged again by middleware. HTTP status and validation details are preserved.
+
+Quartz 4 uses `ValueTask Execute(IJobExecutionContext, CancellationToken)`. The completion job forwards that token to repository calls. `CompleteBookingsJobSettings` configures `IQuartzBuilder` through `AddQuartz`, with service-provider-based trigger configuration and `WithInterval(TimeSpan)`. The API uses Swashbuckle; the unused ASP.NET built-in OpenAPI package is removed to avoid its OpenAPI 2.x constraint conflicting with the updated OpenAPI 3.x dependency.

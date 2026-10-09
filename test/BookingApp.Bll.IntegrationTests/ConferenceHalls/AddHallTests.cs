@@ -1,11 +1,10 @@
 using BookingApp.Bll.IntegrationTests.Infrastructure;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
-using BookingApp.Dal.SqlRepositories.Entities;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookingApp.Bll.IntegrationTests.ConferenceHalls;
 
+[Collection("SqlServer")]
 public class AddHallTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
     [Fact]
@@ -22,10 +21,7 @@ public class AddHallTests(IntegrationTestWebAppFactory factory) : BaseIntegratio
         // Assert
         result.IsSuccess.Should().BeTrue();
 
-        var hall = await DbContext
-            .Set<ConferenceHallEntity>()
-            .AsNoTracking()
-            .FirstOrDefaultAsync(conferenceHall => conferenceHall.Id == result.Value, cancellationToken);
+        var hall = await Halls.GetByIdAsync(result.Value, cancellationToken);
 
         hall.Should().NotBeNull();
         hall.Name.Value.Should().Be(name);

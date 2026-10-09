@@ -1,7 +1,4 @@
-using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Bookings;
-using BookingApp.Bll.Common.Bookings.Models;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Quartz;
 
@@ -13,47 +10,37 @@ namespace BookingApp.Services.Web.Services.BackgroundJobs;
 [DisallowConcurrentExecution]
 public sealed class CompleteBookingsJob(
     IBookingRepository bookingRepository,
-    IUnitOfWork unitOfWork,
     TimeProvider timeProvider,
     IOptions<CompleteBookingsOptions> options,
     ILogger<CompleteBookingsJob> logger) : IJob
 {
-    public async Task Execute(IJobExecutionContext context)
+    /// <summary>Completes expired reservations in bounded batches using one UTC cutoff.</summary>
+    /// <param name="context">Quartz execution context.</param>
+    /// <param name="cancellationToken">Quartz interruption or shutdown token, forwarded to every database operation.</param>
+    /// <returns>A task completed after all due batches are processed or cancellation stops the loop.</returns>
+    public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
         var completedCount = 0;
         var pageSize = options.Value.PageSize;
+        var utcNow = timeProvider.GetUtcNow().UtcDateTime;
 
         // Process repeatedly in bounded batches so one run can drain a backlog without loading everything.
-        while (!context.CancellationToken.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
-            var utcNow = timeProvider.GetUtcNow().UtcDateTime;
-            var bookings = await bookingRepository.GetReservedBookingsDueForCompletionAsync(
+            var count = await bookingRepository.CompleteDueAsync(
                 utcNow,
                 pageSize,
-                context.CancellationToken);
+                cancellationToken);
 
-            if (bookings.Count == 0)
+            if (count == 0)
             {
                 break;
             }
 
-            foreach (var booking in bookings)
-            {
-                if (booking.Status != BookingStatus.Reserved)
-                {
-                    continue;
-                }
-
-                booking.Status = BookingStatus.Completed;
-                booking.CompletedOnUtc = utcNow;
-                bookingRepository.Update(booking);
-                completedCount++;
-            }
-
-            await unitOfWork.SaveChangesAsync(context.CancellationToken);
+            completedCount += count;
 
             // A short batch means there is no remaining page to fetch for this run.
-            if (bookings.Count < pageSize)
+            if (count < pageSize)
             {
                 break;
             }

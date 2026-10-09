@@ -5,12 +5,11 @@ using BookingApp.Bll.IntegrationTests.Infrastructure;
 using BookingApp.Bll.Common.Shared;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.ConferenceHalls;
-using BookingApp.Dal.SqlRepositories.Entities;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookingApp.Bll.IntegrationTests.Bookings;
 
+[Collection("SqlServer")]
 public class AddBookingTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
     [Fact]
@@ -18,10 +17,7 @@ public class AddBookingTests(IntegrationTestWebAppFactory factory) : BaseIntegra
     {
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
-        ConferenceHallEntity hall = await DbContext
-            .Set<ConferenceHallEntity>()
-            .AsNoTracking()
-            .FirstAsync(cancellationToken);
+        var hall = (await Halls.GetListPaginatedAsync(1, 100, cancellationToken)).First();
 
         DateOnly date = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1));
 
@@ -36,10 +32,7 @@ public class AddBookingTests(IntegrationTestWebAppFactory factory) : BaseIntegra
         result.Value.Currency.Should().Be("UAH");
         result.Value.TotalPrice.Should().BeGreaterThan(result.Value.PriceForPeriod);
 
-        var booking = await DbContext
-            .Set<BookingEntity>()
-            .AsNoTracking()
-            .FirstOrDefaultAsync(storedBooking => storedBooking.Id == result.Value.BookingId, cancellationToken);
+        var booking = await Bookings.GetByIdAsync(result.Value.BookingId, cancellationToken);
 
         booking.Should().NotBeNull();
         booking.Status.Should().Be(BookingStatus.Reserved);

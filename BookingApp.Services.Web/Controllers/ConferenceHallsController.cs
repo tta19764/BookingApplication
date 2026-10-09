@@ -1,6 +1,7 @@
 using Asp.Versioning;
 using AutoMapper;
 using BookingApp.Bll.Common.ConferenceHalls;
+using BookingApp.Bll.Common.ConferenceHalls.Errors;
 using BookingApp.Bll.Common.ConferenceHalls.Models;
 using BookingApp.Bll.Common.Shared.Models;
 using BookingApp.Services.Web.Configuration;
@@ -87,18 +88,22 @@ public sealed class ConferenceHallsController(IConferenceHallManager hallManager
             return NoContent();
         }
 
-        return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
+        return result.Error == ConferenceHallErrors.NotFound
             ? NotFound(result.MapToApiResponse())
             : BadRequest(result.MapToApiResponse());
     }
 
     [HttpDelete("{hallId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status409Conflict)]
     [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteConferenceHall(Guid hallId, CancellationToken cancellationToken)
     {
         var result = await hallManager.RemoveHallAsync(new HallReferenceModel(hallId), cancellationToken);
-        return result.IsSuccess ? NoContent() : NotFound(result.MapToApiResponse());
+        if (result.IsSuccess) return NoContent();
+        return result.Error == ConferenceHallErrors.NotFound
+            ? NotFound(result.MapToApiResponse())
+            : Conflict(result.MapToApiResponse());
     }
 
     [HttpGet("available")]

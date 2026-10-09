@@ -13,7 +13,7 @@ public interface IUserRepository
     Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Adds a new user to the persistence context.
+    /// Persists the user and its initial role assignments atomically.
     /// </summary>
-    void Add(User user);
+    Task AddAsync(User user, CancellationToken cancellationToken = default);
 }
