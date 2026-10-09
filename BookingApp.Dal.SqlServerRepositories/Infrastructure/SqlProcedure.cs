@@ -6,6 +6,31 @@ namespace BookingApp.Dal.SqlServerRepositories.Infrastructure;
 /// <summary>Creates stored-procedure commands with explicitly typed parameters.</summary>
 internal static class SqlProcedure
 {
+    /// <summary>Runs a procedure with an owned connection and command, translating SQL failures.</summary>
+    internal static async Task<T> ExecuteAsync<T>(SqlConnectionFactory connections, string procedure,
+        string operation, Func<SqlCommand, Task<T>> execute, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await using var connection = await connections.OpenAsync(cancellationToken);
+            await using var command = Create(connection, procedure, connections.CommandTimeoutSeconds);
+            return await execute(command);
+        }
+        catch (SqlException exception)
+        {
+            throw connections.Translate(exception, operation, cancellationToken);
+        }
+    }
+
+    /// <summary>Runs a procedure that does not return a value using the shared execution lifecycle.</summary>
+    internal static Task ExecuteAsync(SqlConnectionFactory connections, string procedure,
+        string operation, Func<SqlCommand, Task> execute, CancellationToken cancellationToken) =>
+        ExecuteAsync(connections, procedure, operation, async command =>
+        {
+            await execute(command);
+            return true;
+        }, cancellationToken);
+
     /// <summary>Creates a stored-procedure command on the supplied connection.</summary>
     /// <param name="connection">An open connection owned by the caller.</param>
     /// <param name="name">The schema-qualified procedure name.</param>
