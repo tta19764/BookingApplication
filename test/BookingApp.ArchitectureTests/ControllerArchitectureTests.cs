@@ -2,8 +2,9 @@ using BookingApp.Services.Web.Controllers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BookingApp.Services.Web.IntegrationTests.Architecture;
+namespace BookingApp.ArchitectureTests;
 
+[Trait("Category", "Architecture")]
 public sealed class ControllerArchitectureTests
 {
     [Fact]

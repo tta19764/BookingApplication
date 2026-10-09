@@ -3,7 +3,7 @@ using BookingApp.Services.Web.Services.DomainEvents;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BookingApp.Services.Web.IntegrationTests.Architecture;
+namespace BookingApp.Services.Web.UnitTests.Services;
 
 public sealed class DomainEventDispatcherTests
 {

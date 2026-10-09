@@ -21,7 +21,7 @@ Async writes persist immediately. IUnitOfWork is removed. One reservation operat
 
 Startup initialization is optional and controlled by configuration; required scripts run before data seeding. Initial setup uses your code-first database followed by a generated SQL setup script; no deployment-tool project is included. Stored procedures and required reference data are included before generating that script. PostgreSQL migrations cannot be replayed on SQL Server; existing data requires a validated export/import. See the [setup guide](database-initialization.md) and [migration plan](ef-to-ado-net-migration-plan.md).
 
-All four maintained test suites and Postman assets remain under test/. SQL Server Testcontainers run production scripts with restricted runtime credentials. Architecture tests verify provider isolation, mappings, controller boundaries, serialization and events; persistence tests cover concurrency, rollback, completion and permissions. Application deployment uses remote SQL Server; database containers are test-only.
+All maintained test suites and Postman assets remain under test/. SQL Server Testcontainers run production scripts with restricted runtime credentials. A separate architecture project verifies provider isolation, controller boundaries and persistence structure; web unit tests cover serialization, events and controller behavior; persistence tests cover concurrency, rollback, completion and permissions. Application deployment uses remote SQL Server; database containers are test-only.
 
 ## Implemented persistence refactoring
 

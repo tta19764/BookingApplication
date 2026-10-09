@@ -9,7 +9,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 
-namespace BookingApp.Services.Web.IntegrationTests.Architecture;
+namespace BookingApp.Services.Web.UnitTests.Controllers;
 
 public sealed class ConferenceHallErrorRoutingTests
 {

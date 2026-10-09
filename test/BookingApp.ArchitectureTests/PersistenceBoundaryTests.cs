@@ -3,8 +3,9 @@ using BookingApp.Bll.Managers.Bookings;
 using BookingApp.Dal.SqlServerRepositories.Repositories;
 using FluentAssertions;
 
-namespace BookingApp.Services.Web.IntegrationTests.Architecture;
+namespace BookingApp.ArchitectureTests;
 
+[Trait("Category", "Architecture")]
 public sealed class PersistenceBoundaryTests
 {
     [Fact]

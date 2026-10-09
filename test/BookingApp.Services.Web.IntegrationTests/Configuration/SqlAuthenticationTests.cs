@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
 
-namespace BookingApp.Services.Web.IntegrationTests.Architecture;
+namespace BookingApp.Services.Web.IntegrationTests.Configuration;
 
 public sealed class SqlAuthenticationTests
 {

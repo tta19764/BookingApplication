@@ -1,8 +1,9 @@
 using BookingApp.Dal.SqlServerRepositories.Entities;
 using FluentAssertions;
 
-namespace BookingApp.Services.Web.IntegrationTests.Architecture;
+namespace BookingApp.ArchitectureTests;
 
+[Trait("Category", "Architecture")]
 public sealed class PersistenceEntityTests
 {
     [Fact]

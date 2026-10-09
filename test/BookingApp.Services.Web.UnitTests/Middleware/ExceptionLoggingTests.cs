@@ -4,7 +4,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace BookingApp.Services.Web.IntegrationTests.Architecture;
+namespace BookingApp.Services.Web.UnitTests.Middleware;
 
 public sealed class ExceptionLoggingTests
 {

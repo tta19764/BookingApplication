@@ -24,16 +24,25 @@ dotnet test --solution BookingApplicationSolution.sln
 
 HTTP-тести використовують HttpClient та тимчасовий контейнер SQL Server. Вони перевіряють створення, редагування, видалення, доступність і бронювання, HTTP-коди, JSON та точну вартість.
 
-Архітектурні тести перевіряють ізоляцію провайдера, AutoMapper, межу контролерів/managers, серіалізацію TimeOnly, події та пакетне завершення.
+Configuration integration tests: AutoMapper, SQL authentication, Quartz registration.
 
 Обидва проєкти використовують спільний `test/Shared/SqlServerWebAppFactory.cs`. Fixture застосовує Initialization scripts, викликає reference/demo seed methods і створює runtime-користувача лише з EXECUTE та звільняє контейнер після тестів. BLL-тести мають спільну непаралельну collection і окремі ідентифікатори даних. Планувальник у звичайних API-тестах вимкнено. Віддалена база застосунку не використовується.
 
 Docker потрібен для integration tests. Образ SQL Server 2022 зафіксовано digest; `BOOKINGAPP_TEST_SQL_IMAGE` дозволяє узгодити його з віддаленим сервером. Перше завантаження потребує часу та ресурсів. TLS, мережу та автентифікацію віддаленого deployment перевіряють окремо. Див. [SQL Server setup](../en/database-initialization.md).
 
-Поточний набір містить 116 тестів: Common 1, BLL unit 27, BLL integration 51 та Web integration 37. Архітектурні перевірки entities перевіряють Guid inheritance та відсутність бізнес/provider типів у властивостях DAL. Database містить лише персональні файли поза application scope. Test bootstrap використовує Initialization scripts і data seeder methods.
+Архітектурні перевірки entities перевіряють Guid inheritance та відсутність бізнес/provider типів у властивостях DAL. Database містить лише персональні файли поза application scope. Test bootstrap використовує Initialization scripts і data seeder methods.
 
 `DatabaseSeederTests` створює окрему schema-only базу для кожного тесту у спільному SQL Server container. Перевіряються порожній стан даних, SQL-помилки відсутніх таблиць, збереження наявних даних, відновлення пропущених reference rows, конфлікти IDs, rollback, конкурентна ідемпотентність та відмова для runtime credentials. Спільна application-test схема й віддалена база не змінюються.
 
 `RepositoryExceptionTests` містить 18 перевірок для hall, booking і user repositories: read/write SQL failures, відсутня схема, timeout, помилка підключення та cancellation. Перевіряються sanitized PersistenceException, incident ID і один error log. Кожен тест використовує окрему disposable базу.
 
-`SqlObjectNamingTests` перевіряє fresh setup восьми prefixed таблиць, 14 процедур і трьох journaled scripts без legacy об’єктів.
+`SqlObjectNamingTests` перевіряє fresh setup восьми prefixed таблиць, 14 процедур і п’яти journaled scripts без legacy об’єктів.
+
+
+## BookingApp.ArchitectureTests
+
+Структурні перевірки: залежності між шарами, контролери, SQL-ресурси та DAL entities. Категорія `Category=Architecture`; Docker не потрібен.
+
+## BookingApp.Services.Web.UnitTests
+
+Поведінкові перевірки контролерів, middleware, серіалізації, domain events, startup seeding і completion job. Docker не потрібен.

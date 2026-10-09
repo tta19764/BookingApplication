@@ -3,7 +3,7 @@ using BookingApp.Services.Web.DI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BookingApp.Services.Web.IntegrationTests.Architecture;
+namespace BookingApp.Services.Web.IntegrationTests.Configuration;
 
 public sealed class AutoMapperConfigTests
 {

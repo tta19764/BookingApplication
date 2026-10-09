@@ -2,7 +2,7 @@ using System.Text.Json;
 using BookingApp.Services.Web.Dtos.Requests;
 using FluentAssertions;
 
-namespace BookingApp.Services.Web.IntegrationTests.Architecture;
+namespace BookingApp.Services.Web.UnitTests.Serialization;
 
 public sealed class RequestSerializationTests
 {
