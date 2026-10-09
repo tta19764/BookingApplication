@@ -59,7 +59,7 @@ public static partial class DatabaseInitializer
                 const string prefix = "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.";
                 var scripts = assembly.GetManifestResourceNames()
                     .Where(name => name.StartsWith(prefix, StringComparison.Ordinal) && name.EndsWith(".sql", StringComparison.Ordinal))
-                    .Where(name => includePermissions || !name.Equals(prefix + "003_permissions.sql", StringComparison.Ordinal))
+                    .Where(name => includePermissions || !name.EndsWith("_permissions.sql", StringComparison.Ordinal))
                     .OrderBy(name => name, StringComparer.Ordinal);
                 foreach (var resourceName in scripts)
                 {

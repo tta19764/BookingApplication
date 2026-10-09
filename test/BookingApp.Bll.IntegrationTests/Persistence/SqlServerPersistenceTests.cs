@@ -186,6 +186,7 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
         var users = scope.ServiceProvider.GetRequiredService<IUserRepository>();
         var user = new User(Guid.NewGuid(), new FirstName("Іван"), new LastName("Тест"), new Email($"{Guid.NewGuid():N}@booking.local"));
         user.Roles.Add(new Role(1, "Registered"));
+        user.Roles.Add(new Role(1, "Duplicate"));
         await users.AddAsync(user, Token);
         var loaded = (await users.GetByIdAsync(user.Id, Token))!;
         loaded.FirstName.Should().Be(user.FirstName);
@@ -196,6 +197,19 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
         Func<Task> create = () => users.AddAsync(user, Token);
         await create.Should().ThrowAsync<PersistenceException>();
         (await users.GetByIdAsync(user.Id, Token)).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Users_WithEmptyRoles_RoundTripWithoutRoleLinks()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var users = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+        var user = new User(Guid.NewGuid(), new FirstName("No"), new LastName("Roles"),
+            new Email($"{Guid.NewGuid():N}@booking.local"));
+        await users.AddAsync(user, Token);
+        var loaded = (await users.GetByIdAsync(user.Id, Token))!;
+        loaded.FirstName.Should().Be(user.FirstName);
+        loaded.Roles.Should().BeEmpty();
     }
 
     [Fact]

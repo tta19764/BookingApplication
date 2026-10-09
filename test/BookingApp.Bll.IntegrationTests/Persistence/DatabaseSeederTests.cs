@@ -47,13 +47,13 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
         await using var role = new SqlCommand("SELECT COUNT(*) FROM sys.database_principals WHERE name=N'TymchenkoOV.BookingApp.Runtime'", connection);
         ((int)(await role.ExecuteScalarAsync(Token))!).Should().Be(0);
         await using var journal = new SqlCommand("SELECT COUNT(*) FROM [TymchenkoOV].[BookingApp.SchemaVersions]", connection);
-        ((int)(await journal.ExecuteScalarAsync(Token))!).Should().Be(2);
+        ((int)(await journal.ExecuteScalarAsync(Token))!).Should().Be(3);
 
         await DatabaseInitializer.ApplyAsync(_connectionString, Token, includePermissions: true);
         ((int)(await role.ExecuteScalarAsync(Token))!).Should().Be(1);
-        ((int)(await journal.ExecuteScalarAsync(Token))!).Should().Be(3);
+        ((int)(await journal.ExecuteScalarAsync(Token))!).Should().Be(5);
         await Seeder.InitializeAsync(Token);
-        ((int)(await journal.ExecuteScalarAsync(Token))!).Should().Be(3);
+        ((int)(await journal.ExecuteScalarAsync(Token))!).Should().Be(5);
     }
 
     [Fact]

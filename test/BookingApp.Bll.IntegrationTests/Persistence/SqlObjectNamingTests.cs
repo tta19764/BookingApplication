@@ -32,7 +32,7 @@ public sealed class SqlObjectNamingTests(IntegrationTestWebAppFactory factory)
             "hall_update", "hall_delete", "booking_get", "booking_list", "booking_has_overlap", "booking_reserve",
             "booking_due", "booking_complete_due", "user_get", "user_create" }.Select(name => "BookingApp." + name));
         await reader.NextResultAsync(token); await reader.ReadAsync(token);
-        reader.GetInt32(0).Should().Be(3);
+        reader.GetInt32(0).Should().Be(5);
         await reader.NextResultAsync(token); await reader.ReadAsync(token);
         for (var column = 0; column < 4; column++) reader.IsDBNull(column).Should().BeTrue();
     }

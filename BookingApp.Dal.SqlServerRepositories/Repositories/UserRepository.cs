@@ -53,7 +53,13 @@ public sealed class UserRepository(SqlConnectionFactory connections, IMapper map
             command.Parameter("@FirstName", SqlDbType.NVarChar, entity.FirstName, 100);
             command.Parameter("@LastName", SqlDbType.NVarChar, entity.LastName, 100);
             command.Parameter("@Email", SqlDbType.NVarChar, entity.Email, 320);
-            command.Parameter("@RoleIds", SqlDbType.NVarChar, string.Join(',', entity.Roles.Select(role => role.Id).Distinct()), -1);
+            using var roleIds = new DataTable();
+            roleIds.Columns.Add("Id", typeof(int));
+            foreach (var roleId in entity.Roles.Select(role => role.Id).Distinct())
+                roleIds.Rows.Add(roleId);
+            // A typed empty table creates a user without role links.
+            var roles = command.Parameter("@RoleIds", SqlDbType.Structured, roleIds);
+            roles.TypeName = "[TymchenkoOV].[BookingApp.RoleIds]";
             await command.ExecuteNonQueryAsync(cancellationToken);
         }, cancellationToken);
     }
