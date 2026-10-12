@@ -13,6 +13,7 @@ public sealed class SwaggerDocumentationTests
     [Fact]
     public async Task Swagger_UsesXmlCommentsForActionsAndDtoProperties()
     {
+        // Arrange
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {
             ApplicationName = typeof(BookingsController).Assembly.FullName,
@@ -28,8 +29,10 @@ public sealed class SwaggerDocumentationTests
         await using var app = builder.Build();
         app.MapControllers();
 
+        // Act
         var document = app.Services.GetRequiredService<ISwaggerProvider>().GetSwagger("v1");
 
+        // Assert
         document.Paths["/api/v1/bookings"].Operations!.Values.Should()
             .Contain(operation => operation.Summary == "Gets a page of bookings.");
         document.Components!.Schemas!["BookingDto"].Properties!["hallId"].Description.Should()

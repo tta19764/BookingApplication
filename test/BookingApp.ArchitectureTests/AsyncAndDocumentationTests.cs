@@ -23,7 +23,11 @@ public sealed class AsyncAndDocumentationTests
     [Fact]
     public void AsyncApplicationMethods_MustAcceptCancellationToken()
     {
-        var violations = ApplicationAssemblies.SelectMany(assembly => assembly.GetTypes())
+        // Arrange
+        var assemblies = ApplicationAssemblies;
+
+        // Act
+        var violations = assemblies.SelectMany(assembly => assembly.GetTypes())
             // CLR-generated entry points and state machines are outside application contracts.
             .Where(type => type.Namespace?.StartsWith("BookingApp.", StringComparison.Ordinal) == true)
             .Where(type => !type.IsDefined(typeof(CompilerGeneratedAttribute)))
@@ -31,18 +35,23 @@ public sealed class AsyncAndDocumentationTests
                 BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
             .Where(method => !method.IsDefined(typeof(CompilerGeneratedAttribute)))
             .Where(method => IsAsyncReturnType(method.ReturnType))
-            .Where(method => !method.GetParameters().Any(parameter => parameter.ParameterType == typeof(CancellationToken)))
+            .Where(method => method.GetParameters().All(parameter => parameter.ParameterType != typeof(CancellationToken)))
             .Select(method => $"{method.DeclaringType!.FullName}.{method.Name}")
             .ToArray();
 
+        // Assert
         violations.Should().BeEmpty("every application async method must support cancellation");
     }
 
     [Fact]
     public void ApiActionsAndInterfaceMethods_MustHaveXmlSummaries()
     {
+        // Arrange
+        var assemblies = new[] { typeof(IBookingManager).Assembly, typeof(BookingsController).Assembly };
         var violations = new List<string>();
-        foreach (var assembly in new[] { typeof(IBookingManager).Assembly, typeof(BookingsController).Assembly })
+
+        // Act
+        foreach (var assembly in assemblies)
         {
             var documented = ReadDocumentedMembers(assembly);
             var methods = assembly.GetExportedTypes()
@@ -59,14 +68,19 @@ public sealed class AsyncAndDocumentationTests
             }
         }
 
+        // Assert
         violations.Should().BeEmpty("API actions and interface methods need XML documentation");
     }
 
     [Fact]
     public void DtoProperties_MustHaveXmlSummaries()
     {
+        // Arrange
+        var assemblies = new[] { typeof(IBookingManager).Assembly, typeof(BookingsController).Assembly };
         var violations = new List<string>();
-        foreach (var assembly in new[] { typeof(IBookingManager).Assembly, typeof(BookingsController).Assembly })
+
+        // Act
+        foreach (var assembly in assemblies)
         {
             var documented = ReadDocumentedMembers(assembly);
             var types = assembly.GetExportedTypes().Where(type =>
@@ -81,6 +95,7 @@ public sealed class AsyncAndDocumentationTests
             }
         }
 
+        // Assert
         violations.Should().BeEmpty("DTO members need XML documentation, including generated record properties");
     }
 

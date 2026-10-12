@@ -16,6 +16,7 @@ public sealed class RequestCancellationTests
     [Fact]
     public async Task AbortedRequest_PropagatesCancellationWithoutWritingAnErrorResponse()
     {
+        // Arrange
         using var cancellation = new CancellationTokenSource();
         var context = new DefaultHttpContext { RequestAborted = cancellation.Token };
         context.Response.Body = new MemoryStream();
@@ -25,8 +26,10 @@ public sealed class RequestCancellationTests
             throw new OperationCanceledException(cancellation.Token);
         }, NullLogger<ExceptionHandlingMiddleware>.Instance);
 
+        // Act
         Func<Task> action = () => middleware.InvokeAsync(context, context.RequestAborted);
 
+        // Assert
         await action.Should().ThrowAsync<OperationCanceledException>();
         context.Response.Body.Length.Should().Be(0);
         context.Response.StatusCode.Should().Be(StatusCodes.Status200OK);
@@ -35,6 +38,7 @@ public sealed class RequestCancellationTests
     [Fact]
     public async Task ProblemResponse_CanBeCancelledThroughTheRequestAbortToken()
     {
+        // Arrange
         using var cancellation = new CancellationTokenSource();
         var stream = new TokenCapturingStream(cancellation);
         var context = new DefaultHttpContext { RequestAborted = cancellation.Token };
@@ -48,8 +52,10 @@ public sealed class RequestCancellationTests
             return Task.CompletedTask;
         });
 
+        // Act
         Func<Task> action = () => app.Build()(context);
 
+        // Assert
         await action.Should().ThrowAsync<OperationCanceledException>();
         stream.Tokens.Should().NotBeEmpty().And.OnlyContain(token => token.IsCancellationRequested);
         context.Response.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
@@ -58,6 +64,7 @@ public sealed class RequestCancellationTests
     [Fact]
     public async Task LoggingRegistration_StopsAnAlreadyAbortedRequestBeforeCallingDownstream()
     {
+        // Arrange
         using var cancellation = new CancellationTokenSource();
         cancellation.Cancel();
         var context = new DefaultHttpContext { RequestAborted = cancellation.Token };
@@ -71,8 +78,10 @@ public sealed class RequestCancellationTests
             return Task.CompletedTask;
         });
 
+        // Act
         Func<Task> action = () => app.Build()(context);
 
+        // Assert
         await action.Should().ThrowAsync<OperationCanceledException>();
         invoked.Should().BeFalse();
     }
@@ -80,6 +89,7 @@ public sealed class RequestCancellationTests
     [Fact]
     public async Task CorrelationScope_RemainsActiveAfterDownstreamAwaitAndEndsWithTheRequest()
     {
+        // Arrange
         var sink = new CapturingSink();
         using var logger = new LoggerConfiguration().Enrich.FromLogContext().WriteTo.Sink(sink).CreateLogger();
         var context = new DefaultHttpContext();
@@ -90,9 +100,11 @@ public sealed class RequestCancellationTests
             logger.Information("Inside request");
         });
 
+        // Act
         await middleware.Invoke(context, TestContext.Current.CancellationToken);
         logger.Information("After request");
 
+        // Assert
         sink.Events[0].Properties["CorrelationId"].Should().Be(new ScalarValue("request-123"));
         sink.Events[1].Properties.Should().NotContainKey("CorrelationId");
     }
