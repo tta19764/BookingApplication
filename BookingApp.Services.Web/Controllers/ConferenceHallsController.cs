@@ -17,6 +17,10 @@ namespace BookingApp.Services.Web.Controllers;
 [Route("api/v{version:apiVersion}/conference-halls")]
 public sealed class ConferenceHallsController(IConferenceHallManager hallManager, IMapper mapper) : ControllerBase
 {
+    /// <summary>Gets a page of conference halls.</summary>
+    /// <param name="request">Input parameters for the operation.</param>
+    /// <param name="cancellationToken">Cancels the request and downstream resource access.</param>
+    /// <returns>The HTTP response for the operation.</returns>
     [HttpGet]
     [ProducesResponseType<ApiResponse<IReadOnlyCollection<ConferenceHallDto>>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiResponse<IReadOnlyCollection<ConferenceHallDto>>>(StatusCodes.Status400BadRequest)]
@@ -32,6 +36,10 @@ public sealed class ConferenceHallsController(IConferenceHallManager hallManager
         return result.IsSuccess ? Ok(response) : BadRequest(response);
     }
 
+    /// <summary>Creates a conference hall and returns its identifier.</summary>
+    /// <param name="request">Input parameters for the operation.</param>
+    /// <param name="cancellationToken">Cancels the request and downstream resource access.</param>
+    /// <returns>The HTTP response for the operation.</returns>
     [HttpPost]
     [ProducesResponseType<ApiResponse<Guid>>(StatusCodes.Status201Created)]
     [ProducesResponseType<ApiResponse<Guid>>(StatusCodes.Status400BadRequest)]
@@ -55,6 +63,10 @@ public sealed class ConferenceHallsController(IConferenceHallManager hallManager
             : BadRequest(result.MapToApiResponse());
     }
 
+    /// <summary>Gets the details of one conference hall.</summary>
+    /// <param name="hallId">Identifier of the conference hall.</param>
+    /// <param name="cancellationToken">Cancels the request and downstream resource access.</param>
+    /// <returns>The HTTP response for the operation.</returns>
     [HttpGet("{hallId:guid}")]
     [ProducesResponseType<ApiResponse<ConferenceHallDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiResponse<ConferenceHallDto>>(StatusCodes.Status404NotFound)]
@@ -66,6 +78,11 @@ public sealed class ConferenceHallsController(IConferenceHallManager hallManager
         return result.IsSuccess ? Ok(response) : NotFound(response);
     }
 
+    /// <summary>Updates the editable details of a conference hall.</summary>
+    /// <param name="hallId">Identifier of the conference hall.</param>
+    /// <param name="request">Input parameters for the operation.</param>
+    /// <param name="cancellationToken">Cancels the request and downstream resource access.</param>
+    /// <returns>The HTTP response for the operation.</returns>
     [HttpPut("{hallId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status400BadRequest)]
@@ -93,6 +110,10 @@ public sealed class ConferenceHallsController(IConferenceHallManager hallManager
             : BadRequest(result.MapToApiResponse());
     }
 
+    /// <summary>Deletes a hall unless reserved bookings prevent removal.</summary>
+    /// <param name="hallId">Identifier of the conference hall.</param>
+    /// <param name="cancellationToken">Cancels the request and downstream resource access.</param>
+    /// <returns>The HTTP response for the operation.</returns>
     [HttpDelete("{hallId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status409Conflict)]
@@ -106,6 +127,10 @@ public sealed class ConferenceHallsController(IConferenceHallManager hallManager
             : Conflict(result.MapToApiResponse());
     }
 
+    /// <summary>Finds halls available for the requested rental period and capacity.</summary>
+    /// <param name="request">Input parameters for the operation.</param>
+    /// <param name="cancellationToken">Cancels the request and downstream resource access.</param>
+    /// <returns>The HTTP response for the operation.</returns>
     [HttpGet("available")]
     [ProducesResponseType<ApiResponse<IEnumerable<ConferenceHallDto>>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiResponse<IEnumerable<ConferenceHallDto>>>(StatusCodes.Status400BadRequest)]
