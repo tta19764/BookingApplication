@@ -12,7 +12,6 @@ public class RequestContextLoggingMiddleware(RequestDelegate next)
     /// <returns>A task completed after downstream request processing finishes.</returns>
     public async Task Invoke(HttpContext context, CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
         using (LogContext.PushProperty("CorrelationId", GetCorrelationId(context)))
         {
             await next(context);

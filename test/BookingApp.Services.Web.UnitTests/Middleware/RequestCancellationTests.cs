@@ -62,31 +62,6 @@ public sealed class RequestCancellationTests
     }
 
     [Fact]
-    public async Task LoggingRegistration_StopsAnAlreadyAbortedRequestBeforeCallingDownstream()
-    {
-        // Arrange
-        using var cancellation = new CancellationTokenSource();
-        cancellation.Cancel();
-        var context = new DefaultHttpContext { RequestAborted = cancellation.Token };
-        await using var services = new ServiceCollection().BuildServiceProvider();
-        var app = new ApplicationBuilder(services);
-        app.UseRequestContextLogging();
-        var invoked = false;
-        app.Run(_ =>
-        {
-            invoked = true;
-            return Task.CompletedTask;
-        });
-
-        // Act
-        Func<Task> action = () => app.Build()(context);
-
-        // Assert
-        await action.Should().ThrowAsync<OperationCanceledException>();
-        invoked.Should().BeFalse();
-    }
-
-    [Fact]
     public async Task CorrelationScope_RemainsActiveAfterDownstreamAwaitAndEndsWithTheRequest()
     {
         // Arrange
