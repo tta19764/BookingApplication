@@ -19,6 +19,10 @@ namespace BookingApp.Services.Web.Controllers;
 [Route("api/v{version:apiVersion}/bookings")]
 public sealed class BookingsController(IBookingManager bookingManager, IMapper mapper) : ControllerBase
 {
+    /// <summary>Gets a page of bookings.</summary>
+    /// <param name="request">Input parameters for the operation.</param>
+    /// <param name="cancellationToken">Cancels the request and downstream resource access.</param>
+    /// <returns>The HTTP response for the operation.</returns>
     [HttpGet]
     [ProducesResponseType<ApiResponse<IReadOnlyCollection<BookingDto>>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiResponse<IReadOnlyCollection<BookingDto>>>(StatusCodes.Status400BadRequest)]
@@ -34,6 +38,10 @@ public sealed class BookingsController(IBookingManager bookingManager, IMapper m
         return result.IsSuccess ? Ok(response) : BadRequest(response);
     }
 
+    /// <summary>Reserves a hall for the seeded user and returns the booking price breakdown.</summary>
+    /// <param name="request">Input parameters for the operation.</param>
+    /// <param name="cancellationToken">Cancels the request and downstream resource access.</param>
+    /// <returns>The HTTP response for the operation.</returns>
     [HttpPost]
     [ProducesResponseType<ApiResponse<BookingConfirmationDto>>(StatusCodes.Status201Created)]
     [ProducesResponseType<ApiResponse<BookingConfirmationDto>>(StatusCodes.Status400BadRequest)]
