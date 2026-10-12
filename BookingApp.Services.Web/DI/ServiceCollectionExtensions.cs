@@ -60,7 +60,11 @@ public static class ServiceCollectionExtensions
                 options.SubstituteApiVersionInUrl = true;
             });
 
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(options =>
+        {
+            options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "BookingApp.Services.Web.xml"));
+            options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "BookingApp.Bll.Common.xml"));
+        });
         services.ConfigureOptions<ConfigureSwaggerOptions>();
 
         return services;
