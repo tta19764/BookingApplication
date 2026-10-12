@@ -21,17 +21,17 @@ public sealed class UserRepository(SqlConnectionFactory connections, IMapper map
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync<User?>(connections, "[TymchenkoOV].[BookingApp.user_get]",
-            "UserRepository.GetByIdAsync", async (command, cancellationToken) =>
+            "UserRepository.GetByIdAsync", async (command, token) =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
-            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-            if (!await reader.ReadAsync(cancellationToken)) return null;
+            await using var reader = await command.ExecuteReaderAsync(token);
+            if (!await reader.ReadAsync(token)) return null;
             var user = RowMapper.User(reader);
             // The procedure returns user, role and role-permission rows in separate result sets.
-            await reader.NextResultAsync(cancellationToken);
-            while (await reader.ReadAsync(cancellationToken)) user.Roles.Add(RowMapper.Role(reader));
-            await reader.NextResultAsync(cancellationToken);
-            while (await reader.ReadAsync(cancellationToken))
+            await reader.NextResultAsync(token);
+            while (await reader.ReadAsync(token)) user.Roles.Add(RowMapper.Role(reader));
+            await reader.NextResultAsync(token);
+            while (await reader.ReadAsync(token))
                 user.Roles.Single(role => role.Id == reader.GetInt32(reader.GetOrdinal("role_id")))
                     .Permissions.Add(RowMapper.Permission(reader));
             return mapper.Map<User>(user);
@@ -47,7 +47,7 @@ public sealed class UserRepository(SqlConnectionFactory connections, IMapper map
     {
         var entity = mapper.Map<UserEntity>(user);
         await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.user_create]",
-            "UserRepository.AddAsync", async (command, cancellationToken) =>
+            "UserRepository.AddAsync", async (command, token) =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
             command.Parameter("@FirstName", SqlDbType.NVarChar, entity.FirstName, 100);
@@ -60,7 +60,7 @@ public sealed class UserRepository(SqlConnectionFactory connections, IMapper map
             // A typed empty table creates a user without role links.
             var roles = command.Parameter("@RoleIds", SqlDbType.Structured, roleIds);
             roles.TypeName = "[TymchenkoOV].[BookingApp.RoleIds]";
-            await command.ExecuteNonQueryAsync(cancellationToken);
+            await command.ExecuteNonQueryAsync(token);
         }, cancellationToken);
     }
 }

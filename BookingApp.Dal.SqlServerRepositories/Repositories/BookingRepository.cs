@@ -23,11 +23,11 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     public async Task<Booking?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync<Booking?>(connections, "[TymchenkoOV].[BookingApp.booking_get]",
-            "BookingRepository.GetByIdAsync", async (command, cancellationToken) =>
+            "BookingRepository.GetByIdAsync", async (command, token) =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
-            await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-            return await reader.ReadAsync(cancellationToken) ? mapper.Map<Booking>(RowMapper.Booking(reader)) : null;
+            await using var reader = await command.ExecuteReaderAsync(token);
+            return await reader.ReadAsync(token) ? mapper.Map<Booking>(RowMapper.Booking(reader)) : null;
         }, cancellationToken);
     }
 
@@ -40,12 +40,12 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     public async Task<bool> HasOverlapAsync(Guid conferenceHallId, DateRange duration, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.booking_has_overlap]",
-            "BookingRepository.HasOverlapAsync", async (command, cancellationToken) =>
+            "BookingRepository.HasOverlapAsync", async (command, token) =>
         {
             command.Parameter("@HallId", SqlDbType.UniqueIdentifier, conferenceHallId);
             command.Utc("@Start", duration.Start);
             command.Utc("@End", duration.End);
-            return (bool)(await command.ExecuteScalarAsync(cancellationToken))!;
+            return (bool)(await command.ExecuteScalarAsync(token))!;
         }, cancellationToken);
     }
 
@@ -61,7 +61,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
         if (booking.Status != BookingStatus.Reserved) throw new ArgumentException("Only reservations can be created.", nameof(booking));
         var entity = mapper.Map<BookingEntity>(booking);
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.booking_reserve]",
-            "BookingRepository.CreateReservationAsync", async (command, cancellationToken) =>
+            "BookingRepository.CreateReservationAsync", async (command, token) =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
             command.Parameter("@HallId", SqlDbType.UniqueIdentifier, entity.ConferenceHallId);
@@ -77,7 +77,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
             command.Parameter("@TotalCurrency", SqlDbType.NVarChar, entity.TotalPriceCurrency, 3);
             // The procedure commits both writes before reporting a business outcome.
             var outcome = command.Output("@Outcome");
-            await command.ExecuteNonQueryAsync(cancellationToken);
+            await command.ExecuteNonQueryAsync(token);
             var result = (ReservationOutcome)(int)outcome.Value;
             return Enum.IsDefined(result) ? result : throw new InvalidDataException("Unknown reservation outcome");
         }, cancellationToken);
@@ -92,10 +92,10 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     public async Task<IReadOnlyCollection<Booking>> GetListPaginatedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.booking_list]",
-            "BookingRepository.GetListPaginatedAsync", async (command, cancellationToken) =>
+            "BookingRepository.GetListPaginatedAsync", async (command, token) =>
         {
             command.Page(page, pageSize);
-            return await ReadAsync(command, cancellationToken);
+            return await ReadAsync(command, token);
         }, cancellationToken);
     }
 
@@ -125,11 +125,11 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.booking_due]",
-            "BookingRepository.GetReservedBookingsDueForCompletionAsync", async (command, cancellationToken) =>
+            "BookingRepository.GetReservedBookingsDueForCompletionAsync", async (command, token) =>
         {
             command.Utc("@UtcNow", utcNow);
             command.Parameter("@PageSize", SqlDbType.Int, pageSize);
-            return await ReadAsync(command, cancellationToken);
+            return await ReadAsync(command, token);
         }, cancellationToken);
     }
 
@@ -143,13 +143,13 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.booking_complete_due]",
-            "BookingRepository.CompleteDueAsync", async (command, cancellationToken) =>
+            "BookingRepository.CompleteDueAsync", async (command, token) =>
         {
             command.Utc("@UtcNow", utcNow);
             command.Parameter("@PageSize", SqlDbType.Int, pageSize);
             // NOCOUNT makes ExecuteNonQuery row counts unsuitable; use the explicit transition count.
             var count = command.Output("@CompletedCount");
-            await command.ExecuteNonQueryAsync(cancellationToken);
+            await command.ExecuteNonQueryAsync(token);
             return (int)count.Value;
         }, cancellationToken);
     }
