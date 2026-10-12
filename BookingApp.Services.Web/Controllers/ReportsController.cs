@@ -12,6 +12,9 @@ namespace BookingApp.Services.Web.Controllers;
 [Route("api/v{version:apiVersion}/reports")]
 public sealed class ReportsController(IReportManager reportManager, IMapper mapper) : ControllerBase
 {
+    /// <summary>Gets booking counts and revenue grouped by hall.</summary>
+    /// <param name="cancellationToken">Cancels the request and downstream resource access.</param>
+    /// <returns>The HTTP response for the operation.</returns>
     [HttpGet("bookings-summary")]
     [ProducesResponseType<ApiResponse<BookingSummaryDto>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetBookingSummary(CancellationToken cancellationToken)
