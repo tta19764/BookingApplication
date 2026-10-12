@@ -23,7 +23,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
     public async Task<ConferenceHall?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync<ConferenceHall?>(connections, "[TymchenkoOV].[BookingApp.hall_get]",
-            "ConferenceHallRepository.GetByIdAsync", async command =>
+            "ConferenceHallRepository.GetByIdAsync", async (command, cancellationToken) =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -48,7 +48,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
     {
         var entity = mapper.Map<ConferenceHallEntity>(hall);
         return await SqlProcedure.ExecuteAsync(connections, update ? "[TymchenkoOV].[BookingApp.hall_update]" : "[TymchenkoOV].[BookingApp.hall_create]",
-            update ? "ConferenceHallRepository.UpdateAsync" : "ConferenceHallRepository.AddAsync", async command =>
+            update ? "ConferenceHallRepository.UpdateAsync" : "ConferenceHallRepository.AddAsync", async (command, cancellationToken) =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
             command.Parameter("@Name", SqlDbType.NVarChar, entity.Name, 100);
@@ -72,7 +72,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
     public async Task<HallRemovalOutcome> RemoveAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.hall_delete]",
-            "ConferenceHallRepository.RemoveAsync", async command =>
+            "ConferenceHallRepository.RemoveAsync", async (command, cancellationToken) =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
             var outcome = command.Output("@Outcome");
@@ -91,7 +91,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
     public async Task<IReadOnlyCollection<ConferenceHall>> GetListPaginatedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.hall_list]",
-            "ConferenceHallRepository.GetListPaginatedAsync", async command =>
+            "ConferenceHallRepository.GetListPaginatedAsync", async (command, cancellationToken) =>
         {
             command.Page(page, pageSize);
             return await ReadAsync(command, cancellationToken);
@@ -107,7 +107,7 @@ public sealed class ConferenceHallRepository(SqlConnectionFactory connections, I
     public async Task<IEnumerable<ConferenceHall>> GetAvailableConferenceHallsAsync(DateRange dateRange, Capacity seats, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.hall_available]",
-            "ConferenceHallRepository.GetAvailableConferenceHallsAsync", async command =>
+            "ConferenceHallRepository.GetAvailableConferenceHallsAsync", async (command, cancellationToken) =>
         {
             command.Utc("@Start", dateRange.Start);
             command.Utc("@End", dateRange.End);

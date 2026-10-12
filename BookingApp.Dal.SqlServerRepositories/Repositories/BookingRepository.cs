@@ -23,7 +23,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     public async Task<Booking?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync<Booking?>(connections, "[TymchenkoOV].[BookingApp.booking_get]",
-            "BookingRepository.GetByIdAsync", async command =>
+            "BookingRepository.GetByIdAsync", async (command, cancellationToken) =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -40,7 +40,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     public async Task<bool> HasOverlapAsync(Guid conferenceHallId, DateRange duration, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.booking_has_overlap]",
-            "BookingRepository.HasOverlapAsync", async command =>
+            "BookingRepository.HasOverlapAsync", async (command, cancellationToken) =>
         {
             command.Parameter("@HallId", SqlDbType.UniqueIdentifier, conferenceHallId);
             command.Utc("@Start", duration.Start);
@@ -61,7 +61,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
         if (booking.Status != BookingStatus.Reserved) throw new ArgumentException("Only reservations can be created.", nameof(booking));
         var entity = mapper.Map<BookingEntity>(booking);
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.booking_reserve]",
-            "BookingRepository.CreateReservationAsync", async command =>
+            "BookingRepository.CreateReservationAsync", async (command, cancellationToken) =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
             command.Parameter("@HallId", SqlDbType.UniqueIdentifier, entity.ConferenceHallId);
@@ -92,7 +92,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     public async Task<IReadOnlyCollection<Booking>> GetListPaginatedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.booking_list]",
-            "BookingRepository.GetListPaginatedAsync", async command =>
+            "BookingRepository.GetListPaginatedAsync", async (command, cancellationToken) =>
         {
             command.Page(page, pageSize);
             return await ReadAsync(command, cancellationToken);
@@ -125,7 +125,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.booking_due]",
-            "BookingRepository.GetReservedBookingsDueForCompletionAsync", async command =>
+            "BookingRepository.GetReservedBookingsDueForCompletionAsync", async (command, cancellationToken) =>
         {
             command.Utc("@UtcNow", utcNow);
             command.Parameter("@PageSize", SqlDbType.Int, pageSize);
@@ -143,7 +143,7 @@ public sealed class BookingRepository(SqlConnectionFactory connections, IMapper 
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
         return await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.booking_complete_due]",
-            "BookingRepository.CompleteDueAsync", async command =>
+            "BookingRepository.CompleteDueAsync", async (command, cancellationToken) =>
         {
             command.Utc("@UtcNow", utcNow);
             command.Parameter("@PageSize", SqlDbType.Int, pageSize);

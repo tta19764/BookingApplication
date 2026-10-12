@@ -67,7 +67,7 @@ public sealed class ExceptionLoggingTests
         var middleware = new ExceptionHandlingMiddleware(_ => throw exception, logger);
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
-        await middleware.InvokeAsync(context);
+        await middleware.InvokeAsync(context, TestContext.Current.CancellationToken);
         return context;
     }
 

@@ -7,21 +7,30 @@ public class ExceptionHandlingMiddleware(
     RequestDelegate next,
     ILogger<ExceptionHandlingMiddleware> logger)
 {
-    public async Task InvokeAsync(HttpContext context)
+    /// <summary>Runs the request pipeline and converts failures to problem responses.</summary>
+    /// <param name="context">The current HTTP request and response.</param>
+    /// <param name="cancellationToken">The request abort token supplied by middleware registration.</param>
+    /// <returns>A task completed after the request or problem response finishes.</returns>
+    public async Task InvokeAsync(HttpContext context, CancellationToken cancellationToken = default)
     {
         try
         {
             await next(context);
 
-            await HandleStatusResponseAsync(context);
+            await HandleStatusResponseAsync(context, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // A disconnected client cannot receive a problem response.
+            throw;
         }
         catch (Exception exception)
         {
-            await HandleExceptionAsync(context, exception);
+            await HandleExceptionAsync(context, exception, cancellationToken);
         }
     }
 
-    private async Task HandleStatusResponseAsync(HttpContext context)
+    private async Task HandleStatusResponseAsync(HttpContext context, CancellationToken cancellationToken)
     {
         if (context.Response.HasStarted) return;
 
@@ -53,17 +62,17 @@ public class ExceptionHandlingMiddleware(
 
         if (problemDetails is not null)
         {
-            await ModifyHeaderAsync(context, problemDetails);
+            await ModifyHeaderAsync(context, problemDetails, cancellationToken);
         }
     }
 
-    private static async Task ModifyHeaderAsync(HttpContext context, ProblemDetails problemDetails)
+    private static async Task ModifyHeaderAsync(HttpContext context, ProblemDetails problemDetails, CancellationToken cancellationToken)
     {
         context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(problemDetails);
+        await context.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
     }
 
-    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
     {
         var exceptionDetails = GetExceptionDetails(exception);
         if (exceptionDetails.LoggingLevel is { } level)
@@ -91,7 +100,7 @@ public class ExceptionHandlingMiddleware(
             problemDetails.Extensions["incidentId"] = persistence.IncidentId;
 
         context.Response.StatusCode = exceptionDetails.Status;
-        await ModifyHeaderAsync(context, problemDetails);
+        await ModifyHeaderAsync(context, problemDetails, cancellationToken);
     }
 
     private static ExceptionDetails GetExceptionDetails(Exception exception)

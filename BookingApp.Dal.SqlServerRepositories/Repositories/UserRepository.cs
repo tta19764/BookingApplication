@@ -21,7 +21,7 @@ public sealed class UserRepository(SqlConnectionFactory connections, IMapper map
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await SqlProcedure.ExecuteAsync<User?>(connections, "[TymchenkoOV].[BookingApp.user_get]",
-            "UserRepository.GetByIdAsync", async command =>
+            "UserRepository.GetByIdAsync", async (command, cancellationToken) =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, id);
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -47,7 +47,7 @@ public sealed class UserRepository(SqlConnectionFactory connections, IMapper map
     {
         var entity = mapper.Map<UserEntity>(user);
         await SqlProcedure.ExecuteAsync(connections, "[TymchenkoOV].[BookingApp.user_create]",
-            "UserRepository.AddAsync", async command =>
+            "UserRepository.AddAsync", async (command, cancellationToken) =>
         {
             command.Parameter("@Id", SqlDbType.UniqueIdentifier, entity.Id);
             command.Parameter("@FirstName", SqlDbType.NVarChar, entity.FirstName, 100);

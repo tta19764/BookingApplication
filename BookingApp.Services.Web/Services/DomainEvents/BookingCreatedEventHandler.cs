@@ -9,8 +9,10 @@ namespace BookingApp.Services.Web.Services.DomainEvents;
 public sealed class BookingCreatedEventHandler(ILogger<BookingCreatedEventHandler> logger)
     : IDomainEventHandler<BookingCreatedDomainEvent>
 {
+    /// <inheritdoc />
     public Task HandleAsync(BookingCreatedDomainEvent domainEvent, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         logger.LogInformation(
             "Booking {BookingId} created for hall {ConferenceHallId} with total {TotalPrice} {Currency}",
             domainEvent.BookingId,

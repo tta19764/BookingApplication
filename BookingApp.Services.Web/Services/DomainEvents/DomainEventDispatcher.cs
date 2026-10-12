@@ -7,9 +7,11 @@ namespace BookingApp.Services.Web.Services.DomainEvents;
 /// </summary>
 public sealed class DomainEventDispatcher(IServiceProvider serviceProvider) : IDomainEventDispatcher
 {
+    /// <inheritdoc />
     public async Task DispatchAsync<TEvent>(TEvent domainEvent, CancellationToken cancellationToken = default)
         where TEvent : IDomainEvent
     {
+        cancellationToken.ThrowIfCancellationRequested();
         foreach (var handler in serviceProvider.GetServices<IDomainEventHandler<TEvent>>())
         {
             await handler.HandleAsync(domainEvent, cancellationToken);

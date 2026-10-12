@@ -16,7 +16,7 @@ public sealed class PersistenceErrorTests
             NullLogger<ExceptionHandlingMiddleware>.Instance);
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
-        await middleware.InvokeAsync(context);
+        await middleware.InvokeAsync(context, TestContext.Current.CancellationToken);
         context.Response.StatusCode.Should().Be(500);
         context.Response.Body.Position = 0;
         var response = await new StreamReader(context.Response.Body).ReadToEndAsync(TestContext.Current.CancellationToken);

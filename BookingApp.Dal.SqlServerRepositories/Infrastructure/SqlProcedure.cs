@@ -8,13 +8,13 @@ internal static class SqlProcedure
 {
     /// <summary>Runs a procedure with an owned connection and command, translating SQL failures.</summary>
     internal static async Task<T> ExecuteAsync<T>(SqlConnectionFactory connections, string procedure,
-        string operation, Func<SqlCommand, Task<T>> execute, CancellationToken cancellationToken)
+        string operation, Func<SqlCommand, CancellationToken, Task<T>> execute, CancellationToken cancellationToken)
     {
         try
         {
             await using var connection = await connections.OpenAsync(cancellationToken);
             await using var command = Create(connection, procedure, connections.CommandTimeoutSeconds);
-            return await execute(command);
+            return await execute(command, cancellationToken);
         }
         catch (SqlException exception)
         {
@@ -24,10 +24,10 @@ internal static class SqlProcedure
 
     /// <summary>Runs a procedure that does not return a value using the shared execution lifecycle.</summary>
     internal static Task ExecuteAsync(SqlConnectionFactory connections, string procedure,
-        string operation, Func<SqlCommand, Task> execute, CancellationToken cancellationToken) =>
-        ExecuteAsync(connections, procedure, operation, async command =>
+        string operation, Func<SqlCommand, CancellationToken, Task> execute, CancellationToken cancellationToken) =>
+        ExecuteAsync(connections, procedure, operation, async (command, token) =>
         {
-            await execute(command);
+            await execute(command, token);
             return true;
         }, cancellationToken);
 

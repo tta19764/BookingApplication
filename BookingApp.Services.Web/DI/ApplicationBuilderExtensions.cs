@@ -13,7 +13,12 @@ public static class ApplicationBuilderExtensions
     /// </summary>
     public static IApplicationBuilder UseCustomExceptionManager(this IApplicationBuilder app)
     {
-        app.UseMiddleware<ExceptionHandlingMiddleware>();
+        app.Use(next =>
+        {
+            var middleware = new ExceptionHandlingMiddleware(next,
+                app.ApplicationServices.GetRequiredService<ILogger<ExceptionHandlingMiddleware>>());
+            return context => middleware.InvokeAsync(context, context.RequestAborted);
+        });
 
         return app;
     }
@@ -23,7 +28,11 @@ public static class ApplicationBuilderExtensions
     /// </summary>
     public static IApplicationBuilder UseRequestContextLogging(this IApplicationBuilder app)
     {
-        app.UseMiddleware<RequestContextLoggingMiddleware>();
+        app.Use(next =>
+        {
+            var middleware = new RequestContextLoggingMiddleware(next);
+            return context => middleware.Invoke(context, context.RequestAborted);
+        });
 
         return app;
     }
