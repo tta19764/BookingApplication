@@ -112,7 +112,11 @@ public class BookingManagerTests
         result.IsSuccess.Should().BeTrue();
         await bookings.Received(1).CreateReservationAsync(Arg.Is<Booking>(booking => booking.Id == result.Value.BookingId), cancellationToken);
         await events.Received(1).DispatchAsync(
-            Arg.Is<BookingCreatedDomainEvent>(domainEvent => domainEvent.BookingId == result.Value.BookingId),
+            Arg.Is<BookingCreatedDomainEvent>(domainEvent => domainEvent.BookingId == result.Value.BookingId
+                && domainEvent.ConferenceHallId == hall.Id && domainEvent.UserId == model.UserId
+                && domainEvent.StartTimeUtc == result.Value.Start && domainEvent.EndTimeUtc == result.Value.End
+                && domainEvent.TotalPrice == result.Value.TotalPrice && domainEvent.Currency == result.Value.Currency
+                && domainEvent.OccurredOnUtc == now),
             cancellationToken);
     }
 }

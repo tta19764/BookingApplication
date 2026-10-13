@@ -87,7 +87,9 @@ public sealed class BookingManager(IConferenceHallRepository hallRepository, IBo
                 booking.UserId,
                 booking.TotalPrice.Amount,
                 booking.TotalPrice.Currency.Code,
-                utcNow),
+                utcNow,
+                booking.Duration.Start,
+                booking.Duration.End),
             cancellationToken);
 
         return Result.Success(new BookingConfirmationModel(booking.Id, booking.ConferenceHallId,

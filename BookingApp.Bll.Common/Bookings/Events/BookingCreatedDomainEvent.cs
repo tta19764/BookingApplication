@@ -11,4 +11,6 @@ public sealed record BookingCreatedDomainEvent(
     Guid UserId,
     decimal TotalPrice,
     string Currency,
-    DateTime OccurredOnUtc) : IDomainEvent;
+    DateTime OccurredOnUtc,
+    DateTime StartTimeUtc,
+    DateTime EndTimeUtc) : IDomainEvent;
