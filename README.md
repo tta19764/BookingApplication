@@ -39,6 +39,26 @@ The solution uses Services.Web, Bll, Bll.Common, and Dal.SqlServerRepositories l
 
 ## Quick start / Швидкий старт
 
+### Telegram booking notifications
+
+Create a bot with [@BotFather](https://t.me/BotFather), start a conversation with it or add it to the destination group/channel with permission to send messages, and obtain the destination chat ID (for example, from the Bot API `getUpdates` response after sending the bot a message). Notifications use the [Telegram.Bot library](https://github.com/TelegramBots/Telegram.Bot) and its `SendMessage` method.
+
+Store local secrets in the ignored `BookingApp.Services.Web/appsettings.Development.json`. If it is missing in a new checkout, copy the secret-free example once:
+
+```powershell
+Copy-Item BookingApp.Services.Web/appsettings.Development.example.json BookingApp.Services.Web/appsettings.Development.json
+```
+
+In the local file, fill in `ConnectionStrings:Database` (and optionally `ConnectionStrings:Seeding`), `Telegram:BotToken`, and `Telegram:ChatId`; set `Telegram:Enabled` to `true`. The launch profiles select Development, so ASP.NET Core automatically loads this file over the base configuration:
+
+```powershell
+dotnet run --project BookingApp.Services.Web
+```
+
+Keep real secrets only in the local ignored file. It is excluded from Docker build contexts. Environment variables override JSON settings; containers and non-Development deployments should obtain secrets from their environment or deployment secret store. Ignored configuration is local to each checkout and is not restored by Git. Older branches that still track this filename can overwrite or remove it when switching branches; preserve a local backup before switching to those branches. Avoid `git clean -x`, which removes ignored files too.
+
+Notifications are disabled by default. When enabled, missing token/chat settings fail startup validation. Each successfully persisted new reservation sends the hall name, customer name, start/end times in UTC, duration, total and reservation status to the configured chat. Set the optional `Telegram:MessageThreadId` to deliver notifications to a specific forum topic. Rejected bookings do not send messages. Delivery is best effort, runs during the creation request with a ten-second timeout, and has no retry or durable queue; Telegram/network failures are logged without failing a saved booking. Request cancellation can interrupt delivery after persistence. A durable outbox would be needed for guaranteed eventual delivery.
+
 Prerequisites: .NET 10 and an approved remote SQL Server database. Docker is needed only for integration tests or optional API/Seq hosting.
 
 Create an empty SQL Server application database, configure its connection string, and enable initialization to apply embedded schema/procedure/permission scripts before seeding data. The runner does not create the database itself. For an existing external code-first schema, establish a reviewed baseline first; the runner rejects unjournaled application tables. See [database initialization](docs/en/database-initialization.md). A separate EXECUTE-only runtime identity can be used after setup. No deployment-tool project is included. The DAL `DatabaseSeeder`, registered as `IDatabaseSeeder`, can inspect existing row counts and seed reference or demo data explicitly or at opt-in startup; see the [DAL guide](docs/en/dal.sqlserverrepositories.md#explicit-database-seeding).
