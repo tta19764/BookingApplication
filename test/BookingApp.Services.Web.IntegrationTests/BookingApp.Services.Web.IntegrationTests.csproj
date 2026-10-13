@@ -16,9 +16,9 @@
         <PackageReference Include="NSubstitute" Version="6.2.0" />
         <!-- Override Testcontainers' vulnerable transitive minimum (GHSA-q939-rpr3-3284). -->
         <PackageReference Include="SSH.NET" Version="2026.0.0" />
-        <PackageReference Include="Testcontainers.MsSql" Version="4.15.0" />
-        <PackageReference Include="xunit.v3" Version="4.0.1" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
+        <PackageReference Include="Testcontainers.MsSql" Version="4.16.0" />
+        <PackageReference Include="xunit.v3" Version="4.0.2" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
