@@ -19,6 +19,7 @@ using BookingApp.Services.Web.Services.BackgroundJobs;
 using BookingApp.Services.Web.Services.DomainEvents;
 using Quartz;
 using FluentValidation;
+using BookingApp.Services.Web.Services.Telegram;
 
 namespace BookingApp.Services.Web.DI;
 
@@ -43,6 +44,7 @@ public static class ServiceCollectionExtensions
             typeof(BookingApp.Dal.SqlServerRepositories.Mappings.AutoMapperConfig));
 
         AddBusinessLogic(services);
+        AddTelegramNotifications(services, configuration);
         AddDataAccess(services, configuration);
 
         services
@@ -85,6 +87,22 @@ public static class ServiceCollectionExtensions
         services.AddScoped<
             IDomainEventHandler<BookingCreatedDomainEvent>,
             BookingCreatedEventHandler>();
+    }
+
+    private static void AddTelegramNotifications(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<TelegramOptions>()
+            .Bind(configuration.GetSection(TelegramOptions.SectionName))
+            .Validate(options => !options.Enabled ||
+                (!string.IsNullOrWhiteSpace(options.BotToken) && !string.IsNullOrWhiteSpace(options.ChatId)),
+                "Telegram:BotToken and Telegram:ChatId are required when Telegram is enabled.")
+            .ValidateOnStart();
+        services.AddHttpClient<TelegramBookingCreatedEventHandler>(client =>
+            client.Timeout = TimeSpan.FromSeconds(10))
+            // The Telegram request path contains a secret bot token.
+            .RemoveAllLoggers();
+        services.AddTransient<IDomainEventHandler<BookingCreatedDomainEvent>>(provider =>
+            provider.GetRequiredService<TelegramBookingCreatedEventHandler>());
     }
 
     private static void AddDataAccess(IServiceCollection services, IConfiguration configuration)
