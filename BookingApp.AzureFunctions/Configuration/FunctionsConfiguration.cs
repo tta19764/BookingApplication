@@ -77,7 +77,9 @@ public static class FunctionsConfiguration
             throw new InvalidOperationException("ConnectionStrings:Database is required when reports are enabled.");
         }
 
-        services.AddSqlServerDataAccess(connection, configuration.GetValue("Database:CommandTimeoutSeconds", 30));
+        var commandTimeout = configuration.GetValue("Database:CommandTimeoutSeconds",
+            BookingApp.Dal.SqlServerRepositories.Infrastructure.SqlConnectionFactory.DefaultCommandTimeoutSeconds);
+        services.AddSqlServerReportingDataAccess(connection, commandTimeout);
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<IReportingPeriodService, ReportingPeriodService>();
         services.AddScoped<IBookingReportService, BookingReportService>();

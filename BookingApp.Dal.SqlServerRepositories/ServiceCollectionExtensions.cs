@@ -18,14 +18,27 @@ public static class ServiceCollectionExtensions
     /// <returns>The same service collection for chaining.</returns>
     /// <remarks>The composition root must also register the DAL AutoMapperConfig profile. This method performs no schema changes or seeding.</remarks>
     public static IServiceCollection AddSqlServerDataAccess(this IServiceCollection services,
-        string connectionString, int commandTimeoutSeconds = 30)
+        string connectionString, int commandTimeoutSeconds = SqlConnectionFactory.DefaultCommandTimeoutSeconds)
+    {
+        services.AddSqlServerReportingDataAccess(connectionString, commandTimeoutSeconds);
+        services.AddScoped<IConferenceHallRepository, ConferenceHallRepository>();
+        services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        return services;
+    }
+
+    /// <summary>Registers only the connection factory and read-only booking report repository.</summary>
+    /// <param name="services">The application service collection.</param>
+    /// <param name="connectionString">SQL Server reporting connection string.</param>
+    /// <param name="commandTimeoutSeconds">Positive command timeout in seconds.</param>
+    /// <returns>The same collection for chaining.</returns>
+    /// <remarks>Requires logging, but no AutoMapper registration. Performs no database initialization.</remarks>
+    public static IServiceCollection AddSqlServerReportingDataAccess(this IServiceCollection services,
+        string connectionString, int commandTimeoutSeconds = SqlConnectionFactory.DefaultCommandTimeoutSeconds)
     {
         services.AddSingleton(provider => new SqlConnectionFactory(connectionString,
             provider.GetRequiredService<ILogger<SqlConnectionFactory>>(), commandTimeoutSeconds));
-        services.AddScoped<IConferenceHallRepository, ConferenceHallRepository>();
-        services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IBookingReportRepository, BookingReportRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
         return services;
     }
 }

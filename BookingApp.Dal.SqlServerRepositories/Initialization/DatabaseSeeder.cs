@@ -18,7 +18,7 @@ public sealed class DatabaseSeeder : IDatabaseSeeder
     /// <summary>Creates a setup-only seeder without opening a connection.</summary>
     /// <param name="setupConnectionString">Connection string for the already-created application database with administrative setup permissions.</param>
     /// <param name="logger">Required seeder diagnostic logger, supplied by the caller or DI.</param>
-    /// <param name="commandTimeoutSeconds">Positive execution timeout in seconds, defaulting to 30.</param>
+    /// <param name="commandTimeoutSeconds">Positive execution timeout in seconds, defaulting to <see cref="SqlConnectionFactory.DefaultCommandTimeoutSeconds"/>.</param>
     public DatabaseSeeder(string setupConnectionString, ILogger<DatabaseSeeder> logger, int commandTimeoutSeconds = SqlConnectionFactory.DefaultCommandTimeoutSeconds)
     {
         _connections = new SqlConnectionFactory(setupConnectionString, logger, commandTimeoutSeconds);

@@ -111,7 +111,8 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("Database")
             ?? throw new InvalidOperationException("The Database connection string is not configured.");
 
-        var commandTimeout = configuration.GetValue("Database:CommandTimeoutSeconds", 30);
+        var commandTimeout = configuration.GetValue("Database:CommandTimeoutSeconds",
+            BookingApp.Dal.SqlServerRepositories.Infrastructure.SqlConnectionFactory.DefaultCommandTimeoutSeconds);
         services.AddSqlServerDataAccess(connectionString, commandTimeout);
 
         services.Configure<DatabaseSeedingOptions>(configuration.GetSection(DatabaseSeedingOptions.SectionName));
