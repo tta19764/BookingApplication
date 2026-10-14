@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "AZURE_FUNCTIONS_ENVIRONMENT": "Development",
+    "BookingsReportSchedule": "0 0 * * * *",
+    "BookingsReport__Enabled": "false",
+    "BookingsReport__TimeZoneId": "Europe/Kyiv",
+    "KeyVault__Uri": "",
+    "Telegram__ChatId": ""
+  }
+}

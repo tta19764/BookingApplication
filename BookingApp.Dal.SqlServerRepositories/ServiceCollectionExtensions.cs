@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
             provider.GetRequiredService<ILogger<SqlConnectionFactory>>(), commandTimeoutSeconds));
         services.AddScoped<IConferenceHallRepository, ConferenceHallRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IBookingReportRepository, BookingReportRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         return services;
     }

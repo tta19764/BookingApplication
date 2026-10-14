@@ -25,6 +25,31 @@ public sealed class SqlServerPersistenceTests(IntegrationTestWebAppFactory facto
 {
     private static CancellationToken Token => TestContext.Current.CancellationToken;
 
+    [Fact]
+    public async Task DailyReport_UsesHalfOpenOverlapAndJoinsHallWithRuntimePermissions()
+    {
+        var hall = await CreateHallAsync();
+        var day = new DateTime(2040, 1, 10, 0, 0, 0, DateTimeKind.Utc);
+        var before = Reservation(hall.Id, day.AddHours(-2), day);
+        var crossing = Reservation(hall.Id, day.AddHours(-1), day.AddHours(1));
+        var inside = Reservation(hall.Id, day.AddHours(2), day.AddHours(3));
+        var after = Reservation(hall.Id, day.AddDays(1), day.AddDays(1).AddHours(1));
+        // Adjacent periods allow each insert; crossing overlaps before, so use another hall for before.
+        var otherHall = await CreateHallAsync();
+        before.ConferenceHallId = otherHall.Id;
+        foreach (var booking in new[] { before, crossing, inside, after })
+            (await Bookings.CreateReservationAsync(booking, Token)).Should().Be(ReservationOutcome.Created);
+        var repository = new BookingReportRepository(new SqlConnectionFactory(Factory.RuntimeConnectionString,
+            NullLogger<SqlConnectionFactory>.Instance));
+        var rows = await repository.GetAsync(day, day.AddDays(1), Token);
+        rows.Select(r => r.Id).Should().Contain(crossing.Id).And.Contain(inside.Id)
+            .And.NotContain(before.Id).And.NotContain(after.Id);
+        var row = rows.Single(r => r.Id == crossing.Id);
+        row.HallName.Should().Be(hall.Name.Value);
+        row.TotalPrice.Should().Be(2300.25m);
+        row.StartUtc.Kind.Should().Be(DateTimeKind.Utc);
+    }
+
     private async Task<ConferenceHall> CreateHallAsync()
     {
         var hall = new ConferenceHall(Guid.NewGuid(), new Name("Зал 'Юнікод' " + Guid.NewGuid().ToString("N")),

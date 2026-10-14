@@ -41,6 +41,9 @@ The solution uses Services.Web, Bll, Bll.Common, and Dal.SqlServerRepositories l
 
 ### Azure Key Vault secrets
 
+The Azure Functions hourly Telegram report has its own configuration. See
+[report settings and database prerequisites](docs/en/functions-report.md).
+
 Configure `KeyVault:Uri` to load connection strings and bot tokens from Azure Key Vault.
 See [local sign-in, secret names, and deployment setup](docs/en/key-vault.md).
 Vault secrets override matching earlier configuration values when enabled.
