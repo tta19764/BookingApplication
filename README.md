@@ -39,6 +39,12 @@ The solution uses Services.Web, Bll, Bll.Common, and Dal.SqlServerRepositories l
 
 ## Quick start / Швидкий старт
 
+### Azure Key Vault secrets
+
+Configure `KeyVault:Uri` to load connection strings and bot tokens from Azure Key Vault.
+See [local sign-in, secret names, and deployment setup](docs/en/key-vault.md).
+Vault secrets override matching earlier configuration values when enabled.
+
 ### Telegram booking notifications
 
 Create a bot with [@BotFather](https://t.me/BotFather), start a conversation with it or add it to the destination group/channel with permission to send messages, and obtain the destination chat ID (for example, from the Bot API `getUpdates` response after sending the bot a message). Notifications use the [Telegram.Bot library](https://github.com/TelegramBots/Telegram.Bot) and its `SendMessage` method.
