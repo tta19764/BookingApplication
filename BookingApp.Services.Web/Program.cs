@@ -1,8 +1,10 @@
+using BookingApp.Services.Web.Configuration;
 using BookingApp.Services.Web.DI;
 using BookingApp.Services.Web.Services.Initialization;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddKeyVaultSecrets();
 
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
