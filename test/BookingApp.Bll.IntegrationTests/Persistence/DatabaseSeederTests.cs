@@ -46,14 +46,29 @@ public sealed class DatabaseSeederTests(IntegrationTestWebAppFactory factory) : 
         await connection.OpenAsync(Token);
         await using var role = new SqlCommand("SELECT COUNT(*) FROM sys.database_principals WHERE name=N'TymchenkoOV.BookingApp.Runtime'", connection);
         ((int)(await role.ExecuteScalarAsync(Token))!).Should().Be(0);
-        await using var journal = new SqlCommand("SELECT COUNT(*) FROM [TymchenkoOV].[BookingApp.SchemaVersions]", connection);
-        ((int)(await journal.ExecuteScalarAsync(Token))!).Should().Be(3);
+        var expectedScripts = typeof(DatabaseInitializer).Assembly.GetManifestResourceNames()
+            .Where(name => name.EndsWith(".sql", StringComparison.Ordinal))
+            .Select(name => name["BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.".Length..])
+            .ToArray();
+        async Task<string[]> ReadJournalAsync()
+        {
+            await using var journal = new SqlCommand(
+                "SELECT version FROM [TymchenkoOV].[BookingApp.SchemaVersions]", connection);
+            await using var reader = await journal.ExecuteReaderAsync(Token);
+            var versions = new List<string>();
+            while (await reader.ReadAsync(Token)) versions.Add(reader.GetString(0));
+            return versions.ToArray();
+        }
+        (await ReadJournalAsync()).Should().BeEquivalentTo(
+            expectedScripts.Where(name => !name.EndsWith("_permissions.sql", StringComparison.Ordinal)));
 
         await DatabaseInitializer.ApplyAsync(_connectionString, Token, includePermissions: true);
         ((int)(await role.ExecuteScalarAsync(Token))!).Should().Be(1);
-        ((int)(await journal.ExecuteScalarAsync(Token))!).Should().Be(5);
+        var installedVersions = await ReadJournalAsync();
+        installedVersions.Should().BeEquivalentTo(expectedScripts);
         await Seeder.InitializeAsync(Token);
-        ((int)(await journal.ExecuteScalarAsync(Token))!).Should().Be(5);
+        (await ReadJournalAsync()).Should().BeEquivalentTo(installedVersions);
+
     }
 
     [Fact]

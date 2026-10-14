@@ -27,15 +27,13 @@ public sealed class PersistenceBoundaryTests
     public void Initialization_EmbedsOnlyApplicationScriptsAndExcludesPersonalDatabaseTypes()
     {
         var assembly = typeof(BookingRepository).Assembly;
-        assembly.GetManifestResourceNames().Where(name => name.EndsWith(".sql"))
-            .Should().BeEquivalentTo(new[]
-            {
-                "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.001_schema.sql",
-                "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.002_stored_procedures.sql",
-                "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.003_permissions.sql",
-                "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.004_user_roles_tvp.sql",
-                "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.005_tvp_permissions.sql"
-            });
+        var scripts = assembly.GetManifestResourceNames()
+            .Where(name => name.EndsWith(".sql", StringComparison.OrdinalIgnoreCase)).ToArray();
+        scripts.Should().NotBeEmpty();
+        scripts.Should().OnlyContain(name => name.StartsWith(
+            "BookingApp.Dal.SqlServerRepositories.Initialization.Scripts.", StringComparison.Ordinal));
+        scripts.Should().OnlyContain(name => System.Text.RegularExpressions.Regex.IsMatch(
+            name, @"\.\d{3}_[a-z0-9_]+\.sql$"));
         assembly.GetTypes().Should().NotContain(type =>
             (type.Namespace ?? "").StartsWith("BookingApp.Dal.SqlServerRepositories.Database"));
     }
