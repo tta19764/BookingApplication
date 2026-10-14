@@ -1,5 +1,10 @@
 # Azure Key Vault configuration
 
+Tests run in the `Testing` environment, whose appsettings disable Key Vault through
+`KeyVault:Enabled=false`. The integration factory also supplies this override and
+disables Telegram, keeping tests on their ephemeral SQL Server rather than Azure.
+The flag defaults to true in other environments when omitted.
+
 `KeyVaultConfiguration.AddKeyVaultSecrets` runs before logging and service registration.
 When `KeyVault:Uri` is blank or absent, the app uses its existing configuration sources.
 When configured, secrets from the vault override matching JSON, environment variable,

@@ -7,12 +7,17 @@ namespace BookingApp.Services.Web.Configuration;
 public static class KeyVaultConfiguration
 {
     /// <summary>
-    /// Adds secrets when KeyVault:Uri is configured. Development uses the signed-in developer;
+    /// Adds secrets when KeyVault:Uri is configured and KeyVault:Enabled is not false. Development uses the signed-in developer;
     /// other environments use the host's system-assigned managed identity.
     /// Key Vault values override matching values from previously registered providers.
     /// </summary>
     public static WebApplicationBuilder AddKeyVaultSecrets(this WebApplicationBuilder builder)
     {
+        if (!builder.Configuration.GetValue("KeyVault:Enabled", true))
+        {
+            return builder;
+        }
+
         var vaultUri = builder.Configuration["KeyVault:Uri"];
         if (string.IsNullOrWhiteSpace(vaultUri))
         {

@@ -26,6 +26,8 @@ public class SqlServerWebAppFactory : WebApplicationFactory<Program>, IAsyncLife
             new Dictionary<string, string?>
             {
                 ["ConnectionStrings:Database"] = RuntimeConnectionString,
+                ["KeyVault:Enabled"] = "false",
+                ["Telegram:Enabled"] = "false",
                 ["BackgroundJobs:CompleteBookings:Enabled"] = "false",
                 ["DatabaseSeeding:Enabled"] = "false"
             }));
@@ -39,6 +41,8 @@ public class SqlServerWebAppFactory : WebApplicationFactory<Program>, IAsyncLife
             new Dictionary<string, string?>
             {
                 ["ConnectionStrings:Database"] = RuntimeConnectionString,
+                ["KeyVault:Enabled"] = "false",
+                ["Telegram:Enabled"] = "false",
                 ["BackgroundJobs:CompleteBookings:Enabled"] = "false",
                 ["DatabaseSeeding:Enabled"] = "false"
             }));
