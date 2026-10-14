@@ -3,7 +3,7 @@ using Azure.Identity;
 using BookingApp.AzureFunctions.Services;
 using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.Shared;
-using BookingApp.Bll.Services.Bookings;
+using BookingApp.Bll.Managers.Bookings;
 using BookingApp.Bll.Services.Shared;
 using BookingApp.Dal.SqlServerRepositories;
 using Microsoft.Azure.Functions.Worker.Builder;
@@ -82,7 +82,7 @@ public static class FunctionsConfiguration
         services.AddSqlServerReportingDataAccess(connection, commandTimeout);
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<IReportingPeriodService, ReportingPeriodService>();
-        services.AddScoped<IBookingReportService, BookingReportService>();
+        services.AddScoped<IBookingReportManager, BookingReportManager>();
         services.AddSingleton<IBookingsReportFormatter, BookingsReportFormatter>();
         services.AddHttpClient<ITelegramReportSender, TelegramReportSender>(client =>
                 client.Timeout = TimeSpan.FromSeconds(15))
@@ -105,4 +105,6 @@ public static class FunctionsConfiguration
         }
     }
 }
+
+
 

@@ -1,6 +1,6 @@
 # Hourly booking report
 
-`IBookingReportService` in Common is implemented by the BLL `BookingReportService`.
+`IBookingReportManager` in Common is implemented by the BLL `BookingReportManager`.
 It returns a `DailyBookingsReport` containing calendar context and booking rows.
 Functions owns text formatting and Telegram delivery.
 Calendar boundaries are supplied by `IReportingPeriodService` / `ReportingPeriodService`
@@ -40,4 +40,5 @@ No startup send is configured. Infrastructure and CI/CD are outside this scope.
 
 References: [Timer triggers](https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-timer)
 and [Telegram sendMessage](https://core.telegram.org/bots/api#sendmessage).
+
 

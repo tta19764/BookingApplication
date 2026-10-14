@@ -24,7 +24,7 @@ public class BookingsReportSchedule(ILogger<BookingsReportSchedule> logger,
     {
         if (!options.Value.Enabled) { logger.LogInformation("Bookings reporting is disabled."); return; }
         if (timer.IsPastDue) logger.LogWarning("Bookings report timer is past due; reporting the current day.");
-        var report = await services.GetRequiredService<BookingApp.Bll.Common.Bookings.IBookingReportService>()
+        var report = await services.GetRequiredService<BookingApp.Bll.Common.Bookings.IBookingReportManager>()
             .GetTodayAsync(options.Value.TimeZoneId, cancellationToken);
         var messages = services.GetRequiredService<IBookingsReportFormatter>().Format(report.Date,
             TimeZoneInfo.FindSystemTimeZoneById(report.TimeZoneId), report.Bookings);
@@ -32,3 +32,4 @@ public class BookingsReportSchedule(ILogger<BookingsReportSchedule> logger,
         logger.LogInformation("Bookings report sent in {MessageCount} message(s).", messages.Count);
     }
 }
+

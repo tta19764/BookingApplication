@@ -32,10 +32,11 @@ public sealed class FunctionsConfigurationTests
             ValidateScopes = true
         });
         using var scope = provider.CreateScope();
-        Assert.NotNull(scope.ServiceProvider.GetRequiredService<IBookingReportService>());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<IBookingReportManager>());
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<IBookingsReportFormatter>());
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<ITelegramReportSender>());
         Assert.NotNull(ActivatorUtilities.CreateInstance<BookingsReportSchedule>(scope.ServiceProvider));
         Assert.Null(scope.ServiceProvider.GetService<IConferenceHallRepository>());
     }
 }
+

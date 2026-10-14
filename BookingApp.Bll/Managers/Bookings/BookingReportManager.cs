@@ -2,14 +2,14 @@ using BookingApp.Bll.Common.Bookings;
 using BookingApp.Bll.Common.Bookings.Models;
 using BookingApp.Bll.Common.Shared;
 
-namespace BookingApp.Bll.Services.Bookings;
+namespace BookingApp.Bll.Managers.Bookings;
 
 /// <summary>Retrieves daily rental data using local calendar boundaries converted to UTC.</summary>
 /// <param name="repository">Reads rental report projections.</param>
 /// <param name="clock">Provides the current instant.</param>
 /// <param name="periods">Calculates local calendar boundaries in UTC.</param>
-public sealed class BookingReportService(IBookingReportRepository repository, TimeProvider clock,
-    IReportingPeriodService periods) : IBookingReportService
+public sealed class BookingReportManager(IBookingReportRepository repository, TimeProvider clock,
+    IReportingPeriodService periods) : IBookingReportManager
 {
     /// <inheritdoc />
     public async Task<DailyBookingsReport> GetTodayAsync(string timeZoneId, CancellationToken cancellationToken = default)
@@ -20,4 +20,5 @@ public sealed class BookingReportService(IBookingReportRepository repository, Ti
         return new DailyBookingsReport(period.Date, zone.Id, bookings);
     }
 }
+
 
